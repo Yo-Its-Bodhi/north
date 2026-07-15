@@ -1,0 +1,16 @@
+:root {
+  --north-deep-teal: #193136;
+  --north-off-white: #f3ede2;
+  --north-accent-teal: #168b8c;
+  --north-black: #161a1b;
+}
+
+[data-theme="light"] {
+  --north-brand-ink: var(--north-deep-teal);
+  --north-brand-surface: var(--north-off-white);
+}
+
+[data-theme="dark"] {
+  --north-brand-ink: var(--north-off-white);
+  --north-brand-surface: var(--north-deep-teal);
+}

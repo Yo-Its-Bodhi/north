@@ -1,0 +1,20 @@
+node_modules/
+dist/
+.env
+.env.local
+*.log
+*.tsbuildinfo
+vite.config.js
+vite.config.d.ts
+.analysis/
+
+# Local workspace and Android build artifacts
+mobile/android/.gradle/
+mobile/android/.idea/
+mobile/android/build/
+mobile/android/app/build/
+mobile/android/local.properties
+artifacts/
+*.code-workspace
+North.txt
+????????-????-????-????-????????????.png

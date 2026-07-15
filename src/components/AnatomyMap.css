@@ -1,0 +1,49 @@
+.anatomy-map{--anatomy-primary:#19cbd1;--anatomy-secondary:#8b68df;--anatomy-support:#4a93bc;--anatomy-line:#718698}.anatomy-figures{display:flex;align-items:flex-end;justify-content:center;gap:20px}.anatomy-figures>div{min-width:0;text-align:center}.anatomy-figures>div>small{display:block;margin-bottom:-8px;color:var(--muted);font-size:7px;font-weight:900;letter-spacing:.15em}.anatomy-figure{display:block;width:100%;height:auto;overflow:visible}.anatomy-base>*{fill:color-mix(in srgb,var(--surface-solid) 62%,#9baab5);stroke:var(--anatomy-line);stroke-width:2.3;stroke-linecap:round;stroke-linejoin:round}.anatomy-base .limb{fill:none;stroke-width:10}.anatomy-muscle{stroke:rgba(255,255,255,.78);stroke-width:1.1;transition:fill .2s ease,opacity .2s ease,filter .2s ease}.anatomy-muscle.inactive{fill:rgba(113,134,152,.14)}.anatomy-muscle.primary{fill:var(--anatomy-primary)}.anatomy-muscle.secondary{fill:var(--anatomy-secondary)}.anatomy-muscle.supporting{fill:var(--anatomy-support);opacity:.78}.anatomy-muscle.selected{filter:drop-shadow(0 0 5px rgba(25,203,209,.85));stroke-width:2}.anatomy-lines{fill:none;stroke:rgba(113,134,152,.5);stroke-width:1.2;stroke-linecap:round}.anatomy-map.compact{padding:8px 7px 7px;border:1px solid rgba(37,115,173,.22);border-radius:19px;background:linear-gradient(155deg,rgba(12,38,61,.08),rgba(88,72,186,.08));box-shadow:inset 0 1px rgba(255,255,255,.35)}.anatomy-map.compact .anatomy-figures>div{width:100%}.anatomy-map.compact .anatomy-figures>div>small{display:none}.anatomy-map.compact .anatomy-figure{max-height:174px}.anatomy-map.compact .anatomy-caption{display:block;margin-top:0;color:var(--muted);font-size:7px;font-weight:900;letter-spacing:.13em;text-align:center;text-transform:uppercase}.anatomy-map.detailed{padding:18px 12px 14px;border-radius:20px;background:radial-gradient(circle,rgba(25,203,209,.075),transparent 64%)}.anatomy-map.detailed .anatomy-figures>div{width:min(42%,150px)}.anatomy-map.detailed .anatomy-figure{max-height:300px}.anatomy-legend{display:flex;justify-content:center;flex-wrap:wrap;gap:8px 14px;margin-top:13px}.anatomy-legend span{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:10px;font-weight:800}.anatomy-legend i,.anatomy-muscle-list i{width:10px;height:10px;border-radius:50%}.anatomy-legend .primary,.anatomy-muscle-list .primary i{background:var(--anatomy-primary)}.anatomy-legend .secondary,.anatomy-muscle-list .secondary i{background:var(--anatomy-secondary)}.anatomy-legend .supporting,.anatomy-muscle-list .supporting i{background:var(--anatomy-support)}.anatomy-muscle-list{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:14px}.anatomy-muscle-list button{min-height:39px;padding:7px 9px;border:1px solid var(--line);border-radius:10px;display:grid;grid-template-columns:10px 1fr auto;align-items:center;gap:7px;color:var(--ink);background:var(--surface-solid);text-align:left;cursor:pointer}.anatomy-muscle-list button.selected{border-color:var(--anatomy-primary);box-shadow:0 0 0 2px color-mix(in srgb,var(--anatomy-primary) 15%,transparent)}.anatomy-muscle-list span{font-size:9px;font-weight:800}.anatomy-muscle-list small{color:var(--muted);font-size:7px;font-weight:800;text-transform:uppercase}.anatomy-selection{margin:9px 0 0!important;padding:9px 11px;border-radius:10px;color:var(--muted);background:var(--surface);font-size:9px!important}.anatomy-selection strong{color:var(--ink)}:root[data-theme="night"] .anatomy-map{--anatomy-line:#7595a8}:root[data-theme="night"] .anatomy-base>*{fill:rgba(86,115,130,.18)}@media(max-width:420px){.anatomy-muscle-list{grid-template-columns:1fr}}
+
+/* Human anatomy base: activation remains deterministic SVG data above the image. */
+.anatomy-human-figure{width:100%;aspect-ratio:1/3;position:relative;overflow:hidden;border-radius:999px 999px 28px 28px;background-repeat:no-repeat;background-size:200% 100%;background-color:color-mix(in srgb,var(--surface-solid) 88%,#9baab5 12%)}
+.anatomy-human-figure.front{background-position:left center}.anatomy-human-figure.back{background-position:right center}.anatomy-human-figure .anatomy-figure{position:absolute;inset:0;width:100%;height:100%;max-height:none}.anatomy-human-figure .anatomy-muscle{mix-blend-mode:multiply;stroke:rgba(255,255,255,.92)}.anatomy-human-figure .anatomy-muscle.inactive{fill:transparent;stroke:transparent}.anatomy-human-figure .anatomy-muscle.primary{fill-opacity:.86}.anatomy-human-figure .anatomy-muscle.secondary{fill-opacity:.78}.anatomy-human-figure .anatomy-muscle.supporting{fill-opacity:.64}.anatomy-map.compact .anatomy-human-figure{max-height:174px}.anatomy-map.detailed .anatomy-human-figure{max-height:300px}.anatomy-figures>div>small{margin-bottom:4px}
+
+/* Human-map calibration: preserve the source half-image ratio and use unmistakable roles. */
+.anatomy-map{--anatomy-primary:#00d8c8;--anatomy-secondary:#ff8847;--anatomy-support:#8a74e8}
+.anatomy-map.detailed .anatomy-figures>div{width:min(31%,104px)}
+.anatomy-map.compact .anatomy-figures>div{width:58px}
+.anatomy-map.compact .anatomy-figures{gap:7px}
+.anatomy-human-figure{width:100%;height:auto;max-height:none!important;aspect-ratio:1/3;flex:none}
+.anatomy-human-figure .anatomy-muscle{mix-blend-mode:normal;stroke-width:1.45}
+.anatomy-human-figure .anatomy-muscle.primary{fill:var(--anatomy-primary);fill-opacity:.82;stroke:#9ffff6}
+.anatomy-human-figure .anatomy-muscle.secondary{fill:var(--anatomy-secondary);fill-opacity:.78;stroke:#ffd2b8}
+.anatomy-human-figure .anatomy-muscle.supporting{fill:var(--anatomy-support);fill-opacity:.68;stroke:#d8d0ff}
+.anatomy-legend .secondary,.anatomy-muscle-list .secondary i{background:var(--anatomy-secondary)}
+.anatomy-legend .supporting,.anatomy-muscle-list .supporting i{background:var(--anatomy-support)}
+@media(max-width:420px){.anatomy-map.detailed .anatomy-figures>div{width:min(32%,96px)}}
+
+/* Region-by-region fit for the human base. Each shape keeps its data role but follows real proportions. */
+.anatomy-human-figure .region-chest{transform-box:fill-box;transform-origin:center;transform:translateY(-5px) scale(1.38,1.18)}
+.anatomy-human-figure .region-front-delts,.anatomy-human-figure .region-side-delts,.anatomy-human-figure .region-rear-delts{transform-box:fill-box;transform-origin:center;transform:translateY(-3px) scale(1.18,1.16)}
+.anatomy-human-figure .region-biceps,.anatomy-human-figure .region-triceps{transform-box:fill-box;transform-origin:center;transform:translateY(-5px) scale(1.14,1.2)}
+.anatomy-human-figure .region-forearms{transform-box:fill-box;transform-origin:center;transform:translateY(-7px) scale(1.16,1.12)}
+.anatomy-human-figure .region-abs{transform-box:fill-box;transform-origin:center;transform:translateY(-10px) scale(1.38,1.18)}
+.anatomy-human-figure .region-obliques{transform-box:fill-box;transform-origin:center;transform:translateY(-8px) scale(1.3,1.16)}
+.anatomy-human-figure .region-traps{transform-box:fill-box;transform-origin:center;transform:translateY(-5px) scale(1.25,1.16)}
+.anatomy-human-figure .region-lats{transform-box:fill-box;transform-origin:center;transform:translateY(-8px) scale(1.42,1.18)}
+.anatomy-human-figure .region-lower-back{transform-box:fill-box;transform-origin:center;transform:translateY(-7px) scale(1.36,1.2)}
+.anatomy-human-figure .region-glutes{transform-box:fill-box;transform-origin:center;transform:translateY(-4px) scale(1.28,1.14)}
+.anatomy-human-figure .region-quads{transform-box:fill-box;transform-origin:center;transform:translateY(-10px) scale(1.34,1.18)}
+.anatomy-human-figure .region-adductors{transform-box:fill-box;transform-origin:center;transform:translateY(-9px) scale(1.5,1.2)}
+.anatomy-human-figure .region-hamstrings{transform-box:fill-box;transform-origin:center;transform:translateY(-9px) scale(1.4,1.18)}
+.anatomy-human-figure .region-calves,.anatomy-human-figure .region-tibialis{transform-box:fill-box;transform-origin:center;transform:translateY(-6px) scale(1.25,1.16)}
+
+/* The base crop is 1:3 while the original authored mask grid is 1:2.
+   The SVG now fills that same viewport, so compensating region transforms must not stack. */
+.anatomy-human-figure .anatomy-muscle{transform:none}
+
+.anatomy-human-figure .anatomy-muscle:not(.inactive){cursor:pointer}
+.anatomy-human-figure .anatomy-muscle.primary.selected{filter:drop-shadow(0 0 7px var(--anatomy-primary));stroke:#d5fffb}
+.anatomy-human-figure .anatomy-muscle.secondary.selected{filter:drop-shadow(0 0 7px var(--anatomy-secondary));stroke:#fff0e7}
+.anatomy-human-figure .anatomy-muscle.supporting.selected{filter:drop-shadow(0 0 7px var(--anatomy-support));stroke:#eeeaff}
+.anatomy-muscle-list button.primary.selected{border-color:var(--anatomy-primary);box-shadow:0 0 0 2px color-mix(in srgb,var(--anatomy-primary) 22%,transparent)}
+.anatomy-muscle-list button.secondary.selected{border-color:var(--anatomy-secondary);box-shadow:0 0 0 2px color-mix(in srgb,var(--anatomy-secondary) 22%,transparent)}
+.anatomy-muscle-list button.supporting.selected{border-color:var(--anatomy-support);box-shadow:0 0 0 2px color-mix(in srgb,var(--anatomy-support) 22%,transparent)}
+.anatomy-muscle-list button small{font-size:0}.anatomy-muscle-list button small::after{content:"Tap";font-size:7px}
+.anatomy-selection{display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:start;border-left:4px solid var(--anatomy-support);font-size:10px!important;line-height:1.45}.anatomy-selection.primary{border-left-color:var(--anatomy-primary)}.anatomy-selection.secondary{border-left-color:var(--anatomy-secondary)}.anatomy-selection.supporting{border-left-color:var(--anatomy-support)}.anatomy-selection strong{white-space:nowrap}
