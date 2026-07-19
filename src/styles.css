@@ -1785,6 +1785,8 @@ h1,.screen>h1,.destination-screen>h1,.workout-library-screen>h1,.programs-screen
 .settings-screen .preference-panel,.settings-screen .privacy-panel,.settings-screen .data-controls{border-radius:var(--north-radius-workspace);box-shadow:none}
 
 @media(max-width:560px){
+  .nova-screen{height:auto;min-height:calc(100dvh - 72px);display:block;overflow:visible}
+  .nova-screen .conversation-surface{min-height:0;overflow:visible;padding-bottom:24px}
   .nova-screen .nova-page-heading{display:block}
   .nova-screen .nova-heading-actions{margin-top:var(--north-space-3)}
   .nova-screen .nova-starters{grid-template-columns:1fr}
