@@ -422,15 +422,28 @@ function isoDate(date: Date) {
   return `${value.year}-${value.month}-${value.day}`;
 }
 
+function dateAtNoon(date: string) {
+  return new Date(`${date}T12:00:00`);
+}
+
+function addIsoDays(date: string, days: number) {
+  const next = dateAtNoon(date);
+  next.setDate(next.getDate() + days);
+  return isoDate(next);
+}
+
+function weekStartFor(date: string) {
+  const value = dateAtNoon(date);
+  value.setDate(value.getDate() - ((value.getDay() + 6) % 7));
+  return isoDate(value);
+}
+
 function formatNovaText(text: string) {
   return text.replace(/\s+(?=\*\*[^*\n]{2,80}:\*\*)/g, "\n\n").replace(/\s+-\s+(?=[A-Z0-9])/g, "\n• ").replace(/\*\*/g, "").replace(/\n{3,}/g, "\n\n").trim();
 }
 
-function initialWeekPlan(): PlanDay[] {
-  const today = new Date();
-  const monday = new Date(today);
-  const day = today.getDay() || 7;
-  monday.setDate(today.getDate() - day + 1);
+function createWeekPlan(mondayDate: string): PlanDay[] {
+  const monday = dateAtNoon(mondayDate);
   const defaults: Array<[ActivityKind, string]> = [
     ["strength", "Upper body strength"], ["bike", "Zone 2 bike"], ["strength", "Lower body strength"],
     ["recovery", "Recovery and mobility"], ["strength", "Full body strength"], ["walk", "Easy outdoor movement"], ["rest", "Rest"],
@@ -448,12 +461,21 @@ function initialWeekPlan(): PlanDay[] {
   });
 }
 
+function initialWeekPlan(): PlanDay[] {
+  const thisMonday = weekStartFor(isoDate(new Date()));
+  return [...createWeekPlan(thisMonday), ...createWeekPlan(addIsoDays(thisMonday, 7))];
+}
+
 function readPlan(): PlanDay[] {
   try {
     const saved = JSON.parse(localStorage.getItem(PLAN_KEY) ?? "null") as PlanDay[] | null;
-    if (!saved?.length || saved.length !== 7) return initialWeekPlan();
+    if (!saved?.length || (saved.length !== 7 && saved.length !== 14)) return initialWeekPlan();
     const defaults = initialWeekPlan();
-    return saved.map((item, index) => ({ ...item, title: workoutDisplayName(item.title), status: item.status ?? "planned", sessions: Array.isArray(item.sessions) ? item.sessions : [], workout: item.kind === "strength" ? (item.workout?.length ? item.workout : defaults[index].workout ?? resetExercises(starterExercises)) : undefined }));
+    return defaults.map((fallback) => {
+      const item = saved.find((candidate) => candidate.date === fallback.date);
+      if (!item) return fallback;
+      return { ...item, title: workoutDisplayName(item.title), status: item.status ?? "planned", sessions: Array.isArray(item.sessions) ? item.sessions : [], workout: item.kind === "strength" ? (item.workout?.length ? item.workout : fallback.workout ?? resetExercises(starterExercises)) : undefined };
+    });
   } catch { return initialWeekPlan(); }
 }
 
@@ -624,6 +646,7 @@ function App() {
   const [weeklyPlan, setWeeklyPlan] = useState<PlanDay[]>(readPlan);
   const [planSaveStatus, setPlanSaveStatus] = useState("Saved on this device");
   const [selectedPlanDayId, setSelectedPlanDayId] = useState(() => readPlan().find((item) => item.date === isoDate(new Date()))?.id ?? readPlan()[0].id);
+  const [planningWeekOffset, setPlanningWeekOffset] = useState(0);
   const [stackComposerOpen, setStackComposerOpen] = useState(false);
   const [draftPlannedSession, setDraftPlannedSession] = useState<Omit<PlannedSession, "id" | "status">>({ kind: "bike", title: "Zone 2 bike ride", role: "warm-up", duration: "", distance: "", note: "" });
   const [activities, setActivities] = useState<ActivityEntry[]>(readActivities);
@@ -863,6 +886,21 @@ function App() {
   const novaExerciseMatches = novaExerciseSearch.trim() ? exerciseLibrary.filter((item) => `${item.name} ${item.category} ${item.equipment} ${item.aliases.join(" ")}`.toLowerCase().includes(novaExerciseSearch.trim().toLowerCase())).slice(0, 12) : [];
   const selectedHistory = history.find((item) => item.finishedAt === selectedHistoryId) ?? null;
   const selectedPlanDay = weeklyPlan.find((item) => item.id === selectedPlanDayId) ?? weeklyPlan[0];
+  const currentWeekStart = weekStartFor(isoDate(new Date()));
+  const currentWeekPlan = weeklyPlan.filter((day) => day.date >= currentWeekStart && day.date < addIsoDays(currentWeekStart, 7));
+  const viewedWeekStart = addIsoDays(currentWeekStart, planningWeekOffset * 7);
+  const viewedWeekPlan = weeklyPlan.filter((day) => day.date >= viewedWeekStart && day.date < addIsoDays(viewedWeekStart, 7));
+  const selectPlanDay = (day: PlanDay) => {
+    setSelectedPlanDayId(day.id);
+    setPlanningWeekOffset(day.date >= addIsoDays(currentWeekStart, 7) ? 1 : 0);
+  };
+  const showPlanningWeek = (offset: 0 | 1) => {
+    const start = addIsoDays(currentWeekStart, offset * 7);
+    const days = weeklyPlan.filter((day) => day.date >= start && day.date < addIsoDays(start, 7));
+    const weekdayIndex = (dateAtNoon(selectedPlanDay.date).getDay() + 6) % 7;
+    setPlanningWeekOffset(offset);
+    setSelectedPlanDayId(days[weekdayIndex]?.id ?? days[0]?.id ?? selectedPlanDayId);
+  };
   const weightUnit = profile.units === "metric" ? "kg" : "lb";
   const bodyWeightUnit = profile.bodyWeightUnit;
   const distanceUnit = profile.distanceUnit;
@@ -883,7 +921,7 @@ function App() {
   const upNextPlan = [...weeklyPlan].filter((day) => day.date > todayPlan.date && day.status !== "completed" && day.status !== "skipped").sort((left, right) => left.date.localeCompare(right.date))[0];
   const latestWorkout = [...history].sort((left, right) => new Date(workoutRecordDate(right)).getTime() - new Date(workoutRecordDate(left)).getTime())[0];
   const latestWorkoutTitle = latestWorkout?.sourceTitle ?? (latestWorkout?.planDayId ? weeklyPlan.find((day) => day.id === latestWorkout.planDayId)?.title : undefined) ?? (latestWorkout && isoDate(new Date(workoutRecordDate(latestWorkout))) === todayPlan.date ? todayPlan.title : undefined);
-  const plannedWeekDays = weeklyPlan.filter((day) => day.kind !== "rest" && day.kind !== "recovery");
+  const plannedWeekDays = currentWeekPlan.filter((day) => day.kind !== "rest" && day.kind !== "recovery");
   const completedWeekDays = plannedWeekDays.filter((day) => day.status === "completed").length;
   const weeklyPulseProgress = plannedWeekDays.length ? Math.round(completedWeekDays / plannedWeekDays.length * 100) : 0;
   const greetingHour = Number(new Intl.DateTimeFormat("en-US", { hour: "2-digit", hourCycle: "h23", timeZone: readNorthSession()?.user.timezone }).format(new Date()));
@@ -967,7 +1005,7 @@ function App() {
     }));
     return [...totals.entries()].sort((a, b) => b[1] - a[1]);
   })();
-  const weekDayMinutes = weeklyPlan.map((day) => weekSessions.filter((workout) => isoDate(new Date(workoutRecordDate(workout) || 0)) === day.date).reduce((total, workout) => total + (sessionMinutes(workout) ?? 0), 0) + weekActivities.filter((activity) => activity.date === day.date).reduce((total, activity) => total + (Number.parseFloat(activity.duration) || 0), 0));
+  const weekDayMinutes = currentWeekPlan.map((day) => weekSessions.filter((workout) => isoDate(new Date(workoutRecordDate(workout) || 0)) === day.date).reduce((total, workout) => total + (sessionMinutes(workout) ?? 0), 0) + weekActivities.filter((activity) => activity.date === day.date).reduce((total, activity) => total + (Number.parseFloat(activity.duration) || 0), 0));
   const latestBodyweightKg = (Number.parseFloat(checkIns.find((entry) => Number.parseFloat(entry.weight) > 0)?.weight ?? "") || 0) * 0.453592;
   const estimatedWeekCalories = latestBodyweightKg ? Math.round(weekSessions.reduce((total, workout) => total + 6 * latestBodyweightKg * ((sessionMinutes(workout) ?? 0) / 60), 0) + weekActivities.reduce((total, activity) => {
     const met = activity.kind === "run" ? 8 : activity.kind === "bike" ? 6.8 : activity.kind === "walk" ? 3.5 : 2.5;
@@ -1826,7 +1864,7 @@ function App() {
       Object.assign(next[target], sourceContent);
       return next;
     });
-    setSelectedPlanDayId(weeklyPlan[target].id);
+    selectPlanDay(weeklyPlan[target]);
   }
 
   function beginPlannedDay() {
@@ -2563,7 +2601,7 @@ function App() {
 
           <button className="daily-check-in" onClick={() => { setDraftCheckIn({ id: "", date: isoDate(new Date()), weight: checkIns[0]?.weight ? displayBodyWeight(checkIns[0].weight).toFixed(1).replace(/\.0$/, "") : "", sleep: "", energy: 3, soreness: 2, note: "" }); setScreen("check-in"); }}><HeartPulse size={19} /><div><strong>{checkIns[0]?.date === isoDate(new Date()) ? "Today is checked in" : "How are you arriving today?"}</strong><small>{checkIns[0]?.date === isoDate(new Date()) ? `Energy ${checkIns[0].energy}/5 · Soreness ${checkIns[0].soreness}/5` : "Energy, recovery, sleep, and anything worth knowing"}</small></div><ArrowRight size={16} /></button>
 
-          <section className="today-week-pulse"><div className="today-week-pulse-copy"><p className="eyebrow">YOUR WEEK</p><h2>{completedWeekDays ? `${completedWeekDays} of ${plannedWeekDays.length} sessions complete.` : "Your week is ready."}</h2><p>{weekTrainingMinutes ? `${weekTrainingMinutes} minutes already in the record.` : "Your plan can change with real life."}</p></div><div className="week-pulse-orbit" style={{ "--week-progress": `${weeklyPulseProgress * 3.6}deg` } as CSSProperties}><b>{weeklyPulseProgress}%</b><small>COMPLETE</small></div><div className="week-pulse-days" aria-label="This week's plan">{weeklyPlan.map((day) => <button key={day.id} className={`${day.status} ${day.date === todayPlan.date ? "today" : ""}`} onClick={() => { setSelectedPlanDayId(day.id); setScreen("training"); }} aria-label={`${day.label}: ${day.title}, ${day.status}`}><span>{day.label.slice(0, 1)}</span><i>{day.status === "completed" ? <Check size={12}/> : day.kind === "rest" ? <Moon size={11}/> : day.kind === "recovery" ? <HeartPulse size={11}/> : ""}</i></button>)}</div>{upcomingMilestones[0] && <button className="week-pulse-milestone" onClick={() => { setJourneyTab("milestones"); setScreen("journey"); }}><span>Next milestone</span><strong>{upcomingMilestones[0].title.replace(/^Chapter \d+: /, "")}</strong><em>{upcomingMilestones[0].progress}% complete</em><i><b style={{ width: `${upcomingMilestones[0].progress}%` }} /></i><ArrowRight size={14}/></button>}</section>
+          <section className="today-week-pulse"><div className="today-week-pulse-copy"><p className="eyebrow">YOUR WEEK</p><h2>{completedWeekDays ? `${completedWeekDays} of ${plannedWeekDays.length} sessions complete.` : "Your week is ready."}</h2><p>{weekTrainingMinutes ? `${weekTrainingMinutes} minutes already in the record.` : "Your plan can change with real life."}</p></div><div className="week-pulse-orbit" style={{ "--week-progress": `${weeklyPulseProgress * 3.6}deg` } as CSSProperties}><b>{weeklyPulseProgress}%</b><small>COMPLETE</small></div><div className="week-pulse-days" aria-label="This week's plan">{currentWeekPlan.map((day) => <button key={day.id} className={`${day.status} ${day.date === todayPlan.date ? "today" : ""}`} onClick={() => { selectPlanDay(day); setScreen("training"); }} aria-label={`${day.label}: ${day.title}, ${day.status}`}><span>{day.label.slice(0, 1)}</span><i>{day.status === "completed" ? <Check size={12}/> : day.kind === "rest" ? <Moon size={11}/> : day.kind === "recovery" ? <HeartPulse size={11}/> : ""}</i></button>)}</div>{upcomingMilestones[0] && <button className="week-pulse-milestone" onClick={() => { setJourneyTab("milestones"); setScreen("journey"); }}><span>Next milestone</span><strong>{upcomingMilestones[0].title.replace(/^Chapter \d+: /, "")}</strong><em>{upcomingMilestones[0].progress}% complete</em><i><b style={{ width: `${upcomingMilestones[0].progress}%` }} /></i><ArrowRight size={14}/></button>}</section>
 
           <section className="today-record"><header><div><p className="eyebrow">THE RECORD</p><h2>Where you are now.</h2></div><button onClick={() => { setJourneyTab("timeline"); setScreen("journey"); }}>Open Journey <ArrowRight size={14}/></button></header>{latestWorkout ? <button className="today-record-item" onClick={() => openHistory(latestWorkout, "training")}><span><History size={17}/></span><div><small>LAST SESSION</small><strong>{latestWorkoutTitle ?? "Workout completed"}</strong><p>{formatSessionDate(workoutRecordDate(latestWorkout))}{sessionSetCount(latestWorkout) ? ` · ${sessionSetCount(latestWorkout)} working sets` : " · Recorded in North"}</p></div><ArrowRight size={16}/></button> : <div className="today-record-item"><span><History size={17}/></span><div><small>LAST SESSION</small><strong>Your record starts here.</strong><p>Complete a session to begin your Journey.</p></div></div>}{upNextPlan ? <button className="today-record-item" onClick={() => { setSelectedPlanDayId(upNextPlan.id); setScreen("training"); }}><span>{upNextPlan.kind === "bike" ? <Bike size={17}/> : upNextPlan.kind === "run" ? <Footprints size={17}/> : upNextPlan.kind === "recovery" ? <HeartPulse size={17}/> : <CalendarDays size={17}/>}</span><div><small>UP NEXT</small><strong>{upNextPlan.title}</strong><p>{formatSessionDate(`${upNextPlan.date}T12:00:00`)} · {upNextPlan.kind}</p></div><ArrowRight size={16}/></button> : <button className="today-record-item" onClick={() => setScreen("training")}><span><Plus size={17}/></span><div><small>UP NEXT</small><strong>Shape your next session.</strong><p>Build a workout, add a ride, or leave room to recover.</p></div><ArrowRight size={16}/></button>}</section>
 
@@ -2607,9 +2645,9 @@ function App() {
       {screen === "training" && (
         <section className="screen destination-screen training-destination">
           <header className="training-page-header"><div><p className="eyebrow">TRAINING</p><h1>Own the work.</h1><p>Your plan. Your progress. Your strength.</p></div><div className="training-page-actions"><button aria-label="Review this week" title={weeklyReviews.some((item) => item.weekStart === weeklyPlan[0].date) ? "Revisit this week" : "Reflect on this week"} onClick={() => { const existing = weeklyReviews.find((item) => item.weekStart === weeklyPlan[0].date); setDraftReview(existing ? { proud: existing.proud, learned: existing.learned, next: existing.next } : { proud: "", learned: "", next: "" }); setScreen("weekly-review"); }}><NotebookPen size={20} /></button><button aria-label="Open progression and personal records" title="Progression and personal records" onClick={() => setScreen("progression")}><Trophy size={21} /></button></div></header>
-          <div className="section-heading training-rhythm-heading"><button className="text-button" onClick={() => setScreen("week-plan")}>See full week <ArrowRight size={14} /></button></div>
+          <div className="section-heading training-rhythm-heading"><div className="choice-row" aria-label="Planning week"><button className={planningWeekOffset === 0 ? "active" : ""} onClick={() => showPlanningWeek(0)}>This week</button><button className={planningWeekOffset === 1 ? "active" : ""} onClick={() => showPlanningWeek(1)}>Next week</button></div><button className="text-button" onClick={() => setScreen("week-plan")}>See full week <ArrowRight size={14} /></button></div>
           <section className="week-strip training-rhythm-strip">
-            {weeklyPlan.map((day) => <button key={day.id} onClick={() => setSelectedPlanDayId(day.id)} className={`${day.id === selectedPlanDay.id ? "selected" : ""} ${day.date === isoDate(new Date()) ? "today" : ""} ${day.status}`}><span>{day.label.slice(0, 1)}</span><small>{Number(day.date.slice(-2))}</small><i>{day.status === "completed" ? "✓" : day.status === "skipped" ? "×" : day.kind === "strength" ? "●" : day.kind === "rest" ? "—" : "·"}</i></button>)}
+            {viewedWeekPlan.map((day) => <button key={day.id} onClick={() => selectPlanDay(day)} className={`${day.id === selectedPlanDay.id ? "selected" : ""} ${day.date === isoDate(new Date()) ? "today" : ""} ${day.status}`}><span>{day.label.slice(0, 1)}</span><small>{Number(day.date.slice(-2))}</small><i>{day.status === "completed" ? "✓" : day.status === "skipped" ? "×" : day.kind === "strength" ? "●" : day.kind === "rest" ? "—" : "·"}</i></button>)}
           </section>
           <section className={`training-hero ${selectedPlanDay.kind}`}>
             <div className="training-hero-copy"><p className="eyebrow">TODAY’S TRAINING</p><h2>{selectedPlanDay.title}</h2><div className="training-muscle-tags">{selectedPlanDay.kind === "strength" ? Array.from(new Set(selectedWorkout.map((item) => exerciseLibrary.find((entry) => entry.name === item.name)?.category).filter(Boolean))).slice(0, 3).map((group) => <span key={group}>{group}</span>) : <span>{selectedPlanDay.kind}</span>}</div><div className="training-hero-metrics"><span><Clock3 size={16} /><strong>{selectedPlanDay.kind === "strength" ? `${plannedMinutes(selectedWorkout)} min` : "Open"}</strong><small>EST. TIME</small></span><span><TrendingUp size={16} /><strong>{selectedPlanDay.kind === "strength" ? plannedIntensity(selectedWorkout) : "Steady"}</strong><small>INTENSITY</small></span><span><Dumbbell size={16} /><strong>{selectedPlanDay.kind === "strength" ? selectedWorkout.flatMap((item) => item.sets).length : "—"}</strong><small>SETS</small></span></div></div>
@@ -2684,7 +2722,7 @@ function App() {
               <header className="panel-heading"><p className="eyebrow">WEEKLY LOAD</p><h2>What actually happened</h2></header>
               <section className="weekly-load-card">
                 <div className="weekly-load-metrics"><div><strong>{weekSessions.length + weekActivities.length}</strong><span>sessions</span></div><div><strong>{weekTrainingMinutes}</strong><span>minutes</span></div><div><strong>{weekReps}</strong><span>reps</span></div><div><strong>{Math.round(displayWeight(weekTonnage)).toLocaleString()}</strong><span>{weightUnit} volume</span></div><div><strong>{displayDistance(weekDistance).toFixed(1)}</strong><span>{distanceUnit}</span></div></div>
-                <div className="week-bars">{weekDayMinutes.map((minutes, index) => <div key={weeklyPlan[index].id}><i style={{ height: `${Math.max(4, Math.min(56, minutes))}px` }} /><span>{weeklyPlan[index].label.slice(0, 1)}</span></div>)}</div>
+                <div className="week-bars">{weekDayMinutes.map((minutes, index) => <div key={currentWeekPlan[index].id}><i style={{ height: `${Math.max(4, Math.min(56, minutes))}px` }} /><span>{currentWeekPlan[index].label.slice(0, 1)}</span></div>)}</div>
                 {muscleDistribution.length > 0 && <div className="muscle-summary">{muscleDistribution.slice(0, 5).map(([category, sets]) => <span key={category}>{category} <b>{sets} sets</b></span>)}</div>}
                 {calorieEstimates && <p className="calorie-assumption">{estimatedWeekCalories ? `≈${estimatedWeekCalories.toLocaleString()} active kcal estimated using your latest recorded bodyweight and standard activity MET values.` : "Add bodyweight in a check-in to calculate an estimate."} Estimates are optional and are not measurements.</p>}
                 <button className="estimate-toggle" onClick={() => setCalorieEstimates((enabled) => !enabled)}>{calorieEstimates ? "Hide calorie estimate" : "Show optional calorie estimate"}</button>
@@ -2700,9 +2738,10 @@ function App() {
           <p className="eyebrow">FULL WEEK</p>
           <h1>Plan the rhythm.</h1>
           <p className="lead">See every day, preview the real prescription, then open any day to edit it.</p>
-          <section className="expanded-week-list">{weeklyPlan.map((day) => {
+          <div className="choice-row" aria-label="Planning week"><button className={planningWeekOffset === 0 ? "active" : ""} onClick={() => showPlanningWeek(0)}>This week</button><button className={planningWeekOffset === 1 ? "active" : ""} onClick={() => showPlanningWeek(1)}>Next week</button></div>
+          <section className="expanded-week-list">{viewedWeekPlan.map((day) => {
             const workout = day.workout ?? [];
-            return <article key={day.id} className={`${day.kind} ${day.status}`}><button onClick={() => { setSelectedPlanDayId(day.id); setScreen("training"); }}><div className="expanded-day-date"><span>{day.label}</span><strong>{Number(day.date.slice(-2))}</strong></div><div className="expanded-day-content"><small>{day.kind.toUpperCase()} · {day.status}{day.sessions?.length ? ` · ${day.sessions.length + 1} sessions` : ""}</small><h3>{day.title}</h3>{day.kind === "strength" && workout.length > 0 ? <><p>{workout.map((exercise) => exercise.name).join(" · ")}{day.sessions?.length ? ` · then ${day.sessions.map((item) => item.title).join(" · ")}` : ""}</p><div><span><Clock3 size={12} /> ≈{plannedMinutes(workout)} min</span><span><Dumbbell size={12} /> {workout.reduce((sum, exercise) => sum + exercise.sets.length, 0)} sets</span><span><TrendingUp size={12} /> {plannedIntensity(workout)}</span></div></> : <p>{day.note || (day.kind === "rest" ? "Recovery is part of the plan." : "Open the day to add details.")}</p>}</div><ArrowRight size={16} /></button></article>;
+            return <article key={day.id} className={`${day.kind} ${day.status}`}><button onClick={() => { selectPlanDay(day); setScreen("training"); }}><div className="expanded-day-date"><span>{day.label}</span><strong>{Number(day.date.slice(-2))}</strong></div><div className="expanded-day-content"><small>{day.kind.toUpperCase()} · {day.status}{day.sessions?.length ? ` · ${day.sessions.length + 1} sessions` : ""}</small><h3>{day.title}</h3>{day.kind === "strength" && workout.length > 0 ? <><p>{workout.map((exercise) => exercise.name).join(" · ")}{day.sessions?.length ? ` · then ${day.sessions.map((item) => item.title).join(" · ")}` : ""}</p><div><span><Clock3 size={12} /> ≈{plannedMinutes(workout)} min</span><span><Dumbbell size={12} /> {workout.reduce((sum, exercise) => sum + exercise.sets.length, 0)} sets</span><span><TrendingUp size={12} /> {plannedIntensity(workout)}</span></div></> : <p>{day.note || (day.kind === "rest" ? "Recovery is part of the plan." : "Open the day to add details.")}</p>}</div><ArrowRight size={16} /></button></article>;
           })}</section>
         </section>
       )}
