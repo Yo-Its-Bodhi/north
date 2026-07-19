@@ -6,13 +6,13 @@
     ],
     "page": [
       320,
-      1349
+      1324
     ],
     "shell": {
       "x": 0,
       "y": 0,
       "width": 320,
-      "height": 1349,
+      "height": 1324,
       "display": "block",
       "fontSize": "16px",
       "color": "rgb(23, 39, 43)",
@@ -32,7 +32,7 @@
       "x": 0,
       "y": 78,
       "width": 320,
-      "height": 1271,
+      "height": 1246,
       "display": "block",
       "fontSize": "16px",
       "color": "rgb(23, 39, 43)",
@@ -76,13 +76,13 @@
     ],
     "page": [
       430,
-      1342
+      1318
     ],
     "shell": {
       "x": 0,
       "y": 0,
       "width": 430,
-      "height": 1342,
+      "height": 1318,
       "display": "block",
       "fontSize": "16px",
       "color": "rgb(23, 39, 43)",
@@ -102,7 +102,7 @@
       "x": 0,
       "y": 78,
       "width": 430,
-      "height": 1264,
+      "height": 1240,
       "display": "block",
       "fontSize": "16px",
       "color": "rgb(23, 39, 43)",
