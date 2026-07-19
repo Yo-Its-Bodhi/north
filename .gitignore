@@ -2,6 +2,8 @@ node_modules/
 dist/
 .env
 .env.local
+OPENAI_API_KEY=*
+*.tar.gz
 *.log
 *.tsbuildinfo
 vite.config.js

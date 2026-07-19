@@ -1,0 +1,1814 @@
+# North exercise-system data quality audit
+
+Generated: 2026-07-18T05:29:11.489Z
+
+## Summary
+
+- Exercises: **784**
+- Muscles / equipment / templates: **90 / 124 / 21**
+- Validation issues: **0**
+- Duplicate candidates: **76** (0 unresolved)
+- Alias collisions: **0**
+- Parent-muscle fallback uses: **772**
+- Unresolved visual mappings: **0**
+
+## Totals by equipment
+
+| Value | Total |
+|---|---:|
+| abdominal_crunch_machine | 1 |
+| adjustable_bench | 11 |
+| agility_ladder | 2 |
+| air_bike | 2 |
+| arc_trainer | 1 |
+| assisted_pull_up_band | 1 |
+| assisted_pull_up_dip_machine | 4 |
+| back_extension_machine | 1 |
+| barbell | 108 |
+| battle_ropes | 4 |
+| belt_squat_machine | 2 |
+| biceps_curl_machine | 1 |
+| bodyweight | 174 |
+| cable_stack | 83 |
+| calf_raise_machine | 6 |
+| chest_press_machine | 4 |
+| decline_bench | 3 |
+| dip_bars | 2 |
+| dip_machine | 1 |
+| dumbbell | 118 |
+| elliptical | 2 |
+| ez_curl_bar | 8 |
+| flat_bench | 29 |
+| floor | 1 |
+| foam_roller | 3 |
+| functional_trainer | 11 |
+| glute_drive_machine | 1 |
+| gymnastics_rings | 2 |
+| hack_squat_machine | 3 |
+| high_row_machine | 2 |
+| hip_abductor_machine | 3 |
+| hip_adductor_machine | 2 |
+| hip_thrust_machine | 2 |
+| incline_chest_press_machine | 2 |
+| jump_rope | 1 |
+| kettlebell | 56 |
+| lat_pulldown_machine | 4 |
+| lateral_raise_machine | 2 |
+| leg_extension_machine | 2 |
+| leg_press_machine | 7 |
+| long_resistance_band | 48 |
+| low_row_machine | 2 |
+| lying_leg_curl_machine | 3 |
+| manual_treadmill | 2 |
+| medicine_ball | 5 |
+| mini_band | 7 |
+| pec_deck | 3 |
+| pendulum_squat_machine | 2 |
+| plyometric_box | 13 |
+| preacher_bench | 1 |
+| preacher_curl_machine | 2 |
+| pull_up_bar | 18 |
+| recumbent_bike | 1 |
+| reverse_pec_deck | 1 |
+| rotary_torso_machine | 1 |
+| rowing_machine | 2 |
+| sandbag | 4 |
+| seated_leg_curl_machine | 3 |
+| seated_row_machine | 6 |
+| shoulder_press_machine | 3 |
+| ski_erg | 2 |
+| sled | 6 |
+| smith_machine | 6 |
+| spin_bike | 1 |
+| squat_rack | 14 |
+| stability_ball | 2 |
+| stair_climber | 3 |
+| standing_leg_curl_machine | 1 |
+| stationary_bike | 4 |
+| step_mill | 1 |
+| tire | 1 |
+| treadmill | 3 |
+| triceps_extension_machine | 1 |
+| versaclimber | 1 |
+| weight_plate | 1 |
+| weighted_vest | 1 |
+
+## Totals by category
+
+| Value | Total |
+|---|---:|
+| cardio | 77 |
+| core_strength | 78 |
+| full_body_strength | 52 |
+| isometric | 4 |
+| lower_body_strength | 196 |
+| mobility | 46 |
+| upper_body_strength | 331 |
+
+## Totals by difficulty
+
+| Value | Total |
+|---|---:|
+| advanced | 25 |
+| beginner | 226 |
+| intermediate | 533 |
+
+## Records missing instructions
+
+Count: 0
+
+None.
+## Records missing muscle mappings
+
+Count: 0
+
+None.
+
+## Records missing substitutions
+
+Count: 39
+
+- `dead_hang`
+- `pike_push_up`
+- `handstand_push_up`
+- `hanging_knee_raise`
+- `hanging_leg_raise`
+- `kettlebell_swing`
+- `bear_crawl`
+- `cat_cow`
+- `thread_the_needle`
+- `wall_slide`
+- `doorway_chest_stretch`
+- `90_90_hip_switch`
+- `pigeon_stretch`
+- `adductor_rock_back`
+- `frog_stretch`
+- `world_s_greatest_stretch`
+- `ankle_dorsiflexion_mobilization`
+- `calf_stretch`
+- `sciatic_nerve_glide`
+- `hip_airplane`
+- `lateral_bear_crawl`
+- `backward_bear_crawl`
+- `two_hand_kettlebell_swing`
+- `single_arm_kettlebell_swing`
+- `alternating_kettlebell_swing`
+- `double_kettlebell_swing`
+- `wrist_extension_rock`
+- `wrist_flexion_stretch`
+- `wall_shoulder_flexion_drill`
+- `thoracic_extension_over_bench`
+- `half_kneeling_ankle_rock`
+- `standing_hip_car`
+- `dynamic_hamstring_sweep`
+- `standing_quad_stretch`
+- `supine_figure_four_stretch`
+- `downward_facing_dog`
+- `upward_facing_dog`
+- `seated_forward_fold`
+- `standing_side_bend_stretch`
+
+## Records missing progressions
+
+Count: 752
+
+- `push_up_isometric_hold`
+- `top_pull_up_hold`
+- `dumbbell_bench_press`
+- `dumbbell_lateral_raise`
+- `barbell_romanian_deadlift`
+- `bulgarian_split_squat`
+- `cable_pallof_press`
+- `lat_pulldown`
+- `seated_cable_row`
+- `resistance_band_face_pull`
+- `farmer_carry`
+- `jump_rope`
+- `stationary_bike`
+- `hip_flexor_stretch`
+- `barbell_bench_press`
+- `close_grip_bench_press`
+- `wide_grip_bench_press`
+- `incline_barbell_bench_press`
+- `decline_barbell_bench_press`
+- `floor_press`
+- `paused_bench_press`
+- `spoto_press`
+- `pin_press`
+- `incline_dumbbell_press`
+- `decline_dumbbell_press`
+- `dumbbell_floor_press`
+- `dumbbell_squeeze_press`
+- `alternating_dumbbell_press`
+- `single_arm_dumbbell_press`
+- `machine_chest_press`
+- `incline_machine_press`
+- `decline_machine_press`
+- `plate_loaded_chest_press`
+- `smith_machine_bench_press`
+- `smith_machine_incline_press`
+- `cable_chest_press`
+- `single_arm_cable_press`
+- `standing_cable_press`
+- `cable_fly`
+- `low_to_high_cable_fly`
+- `high_to_low_cable_fly`
+- `pec_deck_fly`
+- `dumbbell_fly`
+- `incline_dumbbell_fly`
+- `decline_push_up`
+- `diamond_push_up`
+- `wide_push_up`
+- `ring_push_up`
+- `chest_dip`
+- `landmine_chest_press`
+- `conventional_deadlift`
+- `rack_pull`
+- `barbell_bent_over_row`
+- `pendlay_row`
+- `underhand_barbell_row`
+- `seal_row`
+- `meadows_row`
+- `t_bar_row`
+- `single_arm_landmine_row`
+- `chest_supported_dumbbell_row`
+- `single_arm_dumbbell_row`
+- `dumbbell_pullover`
+- `renegade_row`
+- `kroc_row`
+- `wide_grip_lat_pulldown`
+- `close_grip_lat_pulldown`
+- `neutral_grip_lat_pulldown`
+- `underhand_lat_pulldown`
+- `single_arm_lat_pulldown`
+- `straight_arm_pulldown`
+- `wide_grip_cable_row`
+- `single_arm_cable_row`
+- `rope_seated_row`
+- `machine_high_row`
+- `machine_low_row`
+- `plate_loaded_row`
+- `chest_supported_machine_row`
+- `assisted_pull_up`
+- `chin_up`
+- `neutral_grip_pull_up`
+- `wide_grip_pull_up`
+- `inverted_row`
+- `ring_row`
+- `back_extension`
+- `reverse_hyperextension`
+- `good_morning`
+- `standing_overhead_press`
+- `seated_barbell_shoulder_press`
+- `push_press`
+- `behind_the_neck_press`
+- `bradford_press`
+- `z_press`
+- `seated_dumbbell_shoulder_press`
+- `standing_dumbbell_shoulder_press`
+- `arnold_press`
+- `single_arm_dumbbell_shoulder_press`
+- `seated_lateral_raise`
+- `lean_away_lateral_raise`
+- `dumbbell_front_raise`
+- `dumbbell_rear_delt_raise`
+- `plate_front_raise`
+- `cable_lateral_raise`
+- `behind_the_body_cable_lateral_raise`
+- `cable_front_raise`
+- `cable_y_raise`
+- `face_pull`
+- `cable_rear_delt_fly`
+- `reverse_pec_deck`
+- `machine_shoulder_press`
+- `machine_lateral_raise`
+- `smith_machine_shoulder_press`
+- `landmine_press`
+- `half_kneeling_landmine_press`
+- `pike_push_up`
+- `handstand_push_up`
+- `wall_handstand_hold`
+- `band_pull_apart`
+- `barbell_curl`
+- `ez_bar_curl`
+- `ez_bar_curl_21s`
+- `dumbbell_curl_21s`
+- `wide_grip_ez_bar_curl`
+- `close_grip_ez_bar_curl`
+- `preacher_curl`
+- `spider_curl`
+- `dumbbell_curl`
+- `alternating_dumbbell_curl`
+- `hammer_curl`
+- `cross_body_hammer_curl`
+- `incline_dumbbell_curl`
+- `concentration_curl`
+- `zottman_curl`
+- `waiter_curl`
+- `bayesian_cable_curl`
+- `cable_curl`
+- `rope_hammer_curl`
+- `high_cable_curl`
+- `single_arm_cable_curl`
+- `cable_preacher_curl`
+- `machine_preacher_curl`
+- `machine_biceps_curl`
+- `resistance_band_curl`
+- `reverse_curl`
+- `drag_curl`
+- `chin_up_biceps_focus`
+- `close_grip_barbell_bench_press`
+- `jm_press`
+- `barbell_skull_crusher`
+- `ez_bar_skull_crusher`
+- `dumbbell_skull_crusher`
+- `rolling_dumbbell_extension`
+- `single_arm_overhead_extension`
+- `two_hand_overhead_extension`
+- `tate_press`
+- `rope_pushdown`
+- `straight_bar_pushdown`
+- `v_bar_pushdown`
+- `reverse_grip_pushdown`
+- `single_arm_cable_pushdown`
+- `cable_overhead_extension`
+- `single_arm_cable_overhead_extension`
+- `cross_body_cable_extension`
+- `machine_triceps_extension`
+- `assisted_dip`
+- `parallel_bar_dip`
+- `bench_dip`
+- `diamond_push_up_triceps_focus`
+- `resistance_band_pushdown`
+- `resistance_band_overhead_extension`
+- `front_squat`
+- `high_bar_squat`
+- `low_bar_squat`
+- `box_squat`
+- `zercher_squat`
+- `hack_squat`
+- `pendulum_squat`
+- `belt_squat`
+- `single_leg_press`
+- `horizontal_leg_press`
+- `leg_extension`
+- `single_leg_extension`
+- `smith_machine_squat`
+- `smith_machine_front_squat`
+- `goblet_squat`
+- `dumbbell_squat`
+- `front_foot_elevated_split_squat`
+- `walking_lunge`
+- `reverse_lunge`
+- `forward_lunge`
+- `lateral_lunge`
+- `step_up`
+- `cyclist_squat`
+- `sissy_squat`
+- `wall_sit`
+- `spanish_squat`
+- `pistol_squat`
+- `bodyweight_split_squat`
+- `stiff_leg_deadlift`
+- `snatch_grip_romanian_deadlift`
+- `single_leg_romanian_deadlift`
+- `dumbbell_romanian_deadlift`
+- `kettlebell_romanian_deadlift`
+- `seated_leg_curl`
+- `lying_leg_curl`
+- `standing_single_leg_curl`
+- `nordic_hamstring_curl`
+- `glute_ham_raise`
+- `sliding_leg_curl`
+- `swiss_ball_leg_curl`
+- `cable_pull_through`
+- `good_morning_hamstring_focus`
+- `45_degree_back_extension`
+- `reverse_hyper_hamstring_focus`
+- `banded_leg_curl`
+- `razor_curl`
+- `barbell_hip_thrust`
+- `barbell_glute_bridge`
+- `dumbbell_hip_thrust`
+- `single_leg_hip_thrust`
+- `single_leg_glute_bridge`
+- `frog_pump`
+- `cable_pull_through_glute_focus`
+- `cable_kickback`
+- `cable_standing_hip_abduction`
+- `cable_standing_hip_adduction`
+- `hip_abduction_machine`
+- `hip_adduction_machine`
+- `reverse_lunge_glute_focus`
+- `curtsy_lunge`
+- `high_step_up`
+- `sumo_deadlift`
+- `sumo_squat`
+- `b_stance_romanian_deadlift`
+- `banded_lateral_walk`
+- `monster_walk`
+- `clamshell`
+- `fire_hydrant`
+- `donkey_kick`
+- `lateral_step_down`
+- `standing_calf_raise`
+- `seated_calf_raise`
+- `leg_press_calf_raise`
+- `donkey_calf_raise`
+- `single_leg_standing_calf_raise`
+- `dumbbell_calf_raise`
+- `smith_machine_calf_raise`
+- `tibialis_raise`
+- `tibialis_machine_raise`
+- `toe_elevated_calf_raise`
+- `bent_knee_calf_raise`
+- `farmer_walk_on_toes`
+- `cable_crunch`
+- `kneeling_cable_crunch`
+- `standing_cable_crunch`
+- `half_kneeling_pallof_press`
+- `cable_wood_chop`
+- `cable_lift`
+- `barbell_rollout`
+- `side_plank`
+- `copenhagen_plank`
+- `dead_bug`
+- `bird_dog`
+- `hollow_body_hold`
+- `hollow_body_rock`
+- `v_up`
+- `sit_up`
+- `crunch`
+- `reverse_crunch`
+- `bicycle_crunch`
+- `mountain_climber`
+- `hanging_knee_raise`
+- `hanging_leg_raise`
+- `captain_s_chair_knee_raise`
+- `captain_s_chair_leg_raise`
+- `toes_to_bar`
+- `dragon_flag`
+- `suitcase_carry`
+- `overhead_carry`
+- `turkish_get_up`
+- `russian_twist`
+- `medicine_ball_slam`
+- `stir_the_pot`
+- `barbell_clean`
+- `barbell_power_clean`
+- `barbell_hang_clean`
+- `clean_and_press`
+- `clean_and_jerk`
+- `barbell_snatch`
+- `power_snatch`
+- `hang_snatch`
+- `thruster`
+- `dumbbell_thruster`
+- `devil_press`
+- `dumbbell_clean_and_press`
+- `kettlebell_clean`
+- `kettlebell_clean_and_press`
+- `kettlebell_snatch`
+- `kettlebell_swing`
+- `kettlebell_high_pull`
+- `turkish_get_up_full_body`
+- `man_maker`
+- `bear_crawl`
+- `burpee`
+- `burpee_box_jump`
+- `sled_push`
+- `sled_pull`
+- `battle_rope_alternating_waves`
+- `battle_rope_slams`
+- `treadmill_run`
+- `track_intervals`
+- `hill_sprint`
+- `stair_climb`
+- `stepmill`
+- `outdoor_bike`
+- `spin_bike_intervals`
+- `air_bike`
+- `recumbent_bike`
+- `rowing_machine`
+- `ski_erg`
+- `elliptical`
+- `arc_trainer`
+- `box_jump`
+- `broad_jump`
+- `shuttle_run`
+- `farmer_carry_conditioning`
+- `sled_push_conditioning`
+- `sled_drag_conditioning`
+- `sandbag_carry`
+- `sandbag_clean`
+- `medicine_ball_throw`
+- `zone_2_bike`
+- `zone_2_walk`
+- `zone_2_run`
+- `cat_cow`
+- `child_s_pose`
+- `thread_the_needle`
+- `thoracic_rotation`
+- `open_book_rotation`
+- `wall_slide`
+- `shoulder_dislocate`
+- `banded_shoulder_stretch`
+- `doorway_chest_stretch`
+- `lat_stretch`
+- `couch_stretch`
+- `90_90_hip_switch`
+- `pigeon_stretch`
+- `adductor_rock_back`
+- `frog_stretch`
+- `world_s_greatest_stretch`
+- `deep_squat_hold`
+- `ankle_dorsiflexion_mobilization`
+- `calf_stretch`
+- `hamstring_floss`
+- `sciatic_nerve_glide`
+- `hip_airplane`
+- `cossack_squat_mobility`
+- `foam_roll_quads`
+- `foam_roll_upper_back`
+- `foam_roll_glutes`
+- `scapular_wall_clock`
+- `banded_external_rotation`
+- `close_grip_push_up`
+- `pause_push_up`
+- `explosive_push_up`
+- `clap_push_up`
+- `assisted_one_arm_push_up`
+- `one_arm_push_up`
+- `top_push_up_hold`
+- `midpoint_push_up_hold`
+- `bottom_push_up_hold`
+- `multi_position_push_up_hold`
+- `90_degree_pull_up_hold`
+- `midpoint_pull_up_hold`
+- `close_grip_pull_up`
+- `mixed_grip_pull_up`
+- `weighted_pull_up`
+- `commando_pull_up`
+- `archer_pull_up`
+- `counterbalance_squat`
+- `bodyweight_box_squat`
+- `tempo_air_squat`
+- `pause_air_squat`
+- `jump_squat`
+- `split_squat_iso_hold`
+- `alternating_reverse_lunge`
+- `alternating_forward_lunge`
+- `walking_bodyweight_lunge`
+- `lateral_bodyweight_lunge`
+- `curtsy_bodyweight_lunge`
+- `low_step_up`
+- `lateral_step_up`
+- `step_down`
+- `skater_squat`
+- `assisted_pistol_squat`
+- `glute_bridge_march`
+- `feet_elevated_glute_bridge`
+- `shoulder_elevated_glute_bridge`
+- `frog_pump_hold`
+- `hip_hinge_wall_tap`
+- `single_leg_hip_hinge_reach`
+- `standing_hip_airplane`
+- `prone_hip_extension`
+- `high_plank`
+- `top_plank_hold`
+- `side_plank_from_knees`
+- `star_side_plank`
+- `side_plank_hip_lift`
+- `plank_shoulder_tap`
+- `bear_plank`
+- `bear_plank_shoulder_tap`
+- `dead_bug_heel_tap`
+- `dead_bug_pullover`
+- `bird_dog_row_reach`
+- `cross_body_mountain_climber`
+- `slow_mountain_climber`
+- `hollow_body_tuck_hold`
+- `seated_knee_tuck`
+- `lying_windshield_wiper`
+- `half_burpee`
+- `step_back_burpee`
+- `burpee_broad_jump`
+- `lateral_bear_crawl`
+- `backward_bear_crawl`
+- `crab_walk`
+- `inchworm_walkout`
+- `tuck_jump`
+- `skater_jump`
+- `lateral_line_hop`
+- `forward_line_hop`
+- `split_jump`
+- `standing_broad_jump`
+- `single_leg_hop_and_stick`
+- `neutral_grip_dumbbell_bench_press`
+- `paused_dumbbell_bench_press`
+- `tempo_dumbbell_bench_press`
+- `single_arm_dumbbell_bench_press`
+- `dumbbell_crush_press`
+- `incline_neutral_grip_dumbbell_press`
+- `incline_single_arm_dumbbell_press`
+- `decline_neutral_grip_dumbbell_press`
+- `dumbbell_fly_to_press`
+- `seated_neutral_grip_dumbbell_press`
+- `half_kneeling_single_arm_dumbbell_press`
+- `dumbbell_scaption_raise`
+- `dumbbell_y_raise`
+- `chest_supported_rear_delt_raise`
+- `side_lying_lateral_raise`
+- `dumbbell_external_rotation`
+- `dumbbell_cuban_rotation`
+- `incline_bench_dumbbell_row`
+- `dumbbell_gorilla_row`
+- `dumbbell_tripod_row`
+- `dumbbell_seal_row`
+- `dumbbell_high_row`
+- `dumbbell_rear_delt_row`
+- `single_arm_dumbbell_pullover`
+- `seated_alternating_dumbbell_curl`
+- `incline_hammer_curl`
+- `prone_incline_dumbbell_curl`
+- `dumbbell_preacher_hammer_curl`
+- `dumbbell_reverse_curl`
+- `dumbbell_spider_hammer_curl`
+- `dumbbell_jm_press`
+- `incline_dumbbell_skull_crusher`
+- `single_arm_dumbbell_floor_skull_crusher`
+- `dumbbell_cross_body_triceps_extension`
+- `dumbbell_kickback`
+- `dumbbell_front_squat`
+- `dumbbell_box_squat`
+- `dumbbell_cyclist_squat`
+- `dumbbell_split_squat`
+- `front_foot_elevated_dumbbell_split_squat`
+- `dumbbell_lateral_step_up`
+- `dumbbell_step_down`
+- `dumbbell_glute_bridge`
+- `dumbbell_frog_pump`
+- `dumbbell_curtsy_lunge`
+- `dumbbell_lateral_lunge`
+- `dumbbell_hip_airplane`
+- `dumbbell_dead_bug`
+- `dumbbell_plank_drag`
+- `dumbbell_side_plank_row`
+- `dumbbell_overhead_march`
+- `dumbbell_front_rack_march`
+- `dumbbell_offset_carry`
+- `competition_bench_press`
+- `touch_and_go_bench_press`
+- `tempo_bench_press`
+- `feet_up_bench_press`
+- `larsen_press`
+- `board_press`
+- `reverse_grip_bench_press`
+- `guillotine_press`
+- `incline_close_grip_bench_press`
+- `strict_overhead_press`
+- `paused_overhead_press`
+- `close_grip_overhead_press`
+- `wide_grip_overhead_press`
+- `barbell_front_raise`
+- `barbell_cuban_press`
+- `barbell_seal_row`
+- `barbell_chest_supported_row`
+- `paused_barbell_row`
+- `snatch_grip_barbell_row`
+- `barbell_rear_delt_row`
+- `pin_squat`
+- `anderson_squat`
+- `safety_bar_squat`
+- `cambered_bar_squat`
+- `hatfield_squat`
+- `barbell_split_squat`
+- `barbell_reverse_lunge`
+- `barbell_walking_lunge`
+- `conventional_barbell_deadlift`
+- `sumo_barbell_deadlift`
+- `barbell_stiff_leg_deadlift`
+- `barbell_block_pull`
+- `barbell_deficit_deadlift`
+- `paused_barbell_deadlift`
+- `tempo_barbell_romanian_deadlift`
+- `barbell_single_leg_romanian_deadlift`
+- `barbell_rack_pull`
+- `paused_barbell_hip_thrust`
+- `tempo_barbell_hip_thrust`
+- `barbell_single_leg_hip_thrust`
+- `barbell_frog_pump`
+- `clean_pull`
+- `snatch_pull`
+- `high_hang_power_clean`
+- `hang_power_snatch`
+- `muscle_clean`
+- `barbell_push_jerk`
+- `barbell_split_jerk`
+- `barbell_front_rack_carry`
+- `barbell_overhead_carry`
+- `two_hand_kettlebell_swing`
+- `single_arm_kettlebell_swing`
+- `alternating_kettlebell_swing`
+- `double_kettlebell_swing`
+- `kettlebell_dead_clean`
+- `kettlebell_hang_clean`
+- `double_kettlebell_clean`
+- `kettlebell_push_press`
+- `double_kettlebell_push_press`
+- `kettlebell_clean_and_jerk`
+- `double_kettlebell_clean_and_jerk`
+- `kettlebell_half_snatch`
+- `double_kettlebell_snatch`
+- `kettlebell_thruster`
+- `double_kettlebell_thruster`
+- `kettlebell_long_cycle_clean_and_jerk`
+- `kettlebell_goblet_squat`
+- `double_kettlebell_front_squat`
+- `kettlebell_box_squat`
+- `kettlebell_split_squat`
+- `kettlebell_reverse_lunge`
+- `kettlebell_walking_lunge`
+- `kettlebell_lateral_lunge`
+- `kettlebell_step_up`
+- `kettlebell_deadlift`
+- `double_kettlebell_deadlift`
+- `kettlebell_sumo_deadlift`
+- `single_leg_kettlebell_romanian_deadlift`
+- `double_kettlebell_romanian_deadlift`
+- `kettlebell_good_morning`
+- `kettlebell_strict_press`
+- `half_kneeling_kettlebell_press`
+- `bottoms_up_kettlebell_press`
+- `double_kettlebell_overhead_press`
+- `kettlebell_arm_bar`
+- `kettlebell_windmill`
+- `kettlebell_gorilla_row`
+- `single_arm_kettlebell_row`
+- `double_kettlebell_bent_over_row`
+- `kettlebell_renegade_row`
+- `kettlebell_pullover`
+- `kettlebell_suitcase_carry`
+- `kettlebell_farmer_carry`
+- `kettlebell_front_rack_carry`
+- `kettlebell_overhead_carry`
+- `kettlebell_halo`
+- `kettlebell_dead_bug`
+- `kettlebell_plank_drag`
+- `resistance_band_chest_press`
+- `resistance_band_incline_press`
+- `resistance_band_decline_press`
+- `resistance_band_fly`
+- `single_arm_resistance_band_chest_press`
+- `resistance_band_bent_over_row`
+- `resistance_band_seated_row`
+- `single_arm_resistance_band_row`
+- `resistance_band_lat_pulldown`
+- `resistance_band_straight_arm_pulldown`
+- `resistance_band_assisted_pull_up`
+- `resistance_band_overhead_press`
+- `resistance_band_lateral_raise`
+- `resistance_band_front_raise`
+- `resistance_band_rear_delt_fly`
+- `resistance_band_external_rotation`
+- `resistance_band_internal_rotation`
+- `resistance_band_y_raise`
+- `resistance_band_hammer_curl`
+- `resistance_band_preacher_curl`
+- `single_arm_resistance_band_curl`
+- `resistance_band_triceps_pushdown`
+- `resistance_band_overhead_triceps_extension`
+- `single_arm_resistance_band_triceps_extension`
+- `mini_band_lateral_walk`
+- `mini_band_monster_walk`
+- `mini_band_clamshell`
+- `mini_band_glute_bridge`
+- `mini_band_squat`
+- `mini_band_standing_hip_abduction`
+- `mini_band_fire_hydrant`
+- `resistance_band_front_squat`
+- `resistance_band_split_squat`
+- `resistance_band_reverse_lunge`
+- `resistance_band_terminal_knee_extension`
+- `resistance_band_pallof_press`
+- `half_kneeling_band_pallof_press`
+- `resistance_band_wood_chop`
+- `resistance_band_anti_extension_walkout`
+- `resistance_band_dead_bug`
+- `dual_cable_chest_press`
+- `half_kneeling_single_arm_cable_press`
+- `cable_squeeze_press`
+- `mid_cable_fly`
+- `single_arm_low_to_high_cable_fly`
+- `single_arm_high_to_low_cable_fly`
+- `half_kneeling_single_arm_lat_pulldown`
+- `kneeling_cable_lat_pulldown`
+- `cable_high_row`
+- `cable_low_row`
+- `cable_rear_delt_row`
+- `cable_pullover`
+- `cable_scapular_pulldown`
+- `single_arm_cable_lateral_raise`
+- `cuffed_cable_lateral_raise`
+- `cable_face_pull_to_external_rotation`
+- `cable_scaption_raise`
+- `cable_external_rotation`
+- `cable_internal_rotation`
+- `single_arm_bayesian_cable_curl`
+- `cable_spider_curl`
+- `cable_reverse_curl`
+- `cable_rope_hammer_curl`
+- `lying_cable_curl`
+- `single_arm_cable_triceps_pushdown`
+- `cable_cross_body_triceps_extension`
+- `cable_skull_crusher`
+- `standing_cable_pallof_press`
+- `tall_kneeling_cable_pallof_press`
+- `cable_anti_rotation_hold`
+- `cable_reverse_wood_chop`
+- `cable_dead_bug`
+- `cable_standing_rotation`
+- `cable_glute_kickback`
+- `cable_reverse_lunge`
+- `cable_step_through`
+- `selectorized_chest_press`
+- `selectorized_incline_chest_press`
+- `plate_loaded_incline_chest_press`
+- `single_arm_machine_chest_press`
+- `machine_pec_fly`
+- `machine_neutral_grip_lat_pulldown`
+- `machine_underhand_lat_pulldown`
+- `single_arm_machine_lat_pulldown`
+- `machine_seated_neutral_grip_row`
+- `single_arm_seated_row_machine`
+- `single_arm_high_row_machine`
+- `single_arm_low_row_machine`
+- `machine_neutral_grip_shoulder_press`
+- `single_arm_machine_shoulder_press`
+- `single_arm_machine_lateral_raise`
+- `machine_reverse_fly`
+- `45_degree_leg_press`
+- `single_leg_machine_leg_press`
+- `narrow_stance_leg_press`
+- `wide_stance_leg_press`
+- `machine_hack_squat`
+- `reverse_machine_hack_squat`
+- `pendulum_squat_machine`
+- `belt_squat_machine`
+- `single_leg_machine_extension`
+- `machine_seated_leg_curl`
+- `single_leg_seated_leg_curl`
+- `machine_lying_leg_curl`
+- `single_leg_lying_leg_curl`
+- `machine_standing_leg_curl`
+- `machine_hip_thrust`
+- `single_leg_hip_thrust_machine`
+- `glute_drive_machine`
+- `machine_hip_abduction`
+- `single_leg_hip_abduction_machine`
+- `machine_hip_adduction`
+- `machine_standing_calf_raise`
+- `machine_seated_calf_raise`
+- `single_leg_calf_raise_machine`
+- `machine_rotary_torso`
+- `machine_abdominal_crunch`
+- `machine_back_extension`
+- `single_arm_machine_preacher_curl`
+- `machine_dip`
+- `assisted_dip_machine`
+- `outdoor_hill_intervals`
+- `pool_swimming`
+- `pool_walking`
+- `outdoor_hiking`
+- `shadow_boxing`
+- `dance_cardio`
+- `manual_treadmill_walk`
+- `manual_treadmill_run`
+- `recumbent_bike_session`
+- `air_bike_intervals`
+- `rowing_machine_intervals`
+- `ski_erg_intervals`
+- `elliptical_session`
+- `stair_climber_session`
+- `step_mill_session`
+- `arc_trainer_session`
+- `versaclimber_session`
+- `neck_controlled_rotation`
+- `wrist_extension_rock`
+- `wrist_flexion_stretch`
+- `wall_shoulder_flexion_drill`
+- `thoracic_extension_over_bench`
+- `quadruped_thoracic_rotation`
+- `half_kneeling_ankle_rock`
+- `standing_hip_car`
+- `supine_hip_internal_rotation`
+- `dynamic_hamstring_sweep`
+- `standing_quad_stretch`
+- `supine_figure_four_stretch`
+- `downward_facing_dog`
+- `upward_facing_dog`
+- `low_lunge_stretch`
+- `seated_forward_fold`
+- `standing_side_bend_stretch`
+- `battle_rope_outside_circles`
+- `battle_rope_inside_circles`
+- `lateral_sled_drag`
+- `bear_hug_sandbag_carry`
+- `front_rack_sandbag_carry`
+- `tire_flip`
+- `sledgehammer_tire_strike`
+- `shuttle_sprint`
+- `agility_ladder_two_feet_in`
+- `agility_ladder_lateral_shuffle`
+- `medicine_ball_rotational_wall_throw`
+- `medicine_ball_chest_pass`
+- `box_jump_and_stick`
+- `lateral_box_jump`
+
+## Parent-muscle fallbacks
+
+Count: 772
+
+- `{"exerciseId":"standard_push_up","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"push_up_isometric_hold","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"dumbbell_bench_press","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"barbell_back_squat","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"barbell_romanian_deadlift","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"bulgarian_split_squat","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"leg_press","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"jump_rope","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"treadmill_walk","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"treadmill_walk","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"stationary_bike","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"stationary_bike","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"barbell_bench_press","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"close_grip_bench_press","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"wide_grip_bench_press","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"incline_barbell_bench_press","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"decline_barbell_bench_press","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"floor_press","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"paused_bench_press","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"spoto_press","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"pin_press","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"incline_dumbbell_press","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"decline_dumbbell_press","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"dumbbell_floor_press","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"dumbbell_squeeze_press","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"alternating_dumbbell_press","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"single_arm_dumbbell_press","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"machine_chest_press","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"incline_machine_press","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"decline_machine_press","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"plate_loaded_chest_press","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"smith_machine_bench_press","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"smith_machine_incline_press","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"cable_chest_press","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"single_arm_cable_press","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"standing_cable_press","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"cable_fly","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"low_to_high_cable_fly","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"high_to_low_cable_fly","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"pec_deck_fly","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"dumbbell_fly","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"incline_dumbbell_fly","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"incline_push_up","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"decline_push_up","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"diamond_push_up","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"wide_push_up","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"deficit_push_up","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"ring_push_up","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"chest_dip","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"landmine_chest_press","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"conventional_deadlift","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"conventional_deadlift","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"rack_pull","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"rack_pull","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"good_morning","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"close_grip_barbell_bench_press","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"jm_press","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"barbell_skull_crusher","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"ez_bar_skull_crusher","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"dumbbell_skull_crusher","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"single_arm_overhead_extension","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"two_hand_overhead_extension","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"rope_pushdown","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"straight_bar_pushdown","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"v_bar_pushdown","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"reverse_grip_pushdown","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"single_arm_cable_pushdown","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"cable_overhead_extension","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"single_arm_cable_overhead_extension","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"machine_triceps_extension","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"parallel_bar_dip","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"bench_dip","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"diamond_push_up_triceps_focus","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"resistance_band_pushdown","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"resistance_band_overhead_extension","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"front_squat","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"front_squat","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"high_bar_squat","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"high_bar_squat","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"low_bar_squat","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"low_bar_squat","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"pause_squat","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"pause_squat","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"box_squat","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"box_squat","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"zercher_squat","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"zercher_squat","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"hack_squat","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"hack_squat","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"pendulum_squat","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"pendulum_squat","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"belt_squat","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"belt_squat","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"single_leg_press","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"single_leg_press","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"horizontal_leg_press","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"horizontal_leg_press","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"leg_extension","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"single_leg_extension","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"smith_machine_squat","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"smith_machine_squat","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"smith_machine_front_squat","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"smith_machine_front_squat","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"goblet_squat","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"goblet_squat","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"dumbbell_squat","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"dumbbell_squat","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"front_foot_elevated_split_squat","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"front_foot_elevated_split_squat","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"walking_lunge","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"walking_lunge","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"reverse_lunge","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"reverse_lunge","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"forward_lunge","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"forward_lunge","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"lateral_lunge","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"lateral_lunge","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"step_up","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"step_up","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"cyclist_squat","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"cyclist_squat","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"sissy_squat","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"sissy_squat","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"wall_sit","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"wall_sit","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"spanish_squat","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"spanish_squat","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"pistol_squat","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"pistol_squat","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"bodyweight_split_squat","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"bodyweight_split_squat","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"stiff_leg_deadlift","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"snatch_grip_romanian_deadlift","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"single_leg_romanian_deadlift","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"dumbbell_romanian_deadlift","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"kettlebell_romanian_deadlift","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"seated_leg_curl","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"lying_leg_curl","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"standing_single_leg_curl","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"nordic_hamstring_curl","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"glute_ham_raise","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"sliding_leg_curl","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"swiss_ball_leg_curl","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"cable_pull_through","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"good_morning_hamstring_focus","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"45_degree_back_extension","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"reverse_hyper_hamstring_focus","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"banded_leg_curl","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"razor_curl","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"barbell_hip_thrust","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"barbell_glute_bridge","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"dumbbell_hip_thrust","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"single_leg_hip_thrust","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"single_leg_glute_bridge","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"frog_pump","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"cable_pull_through_glute_focus","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"cable_kickback","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"reverse_lunge_glute_focus","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"curtsy_lunge","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"curtsy_lunge","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"high_step_up","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"high_step_up","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"sumo_deadlift","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"sumo_deadlift","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"sumo_squat","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"sumo_squat","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"b_stance_romanian_deadlift","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"donkey_kick","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"donkey_kick","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"lateral_step_down","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"lateral_step_down","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"standing_calf_raise","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"standing_calf_raise","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"seated_calf_raise","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"seated_calf_raise","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"leg_press_calf_raise","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"leg_press_calf_raise","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"donkey_calf_raise","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"donkey_calf_raise","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"single_leg_standing_calf_raise","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"single_leg_standing_calf_raise","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"dumbbell_calf_raise","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"dumbbell_calf_raise","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"smith_machine_calf_raise","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"smith_machine_calf_raise","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"toe_elevated_calf_raise","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"toe_elevated_calf_raise","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"bent_knee_calf_raise","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"bent_knee_calf_raise","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"farmer_walk_on_toes","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"farmer_walk_on_toes","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"barbell_clean","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"barbell_clean","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"barbell_clean","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"barbell_power_clean","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"barbell_power_clean","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"barbell_power_clean","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"barbell_hang_clean","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"barbell_hang_clean","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"barbell_hang_clean","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"clean_and_press","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"clean_and_press","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"clean_and_press","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"clean_and_jerk","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"clean_and_jerk","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"clean_and_jerk","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"barbell_snatch","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"barbell_snatch","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"barbell_snatch","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"power_snatch","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"power_snatch","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"power_snatch","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"hang_snatch","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"hang_snatch","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"hang_snatch","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"thruster","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"thruster","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"thruster","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"dumbbell_thruster","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"dumbbell_thruster","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"dumbbell_thruster","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"devil_press","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"devil_press","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"devil_press","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"dumbbell_clean_and_press","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"dumbbell_clean_and_press","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"dumbbell_clean_and_press","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"kettlebell_clean","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"kettlebell_clean","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"kettlebell_clean","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"kettlebell_clean_and_press","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"kettlebell_clean_and_press","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"kettlebell_clean_and_press","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"kettlebell_snatch","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"kettlebell_snatch","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"kettlebell_snatch","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"kettlebell_swing","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"kettlebell_swing","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"kettlebell_swing","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"kettlebell_high_pull","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"kettlebell_high_pull","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"kettlebell_high_pull","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"turkish_get_up_full_body","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"turkish_get_up_full_body","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"turkish_get_up_full_body","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"man_maker","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"man_maker","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"man_maker","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"bear_crawl","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"bear_crawl","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"bear_crawl","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"burpee","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"burpee","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"burpee","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"burpee_box_jump","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"burpee_box_jump","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"burpee_box_jump","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"sled_push","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"sled_push","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"sled_push","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"sled_pull","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"sled_pull","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"sled_pull","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"battle_rope_alternating_waves","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"battle_rope_alternating_waves","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"battle_rope_alternating_waves","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"battle_rope_slams","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"battle_rope_slams","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"battle_rope_slams","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"outdoor_walk","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"outdoor_walk","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"incline_treadmill_walk","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"incline_treadmill_walk","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"outdoor_run","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"outdoor_run","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"treadmill_run","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"treadmill_run","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"track_intervals","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"track_intervals","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"hill_sprint","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"hill_sprint","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"stair_climb","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"stair_climb","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"stepmill","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"stepmill","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"outdoor_bike","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"outdoor_bike","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"spin_bike_intervals","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"spin_bike_intervals","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"air_bike","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"air_bike","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"recumbent_bike","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"recumbent_bike","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"rowing_machine","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"rowing_machine","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"ski_erg","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"ski_erg","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"elliptical","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"elliptical","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"arc_trainer","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"arc_trainer","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"box_jump","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"box_jump","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"broad_jump","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"broad_jump","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"shuttle_run","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"shuttle_run","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"farmer_carry_conditioning","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"farmer_carry_conditioning","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"sled_push_conditioning","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"sled_push_conditioning","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"sled_drag_conditioning","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"sled_drag_conditioning","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"sandbag_carry","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"sandbag_carry","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"sandbag_clean","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"sandbag_clean","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"medicine_ball_throw","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"medicine_ball_throw","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"zone_2_bike","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"zone_2_bike","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"zone_2_walk","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"zone_2_walk","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"zone_2_run","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"zone_2_run","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"cat_cow","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"child_s_pose","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"thread_the_needle","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"thoracic_rotation","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"open_book_rotation","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"wall_slide","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"shoulder_dislocate","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"banded_shoulder_stretch","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"doorway_chest_stretch","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"lat_stretch","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"couch_stretch","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"90_90_hip_switch","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"pigeon_stretch","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"adductor_rock_back","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"frog_stretch","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"world_s_greatest_stretch","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"deep_squat_hold","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"ankle_dorsiflexion_mobilization","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"calf_stretch","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"hamstring_floss","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"sciatic_nerve_glide","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"hip_airplane","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"cossack_squat_mobility","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"foam_roll_quads","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"foam_roll_upper_back","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"foam_roll_glutes","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"scapular_wall_clock","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"banded_external_rotation","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"wall_push_up","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"counter_push_up","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"knee_push_up","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"close_grip_push_up","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"tempo_push_up","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"weighted_vest_push_up","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"pause_push_up","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"explosive_push_up","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"clap_push_up","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"archer_push_up","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"assisted_one_arm_push_up","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"one_arm_push_up","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"top_push_up_hold","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"midpoint_push_up_hold","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"bottom_push_up_hold","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"multi_position_push_up_hold","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"chair_squat","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"chair_squat","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"counterbalance_squat","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"counterbalance_squat","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"bodyweight_box_squat","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"bodyweight_box_squat","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"tempo_air_squat","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"tempo_air_squat","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"pause_air_squat","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"pause_air_squat","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"jump_squat","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"jump_squat","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"split_squat_iso_hold","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"split_squat_iso_hold","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"alternating_reverse_lunge","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"alternating_reverse_lunge","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"alternating_forward_lunge","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"alternating_forward_lunge","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"walking_bodyweight_lunge","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"walking_bodyweight_lunge","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"lateral_bodyweight_lunge","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"lateral_bodyweight_lunge","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"curtsy_bodyweight_lunge","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"curtsy_bodyweight_lunge","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"low_step_up","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"low_step_up","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"lateral_step_up","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"lateral_step_up","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"step_down","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"step_down","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"skater_squat","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"skater_squat","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"assisted_pistol_squat","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"assisted_pistol_squat","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"glute_bridge_march","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"feet_elevated_glute_bridge","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"shoulder_elevated_glute_bridge","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"frog_pump_hold","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"frog_pump_hold","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"hip_hinge_wall_tap","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"hip_hinge_wall_tap","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"single_leg_hip_hinge_reach","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"single_leg_hip_hinge_reach","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"standing_hip_airplane","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"standing_hip_airplane","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"prone_hip_extension","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"prone_hip_extension","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"half_burpee","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"half_burpee","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"step_back_burpee","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"step_back_burpee","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"burpee_broad_jump","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"burpee_broad_jump","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"lateral_bear_crawl","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"lateral_bear_crawl","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"backward_bear_crawl","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"backward_bear_crawl","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"crab_walk","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"crab_walk","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"inchworm_walkout","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"inchworm_walkout","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"tuck_jump","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"tuck_jump","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"skater_jump","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"skater_jump","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"lateral_line_hop","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"lateral_line_hop","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"forward_line_hop","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"forward_line_hop","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"split_jump","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"split_jump","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"standing_broad_jump","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"standing_broad_jump","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"single_leg_hop_and_stick","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"single_leg_hop_and_stick","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"neutral_grip_dumbbell_bench_press","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"paused_dumbbell_bench_press","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"tempo_dumbbell_bench_press","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"single_arm_dumbbell_bench_press","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"dumbbell_crush_press","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"incline_neutral_grip_dumbbell_press","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"incline_single_arm_dumbbell_press","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"decline_neutral_grip_dumbbell_press","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"dumbbell_fly_to_press","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"dumbbell_jm_press","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"incline_dumbbell_skull_crusher","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"single_arm_dumbbell_floor_skull_crusher","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"dumbbell_cross_body_triceps_extension","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"dumbbell_kickback","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"dumbbell_front_squat","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"dumbbell_front_squat","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"dumbbell_box_squat","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"dumbbell_box_squat","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"dumbbell_cyclist_squat","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"dumbbell_cyclist_squat","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"dumbbell_split_squat","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"dumbbell_split_squat","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"front_foot_elevated_dumbbell_split_squat","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"front_foot_elevated_dumbbell_split_squat","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"dumbbell_lateral_step_up","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"dumbbell_lateral_step_up","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"dumbbell_step_down","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"dumbbell_step_down","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"dumbbell_glute_bridge","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"dumbbell_frog_pump","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"dumbbell_curtsy_lunge","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"dumbbell_curtsy_lunge","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"dumbbell_lateral_lunge","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"dumbbell_lateral_lunge","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"dumbbell_hip_airplane","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"dumbbell_hip_airplane","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"competition_bench_press","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"touch_and_go_bench_press","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"tempo_bench_press","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"feet_up_bench_press","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"larsen_press","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"board_press","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"reverse_grip_bench_press","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"guillotine_press","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"incline_close_grip_bench_press","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"tempo_back_squat","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"tempo_back_squat","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"pin_squat","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"pin_squat","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"anderson_squat","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"anderson_squat","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"safety_bar_squat","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"safety_bar_squat","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"cambered_bar_squat","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"cambered_bar_squat","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"hatfield_squat","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"hatfield_squat","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"barbell_split_squat","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"barbell_split_squat","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"barbell_reverse_lunge","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"barbell_reverse_lunge","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"barbell_walking_lunge","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"barbell_walking_lunge","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"conventional_barbell_deadlift","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"conventional_barbell_deadlift","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"sumo_barbell_deadlift","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"sumo_barbell_deadlift","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"barbell_stiff_leg_deadlift","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"barbell_block_pull","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"barbell_deficit_deadlift","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"barbell_deficit_deadlift","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"paused_barbell_deadlift","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"paused_barbell_deadlift","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"tempo_barbell_romanian_deadlift","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"barbell_single_leg_romanian_deadlift","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"barbell_rack_pull","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"barbell_rack_pull","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"paused_barbell_hip_thrust","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"tempo_barbell_hip_thrust","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"barbell_single_leg_hip_thrust","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"barbell_frog_pump","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"clean_pull","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"clean_pull","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"clean_pull","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"snatch_pull","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"snatch_pull","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"snatch_pull","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"high_hang_power_clean","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"high_hang_power_clean","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"high_hang_power_clean","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"hang_power_snatch","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"hang_power_snatch","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"hang_power_snatch","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"muscle_clean","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"muscle_clean","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"muscle_clean","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"barbell_push_jerk","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"barbell_push_jerk","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"barbell_push_jerk","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"barbell_split_jerk","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"barbell_split_jerk","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"barbell_split_jerk","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"barbell_front_rack_carry","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"barbell_front_rack_carry","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"barbell_front_rack_carry","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"barbell_overhead_carry","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"barbell_overhead_carry","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"barbell_overhead_carry","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"two_hand_kettlebell_swing","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"two_hand_kettlebell_swing","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"two_hand_kettlebell_swing","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"single_arm_kettlebell_swing","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"single_arm_kettlebell_swing","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"single_arm_kettlebell_swing","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"alternating_kettlebell_swing","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"alternating_kettlebell_swing","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"alternating_kettlebell_swing","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"double_kettlebell_swing","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"double_kettlebell_swing","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"double_kettlebell_swing","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"kettlebell_dead_clean","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"kettlebell_dead_clean","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"kettlebell_dead_clean","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"kettlebell_hang_clean","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"kettlebell_hang_clean","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"kettlebell_hang_clean","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"double_kettlebell_clean","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"double_kettlebell_clean","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"double_kettlebell_clean","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"kettlebell_clean_and_jerk","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"kettlebell_clean_and_jerk","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"kettlebell_clean_and_jerk","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"double_kettlebell_clean_and_jerk","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"double_kettlebell_clean_and_jerk","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"double_kettlebell_clean_and_jerk","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"kettlebell_half_snatch","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"kettlebell_half_snatch","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"kettlebell_half_snatch","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"double_kettlebell_snatch","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"double_kettlebell_snatch","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"double_kettlebell_snatch","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"kettlebell_thruster","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"kettlebell_thruster","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"kettlebell_thruster","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"double_kettlebell_thruster","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"double_kettlebell_thruster","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"double_kettlebell_thruster","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"kettlebell_long_cycle_clean_and_jerk","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"kettlebell_long_cycle_clean_and_jerk","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"kettlebell_long_cycle_clean_and_jerk","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"kettlebell_goblet_squat","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"kettlebell_goblet_squat","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"double_kettlebell_front_squat","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"double_kettlebell_front_squat","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"kettlebell_box_squat","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"kettlebell_box_squat","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"kettlebell_split_squat","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"kettlebell_split_squat","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"kettlebell_reverse_lunge","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"kettlebell_reverse_lunge","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"kettlebell_walking_lunge","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"kettlebell_walking_lunge","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"kettlebell_lateral_lunge","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"kettlebell_lateral_lunge","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"kettlebell_step_up","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"kettlebell_step_up","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"kettlebell_deadlift","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"kettlebell_deadlift","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"double_kettlebell_deadlift","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"double_kettlebell_deadlift","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"kettlebell_sumo_deadlift","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"kettlebell_sumo_deadlift","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"single_leg_kettlebell_romanian_deadlift","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"double_kettlebell_romanian_deadlift","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"kettlebell_good_morning","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"resistance_band_chest_press","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"resistance_band_incline_press","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"resistance_band_decline_press","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"resistance_band_fly","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"single_arm_resistance_band_chest_press","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"resistance_band_triceps_pushdown","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"resistance_band_overhead_triceps_extension","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"single_arm_resistance_band_triceps_extension","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"mini_band_glute_bridge","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"mini_band_squat","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"mini_band_squat","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"resistance_band_front_squat","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"resistance_band_front_squat","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"resistance_band_split_squat","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"resistance_band_split_squat","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"resistance_band_reverse_lunge","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"resistance_band_reverse_lunge","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"resistance_band_terminal_knee_extension","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"resistance_band_terminal_knee_extension","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"resistance_band_anti_extension_walkout","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"resistance_band_anti_extension_walkout","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"dual_cable_chest_press","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"half_kneeling_single_arm_cable_press","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"cable_squeeze_press","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"mid_cable_fly","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"single_arm_low_to_high_cable_fly","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"single_arm_high_to_low_cable_fly","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"single_arm_cable_triceps_pushdown","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"cable_cross_body_triceps_extension","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"cable_skull_crusher","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"cable_glute_kickback","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"cable_reverse_lunge","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"cable_reverse_lunge","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"cable_step_through","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"cable_step_through","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"selectorized_chest_press","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"selectorized_incline_chest_press","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"plate_loaded_incline_chest_press","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"single_arm_machine_chest_press","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"machine_pec_fly","muscleId":"pectoralis_major","resolvedTo":["pectoralis_major_clavicular","pectoralis_major_sternal","pectoralis_major_costal"]}`
+- `{"exerciseId":"45_degree_leg_press","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"45_degree_leg_press","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"single_leg_machine_leg_press","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"single_leg_machine_leg_press","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"narrow_stance_leg_press","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"narrow_stance_leg_press","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"wide_stance_leg_press","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"wide_stance_leg_press","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"machine_hack_squat","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"machine_hack_squat","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"reverse_machine_hack_squat","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"reverse_machine_hack_squat","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"pendulum_squat_machine","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"pendulum_squat_machine","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"belt_squat_machine","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"belt_squat_machine","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"single_leg_machine_extension","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"single_leg_machine_extension","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"machine_seated_leg_curl","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"single_leg_seated_leg_curl","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"machine_lying_leg_curl","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"single_leg_lying_leg_curl","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"machine_hip_thrust","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"single_leg_hip_thrust_machine","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"glute_drive_machine","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"glute_drive_machine","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"machine_standing_calf_raise","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"machine_standing_calf_raise","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"machine_seated_calf_raise","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"machine_seated_calf_raise","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"single_leg_calf_raise_machine","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"single_leg_calf_raise_machine","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"trail_run","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"trail_run","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"outdoor_hill_intervals","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"outdoor_hill_intervals","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"pool_swimming","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"pool_swimming","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"pool_walking","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"pool_walking","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"outdoor_hiking","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"outdoor_hiking","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"shadow_boxing","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"shadow_boxing","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"dance_cardio","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"dance_cardio","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"manual_treadmill_walk","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"manual_treadmill_walk","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"manual_treadmill_run","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"manual_treadmill_run","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"recumbent_bike_session","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"recumbent_bike_session","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"air_bike_intervals","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"air_bike_intervals","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"rowing_machine_intervals","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"rowing_machine_intervals","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"ski_erg_intervals","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"ski_erg_intervals","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"elliptical_session","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"elliptical_session","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"stair_climber_session","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"stair_climber_session","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"step_mill_session","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"step_mill_session","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"arc_trainer_session","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"arc_trainer_session","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"versaclimber_session","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"versaclimber_session","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"neck_controlled_rotation","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"wrist_extension_rock","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"wrist_flexion_stretch","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"wall_shoulder_flexion_drill","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"thoracic_extension_over_bench","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"quadruped_thoracic_rotation","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"half_kneeling_ankle_rock","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"standing_hip_car","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"supine_hip_internal_rotation","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"dynamic_hamstring_sweep","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"standing_quad_stretch","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"supine_figure_four_stretch","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"downward_facing_dog","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"upward_facing_dog","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"low_lunge_stretch","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"seated_forward_fold","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"standing_side_bend_stretch","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"battle_rope_outside_circles","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"battle_rope_outside_circles","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"battle_rope_inside_circles","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"battle_rope_inside_circles","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"lateral_sled_drag","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"lateral_sled_drag","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"bear_hug_sandbag_carry","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"bear_hug_sandbag_carry","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"front_rack_sandbag_carry","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"front_rack_sandbag_carry","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"tire_flip","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"tire_flip","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"sledgehammer_tire_strike","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"sledgehammer_tire_strike","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"shuttle_sprint","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"shuttle_sprint","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"agility_ladder_two_feet_in","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"agility_ladder_two_feet_in","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"agility_ladder_lateral_shuffle","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"agility_ladder_lateral_shuffle","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"medicine_ball_rotational_wall_throw","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"medicine_ball_rotational_wall_throw","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"medicine_ball_chest_pass","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"medicine_ball_chest_pass","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"box_jump_and_stick","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"box_jump_and_stick","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+- `{"exerciseId":"lateral_box_jump","muscleId":"quadriceps","resolvedTo":["rectus_femoris","vastus_lateralis","vastus_medialis"]}`
+- `{"exerciseId":"lateral_box_jump","muscleId":"hamstrings","resolvedTo":["biceps_femoris_long_head","semitendinosus"]}`
+
+## Unresolved visual mappings
+
+Count: 0
+
+None.
+
+## Duplicate candidates
+
+Count: 76
+
+- `{"leftId":"close_grip_bench_press","rightId":"incline_close_grip_bench_press","score":1,"reasons":["name similarity 0.80","same equipment","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"single_arm_dumbbell_press","rightId":"incline_single_arm_dumbbell_press","score":1,"reasons":["name similarity 0.80","same equipment","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"low_to_high_cable_fly","rightId":"high_to_low_cable_fly","score":1,"reasons":["name similarity 1.00","same equipment","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"single_arm_cable_curl","rightId":"single_arm_bayesian_cable_curl","score":1,"reasons":["name similarity 0.80","same equipment","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"single_arm_cable_pushdown","rightId":"single_arm_cable_triceps_pushdown","score":1,"reasons":["name similarity 0.80","same equipment","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"cross_body_cable_extension","rightId":"cable_cross_body_triceps_extension","score":1,"reasons":["name similarity 0.80","same equipment","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"resistance_band_overhead_extension","rightId":"resistance_band_overhead_triceps_extension","score":1,"reasons":["name similarity 0.80","same equipment","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"front_foot_elevated_split_squat","rightId":"front_foot_elevated_dumbbell_split_squat","score":1,"reasons":["name similarity 0.83","same equipment","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"hip_abduction_machine","rightId":"machine_hip_abduction","score":1,"reasons":["name similarity 1.00","same equipment","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"hip_adduction_machine","rightId":"machine_hip_adduction","score":1,"reasons":["name similarity 1.00","same equipment","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"assisted_one_arm_push_up","rightId":"one_arm_push_up","score":1,"reasons":["name similarity 0.80","same equipment","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"band_assisted_pull_up","rightId":"resistance_band_assisted_pull_up","score":1,"reasons":["name similarity 0.80","same equipment","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"kettlebell_clean_and_jerk","rightId":"double_kettlebell_clean_and_jerk","score":1,"reasons":["name similarity 0.80","same equipment","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"single_arm_low_to_high_cable_fly","rightId":"single_arm_high_to_low_cable_fly","score":1,"reasons":["name similarity 1.00","same equipment","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"dumbbell_bench_press","rightId":"paused_dumbbell_bench_press","score":0.9899999999999999,"reasons":["name similarity 0.75","same equipment","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"dumbbell_bench_press","rightId":"tempo_dumbbell_bench_press","score":0.9899999999999999,"reasons":["name similarity 0.75","same equipment","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"barbell_romanian_deadlift","rightId":"tempo_barbell_romanian_deadlift","score":0.9899999999999999,"reasons":["name similarity 0.75","same equipment","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"cable_pallof_press","rightId":"standing_cable_pallof_press","score":0.9899999999999999,"reasons":["name similarity 0.75","same equipment","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"barbell_bench_press","rightId":"incline_barbell_bench_press","score":0.9899999999999999,"reasons":["name similarity 0.75","same equipment","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"barbell_bench_press","rightId":"decline_barbell_bench_press","score":0.9899999999999999,"reasons":["name similarity 0.75","same equipment","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"paused_bench_press","rightId":"paused_dumbbell_bench_press","score":0.9899999999999999,"reasons":["name similarity 0.75","same equipment","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"cable_chest_press","rightId":"dual_cable_chest_press","score":0.9899999999999999,"reasons":["name similarity 0.75","same equipment","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"assisted_pull_up","rightId":"machine_assisted_pull_up","score":0.9899999999999999,"reasons":["name similarity 0.75","same equipment","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"cable_lateral_raise","rightId":"cuffed_cable_lateral_raise","score":0.9899999999999999,"reasons":["name similarity 0.75","same equipment","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"ez_bar_curl","rightId":"ez_bar_curl_21s","score":0.9899999999999999,"reasons":["name similarity 0.75","same equipment","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"alternating_dumbbell_curl","rightId":"seated_alternating_dumbbell_curl","score":0.9899999999999999,"reasons":["name similarity 0.75","same equipment","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"incline_dumbbell_curl","rightId":"prone_incline_dumbbell_curl","score":0.9899999999999999,"reasons":["name similarity 0.75","same equipment","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"rope_hammer_curl","rightId":"cable_rope_hammer_curl","score":0.9899999999999999,"reasons":["name similarity 0.75","same equipment","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"resistance_band_curl","rightId":"resistance_band_hammer_curl","score":0.9899999999999999,"reasons":["name similarity 0.75","same equipment","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"resistance_band_curl","rightId":"resistance_band_preacher_curl","score":0.9899999999999999,"reasons":["name similarity 0.75","same equipment","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"dumbbell_skull_crusher","rightId":"incline_dumbbell_skull_crusher","score":0.9899999999999999,"reasons":["name similarity 0.75","same equipment","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"resistance_band_pushdown","rightId":"resistance_band_triceps_pushdown","score":0.9899999999999999,"reasons":["name similarity 0.75","same equipment","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"single_leg_press","rightId":"single_leg_machine_leg_press","score":0.9899999999999999,"reasons":["name similarity 0.75","same equipment","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"smith_machine_squat","rightId":"smith_machine_front_squat","score":0.9899999999999999,"reasons":["name similarity 0.75","same equipment","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"stiff_leg_deadlift","rightId":"barbell_stiff_leg_deadlift","score":0.9899999999999999,"reasons":["name similarity 0.75","same equipment","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"kettlebell_romanian_deadlift","rightId":"double_kettlebell_romanian_deadlift","score":0.9899999999999999,"reasons":["name similarity 0.75","same equipment","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"seated_leg_curl","rightId":"machine_seated_leg_curl","score":0.9899999999999999,"reasons":["name similarity 0.75","same equipment","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"seated_leg_curl","rightId":"single_leg_seated_leg_curl","score":0.9899999999999999,"reasons":["name similarity 0.75","same equipment","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"lying_leg_curl","rightId":"machine_lying_leg_curl","score":0.9899999999999999,"reasons":["name similarity 0.75","same equipment","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"lying_leg_curl","rightId":"single_leg_lying_leg_curl","score":0.9899999999999999,"reasons":["name similarity 0.75","same equipment","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"barbell_hip_thrust","rightId":"paused_barbell_hip_thrust","score":0.9899999999999999,"reasons":["name similarity 0.75","same equipment","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"barbell_hip_thrust","rightId":"tempo_barbell_hip_thrust","score":0.9899999999999999,"reasons":["name similarity 0.75","same equipment","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"standing_calf_raise","rightId":"machine_standing_calf_raise","score":0.9899999999999999,"reasons":["name similarity 0.75","same equipment","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"seated_calf_raise","rightId":"machine_seated_calf_raise","score":0.9899999999999999,"reasons":["name similarity 0.75","same equipment","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"cable_wood_chop","rightId":"cable_reverse_wood_chop","score":0.9899999999999999,"reasons":["name similarity 0.75","same equipment","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"hollow_body_hold","rightId":"hollow_body_tuck_hold","score":0.9899999999999999,"reasons":["name similarity 0.75","same equipment","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"lateral_step_up","rightId":"dumbbell_lateral_step_up","score":0.9899999999999999,"reasons":["name similarity 0.75","same equipment","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"plank_shoulder_tap","rightId":"bear_plank_shoulder_tap","score":0.9899999999999999,"reasons":["name similarity 0.75","same equipment","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"tempo_dumbbell_bench_press","rightId":"tempo_bench_press","score":0.9899999999999999,"reasons":["name similarity 0.75","same equipment","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"kettlebell_push_press","rightId":"double_kettlebell_push_press","score":0.9899999999999999,"reasons":["name similarity 0.75","same equipment","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"double_kettlebell_deadlift","rightId":"double_kettlebell_romanian_deadlift","score":0.9899999999999999,"reasons":["name similarity 0.75","same equipment","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"resistance_band_lateral_raise","rightId":"resistance_band_y_raise","score":0.9899999999999999,"reasons":["name similarity 0.75","same equipment","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"resistance_band_front_raise","rightId":"resistance_band_y_raise","score":0.9899999999999999,"reasons":["name similarity 0.75","same equipment","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"machine_hack_squat","rightId":"reverse_machine_hack_squat","score":0.9899999999999999,"reasons":["name similarity 0.75","same equipment","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"close_grip_bench_press","rightId":"close_grip_barbell_bench_press","score":0.96,"reasons":["name similarity 0.80","same equipment","same movement pattern"],"disposition":"distinct_variation"}`
+- `{"leftId":"single_arm_dumbbell_press","rightId":"single_arm_dumbbell_bench_press","score":0.96,"reasons":["name similarity 0.80","same equipment","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"plate_loaded_chest_press","rightId":"plate_loaded_incline_chest_press","score":0.96,"reasons":["name similarity 0.80","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"neutral_grip_lat_pulldown","rightId":"machine_neutral_grip_lat_pulldown","score":0.96,"reasons":["name similarity 0.80","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"single_arm_lat_pulldown","rightId":"single_arm_machine_lat_pulldown","score":0.96,"reasons":["name similarity 0.80","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"single_arm_overhead_extension","rightId":"single_arm_cable_overhead_extension","score":0.96,"reasons":["name similarity 0.80","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"single_leg_romanian_deadlift","rightId":"barbell_single_leg_romanian_deadlift","score":0.96,"reasons":["name similarity 0.80","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"single_leg_romanian_deadlift","rightId":"single_leg_kettlebell_romanian_deadlift","score":0.96,"reasons":["name similarity 0.80","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"single_leg_hip_thrust","rightId":"barbell_single_leg_hip_thrust","score":0.96,"reasons":["name similarity 0.80","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"single_leg_hip_thrust","rightId":"single_leg_hip_thrust_machine","score":0.96,"reasons":["name similarity 0.80","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"half_kneeling_pallof_press","rightId":"half_kneeling_band_pallof_press","score":0.96,"reasons":["name similarity 0.80","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"incline_machine_press","rightId":"smith_machine_incline_press","score":0.9099999999999999,"reasons":["name similarity 0.75","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"underhand_lat_pulldown","rightId":"machine_underhand_lat_pulldown","score":0.9099999999999999,"reasons":["name similarity 0.75","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"assisted_pull_up","rightId":"band_assisted_pull_up","score":0.9099999999999999,"reasons":["name similarity 0.75","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"machine_shoulder_press","rightId":"smith_machine_shoulder_press","score":0.9099999999999999,"reasons":["name similarity 0.75","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"clean_and_press","rightId":"dumbbell_clean_and_press","score":0.9099999999999999,"reasons":["name similarity 0.75","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"clean_and_press","rightId":"kettlebell_clean_and_press","score":0.9099999999999999,"reasons":["name similarity 0.75","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"clean_and_jerk","rightId":"kettlebell_clean_and_jerk","score":0.9099999999999999,"reasons":["name similarity 0.75","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"selectorized_chest_press","rightId":"selectorized_incline_chest_press","score":0.9099999999999999,"reasons":["name similarity 0.75","same movement pattern","same primary muscle"],"disposition":"distinct_variation"}`
+- `{"leftId":"single_arm_dumbbell_press","rightId":"single_arm_dumbbell_shoulder_press","score":0.88,"reasons":["name similarity 0.80","same equipment"],"disposition":"distinct_variation"}`
+- `{"leftId":"standing_cable_press","rightId":"standing_cable_pallof_press","score":0.83,"reasons":["name similarity 0.75","same equipment"],"disposition":"distinct_variation"}`
+- `{"leftId":"single_leg_extension","rightId":"single_leg_machine_extension","score":0.83,"reasons":["name similarity 0.75","same primary muscle"],"disposition":"distinct_variation"}`
+
+## Aliases resolving to multiple exercises
+
+Count: 0
+
+None.
+
+## Suspicious tracking templates
+
+Count: 0
+
+None.
+
+## Published but not fully reviewed
+
+Count: 0
+
+None.
+
+## Validation issues
+
+Count: 0
+
+None.

@@ -13,7 +13,7 @@ class MemoryStorage {
 }
 
 globalThis.localStorage = new MemoryStorage();
-const { northRepository, migrateLegacyStorage } = await import("../src/data/northDb.ts");
+const { deleteCurrentNorthDatabase, northRepository, migrateLegacyStorage } = await import("../src/data/northDb.ts");
 
 function useOwner(id) {
   localStorage.setItem("north-account-session-v1", JSON.stringify({ user: { id } }));
@@ -28,8 +28,21 @@ test("local writes are versioned and queue one current idempotent mutation", asy
   assert.deepEqual((await northRepository.get("workouts", "primary")).data, [{ id: 1 }, { id: 2 }]);
   const pending = await northRepository.pendingMutations();
   assert.equal(pending.length, 1);
-  assert.equal(pending[0].mutationId, "workouts:primary");
+  assert.equal(pending[0].documentKey, "workouts:primary");
+  assert.notEqual(pending[0].mutationId, "workouts:primary");
   assert.equal(pending[0].baseVersion, 1);
+});
+
+test("each new document revision receives a fresh idempotency key while superseding its unsent predecessor", async () => {
+  useOwner("test-idempotency-revisions");
+  await northRepository.put("week-plan", "primary", { revision: 1 });
+  const first = (await northRepository.pendingMutations())[0];
+  await northRepository.put("week-plan", "primary", { revision: 2 });
+  const pending = await northRepository.pendingMutations();
+  assert.equal(pending.length, 1);
+  assert.equal(pending[0].documentKey, "week-plan:primary");
+  assert.notEqual(pending[0].mutationId, first.mutationId);
+  assert.deepEqual(pending[0].data, { revision: 2 });
 });
 
 test("retry preserves a mutation and applies bounded exponential backoff", async () => {
@@ -91,6 +104,18 @@ test("each account receives an isolated IndexedDB document and outbox namespace"
   assert.deepEqual((await northRepository.get("profile", "primary")).data, { name: "A" });
   useOwner("owner-b");
   assert.deepEqual((await northRepository.get("profile", "primary")).data, { name: "B" });
+});
+
+test("erasing a device copy removes both documents and queued writes for only the current account", async () => {
+  useOwner("erase-owner-a");
+  await northRepository.put("week-plan", "primary", { owner: "A" });
+  useOwner("erase-owner-b");
+  await northRepository.put("week-plan", "primary", { owner: "B" });
+  await deleteCurrentNorthDatabase();
+  assert.equal(await northRepository.get("week-plan", "primary"), null);
+  assert.equal((await northRepository.pendingMutations()).length, 0);
+  useOwner("erase-owner-a");
+  assert.deepEqual((await northRepository.get("week-plan", "primary")).data, { owner: "A" });
 });
 
 test("legacy local data migrates exactly once without creating upload mutations", async () => {

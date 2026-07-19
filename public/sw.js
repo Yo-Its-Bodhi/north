@@ -1,4 +1,4 @@
-const CACHE = "north-shell-v5";
+const CACHE = "north-shell-v8";
 const SHELL = ["/", "/index.html", "/manifest.webmanifest", "/app-icons/pwa-icon-light-512.png"];
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(SHELL)));

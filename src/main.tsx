@@ -11,20 +11,22 @@ import "@fontsource/barlow-condensed/latin-700.css";
 import "@fontsource/barlow-condensed/latin-800.css";
 import App from "./App";
 import Admin from "./Admin";
+import MuscleMapPreview from "./components/MuscleMapPreview";
 import { BootIntro } from "./components/BrandMotion";
 import { hydratePublishedCatalogue } from "./data/catalogue";
 import "./styles.css";
 
 export function NorthRoot() {
   const admin = location.pathname.startsWith("/admin");
-  const [ready, setReady] = useState(admin);
+  const musclePreview = import.meta.env.DEV && location.pathname.startsWith("/dev/muscle-map");
+  const [ready, setReady] = useState(admin || musclePreview);
   useEffect(() => {
-    if (admin) return;
+    if (admin || musclePreview) return;
     let active = true;
     void hydratePublishedCatalogue().finally(() => { if (active) setReady(true); });
     return () => { active = false; };
-  }, [admin]);
-  return <BootIntro ready={ready}>{ready ? createElement(admin ? Admin : App) : null}</BootIntro>;
+  }, [admin, musclePreview]);
+  return <BootIntro ready={ready}>{ready ? createElement(musclePreview ? MuscleMapPreview : admin ? Admin : App) : null}</BootIntro>;
 }
 
 class NorthErrorBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {

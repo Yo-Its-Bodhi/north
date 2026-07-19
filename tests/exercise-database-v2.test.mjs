@@ -1,0 +1,20 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+import { reviewedExercises } from "../src/exerciseDatabase/reviewedExercises.ts";
+import { categories, equipment, muscles, trackingTemplates } from "../src/exerciseDatabase/taxonomies.ts";
+import { canonicalExerciseDatabase, validateExerciseDatabase } from "../src/exerciseDatabase/validation.ts";
+import { searchExercises } from "../src/exerciseDatabase/search.ts";
+import { resolveExerciseRelationships } from "../src/exerciseDatabase/relationships.ts";
+import { stageExerciseImports } from "../src/exerciseDatabase/import.ts";
+
+const database=canonicalExerciseDatabase(reviewedExercises);
+test("reviewed architecture contains exactly the requested 20 valid exercises",()=>{ assert.equal(reviewedExercises.length,20); assert.deepEqual(validateExerciseDatabase(database),[]); });
+test("every reference taxonomy uses stable snake-case IDs",()=>{ for(const row of [...muscles,...equipment,...categories,...trackingTemplates]) assert.match(row.id,/^[a-z0-9]+(?:_[a-z0-9]+)*$/); });
+test("strength units permit kg and lb without coupling profile units",()=>{ const weight=trackingTemplates.find((x)=>x.id==="reps_and_weight").fields.find((x)=>x.id==="weight"); assert.deepEqual(weight.units,["kg","lb"]); });
+test("muscle mappings preserve rich roles and visual regions",()=>{ const squat=reviewedExercises.find((x)=>x.id==="barbell_back_squat"); assert.deepEqual(new Set(squat.muscles.map((x)=>x.role)),new Set(["primary","synergist","stabilizer"])); assert.ok(squat.muscles.every((x)=>x.visualRegionId)); });
+test("search ranks canonical names, aliases and filters",()=>{ assert.equal(searchExercises(database,"RDL")[0].exercise.id,"barbell_romanian_deadlift"); assert.equal(searchExercises(database,"press",{equipmentIds:["dumbbell"]})[0].exercise.id,"dumbbell_bench_press"); });
+test("timed holds use duration and optional added load",()=>{ for(const id of ["dead_hang","top_pull_up_hold","plank"]) { const x=reviewedExercises.find((row)=>row.id===id); assert.equal(x.timedHold,true); assert.equal(x.trackingTemplateId,"timed_hold"); } });
+test("unilateral prescriptions retain independent side tracking",()=>{ const split=reviewedExercises.find((x)=>x.id==="bulgarian_split_squat"); assert.equal(split.unilateral,true); const template=trackingTemplates.find((x)=>x.id===split.trackingTemplateId); assert.ok(template.fields.every((x)=>x.perSide)); });
+test("cardio templates support distance and machine sessions",()=>{ assert.equal(reviewedExercises.find((x)=>x.id==="treadmill_walk").trackingTemplateId,"distance_and_time"); assert.equal(reviewedExercises.find((x)=>x.id==="stationary_bike").trackingTemplateId,"cardio_session"); });
+test("relationships resolve by stable IDs and priority",()=>{ assert.deepEqual(resolveExerciseRelationships(reviewedExercises,"dead_hang",["progression"]).map((x)=>x.id),["top_pull_up_hold"]); });
+test("raw imports are staged and duplicates flagged rather than published",()=>{ const [candidate]=stageExerciseImports([{name:"RDL",source:{sourceName:"test"}}],reviewedExercises); assert.equal(candidate.duplicateOf,"barbell_romanian_deadlift"); assert.ok(candidate.issues.some((x)=>x.code==="possible_duplicate")); });
