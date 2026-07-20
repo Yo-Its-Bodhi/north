@@ -235,6 +235,25 @@ try {
     assert.equal(day.sessions?.[0]?.title, "60-minute steady bike ride");
   });
 
+  await check("Today keeps a completed strength session visible beside a logged bike ride", async () => {
+    await page.goto(base);
+    await page.evaluate((date) => {
+      const plan = JSON.parse(localStorage.getItem("north-week-plan-v1") ?? "[]");
+      const today = plan.find((item) => item.date === date);
+      today.kind = "strength";
+      today.title = "Upper body strength";
+      today.status = "completed";
+      localStorage.setItem("north-week-plan-v1", JSON.stringify(plan));
+      localStorage.setItem("north-activities-v1", JSON.stringify([{ id: "browser-test-bike", date, kind: "bike", duration: "35", distance: "10", effort: 3, note: "Easy ride" }]));
+    }, testDate);
+    await page.reload();
+    await page.getByRole("button", { name: "Today", exact: true }).last().click();
+    await page.getByRole("region", { name: "Today's completed sessions" }).waitFor();
+    await page.getByText("Upper body strength", { exact: true }).last().waitFor();
+    await page.getByText("Bike ride", { exact: true }).waitFor();
+    await page.getByText("Completed", { exact: true }).last().waitFor();
+  });
+
   await check("keyboard focus reaches primary navigation and all visible controls have names", async () => {
     await page.goto(base);
     await page.locator("button.brand").focus();

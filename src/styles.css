@@ -979,6 +979,11 @@ body::before { content:""; position:fixed; inset:0; pointer-events:none; opacity
 .simple-set-fields small,.simple-set-rest small { color:var(--muted); font-size:10px; }
 .simple-set-rest { width:min(180px,100%); margin-top:11px; }
 @media(max-width:420px){.simple-set-fields.fields-3{grid-template-columns:1fr 1fr}.simple-set-fields.fields-3 label:last-child{grid-column:1/-1}}
+.dynamic-set-row{grid-template-columns:34px repeat(1,minmax(0,1fr)) minmax(72px,.8fr) 44px}
+.dynamic-set-row.set-head{font-size:9px}
+.dynamic-set-field{position:relative;min-width:0}
+.dynamic-set-field input{padding-right:28px}
+.dynamic-set-field small{position:absolute;top:12px;right:8px;color:var(--muted);font-size:9px;pointer-events:none}
 .previous-strip { padding:16px; border:1px solid rgba(17,215,255,.2); border-radius:17px; background:linear-gradient(120deg,rgba(17,215,255,.07),rgba(124,77,255,.06)); }
 .sets-table { border:0; display:grid; gap:8px; }
 .set-row:not(.set-head) { min-height:68px; padding:7px 9px; border:1px solid var(--line); border-radius:16px; background:var(--surface-solid); box-shadow:0 7px 18px rgba(20,58,101,.05); }
@@ -1832,9 +1837,9 @@ h1,.screen>h1,.destination-screen>h1,.workout-library-screen>h1,.programs-screen
 }
 
 @media(min-width:1024px){
-  .nova-screen .nova-page-heading{width:min(100%,1100px);max-width:none}
-  .nova-screen .conversation-surface{width:min(100%,1100px)}
-  .nova-input{width:min(calc(100% - 112px),1100px)}
+  .nova-screen .conversation-surface{width:min(100%,1100px);margin-inline:auto;padding-bottom:120px}
+  .nova-safety-note{margin-right:auto;margin-left:auto}
+  .nova-input{left:calc(232px + (100vw - 232px)/2 - 8.5px);width:min(calc(100% - 144px),1068px)}
   .you-screen{grid-template-columns:minmax(0,1.12fr) minmax(340px,.88fr)}
   .you-screen .you-progress-dashboard{grid-column:1}
   .you-screen .direction-statement{grid-column:1}
@@ -2089,12 +2094,13 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
 .routine-library-switcher button{min-height:44px;padding:0 var(--north-space-3);border:1px solid var(--north-divider);border-radius:var(--north-radius-control);display:inline-flex;align-items:center;gap:7px;color:var(--north-text-primary);background:var(--north-surface-raised);font:800 12px/1 "DM Sans",sans-serif;cursor:pointer}
 .routine-library-switcher button:hover{border-color:var(--north-active-divider);color:var(--north-action-primary);background:var(--north-surface-accent)}
 @media(min-width:1024px){
+  .routine-library-switcher{justify-content:center}
   .primary-nav{background:var(--north-rail-surface);border-color:color-mix(in srgb,var(--north-rail-text) 12%,transparent)}
   .primary-nav::before{color:var(--north-rail-text)}
   .primary-nav button{color:var(--north-rail-text-muted)}
   .primary-nav button:hover{color:var(--north-rail-text);background:color-mix(in srgb,var(--north-rail-text) 8%,transparent)}
   .primary-nav button.active{color:var(--north-rail-text);background:var(--north-rail-active);box-shadow:inset 3px 0 0 var(--north-action-primary)}
-  .member-shell .nova-workout-builder-screen,.member-shell .nova-routine-builder-screen,.member-shell .workout-template-screen{width:min(100%,980px)}
+  .member-shell .nova-workout-builder-screen,.member-shell .nova-routine-builder-screen,.member-shell .workout-template-screen{width:min(100%,980px);margin-inline:auto}
   .member-shell .workout-library-screen{width:100%;max-width:none}
   .member-shell .workout-library-screen .template-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
 }

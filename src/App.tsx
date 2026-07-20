@@ -917,6 +917,7 @@ function App() {
   const recordedVolume = history.reduce((total, workout) => total + sessionTonnage(workout), 0);
   const todayPlan = weeklyPlan.find((item) => item.date === isoDate(new Date())) ?? weeklyPlan[0];
   const todayActivities = activities.filter((item) => item.date === todayPlan.date);
+  const todayCompletedWorkout = history.find((item) => isoDate(new Date(workoutRecordDate(item) || 0)) === todayPlan.date);
   const todayPlanCompleted = todayPlan.status === "completed";
   const upNextPlan = [...weeklyPlan].filter((day) => day.date > todayPlan.date && day.status !== "completed" && day.status !== "skipped").sort((left, right) => left.date.localeCompare(right.date))[0];
   const latestWorkout = [...history].sort((left, right) => new Date(workoutRecordDate(right)).getTime() - new Date(workoutRecordDate(left)).getTime())[0];
@@ -2152,7 +2153,7 @@ function App() {
     setRecentTemplateIds((ids) => [template.id, ...ids.filter((id) => id !== template.id)].slice(0, 8));
     const exercises = exercisesFromTemplate(template);
     setSelectedTemplateId(template.id);
-    setWeeklyPlan((days) => days.map((day) => day.id === planDayId ? { ...day, kind: "strength", title: workoutDisplayName(template.name), workout: exercises, status: "planned" } : day));
+    setWeeklyPlan((days) => days.map((day) => day.id === planDayId ? { ...day, kind: "strength", title: workoutDisplayName(template.name), workout: exercises, status: day.status === "completed" ? "completed" : "planned" } : day));
     if (prepareNow) {
       setSession(initialSession(exercises, planDayId));
       setScreen("prepare");
@@ -2595,6 +2596,7 @@ function App() {
             </div>
             {todayPlan.kind !== "run" && todayPlan.kind !== "strength" && todayPlan.kind !== "rest" && <span className="direction-mark">{todayPlan.kind === "bike" ? <Bike size={24} /> : todayPlan.kind === "walk" ? <Footprints size={24} /> : todayPlan.kind === "recovery" ? <HeartPulse size={24} /> : <Compass size={24} />}</span>}
           </section>
+          {todayActivities.length > 0 && <section className="day-session-stack compact" aria-label="Today's completed sessions"><header><div><p className="eyebrow">TODAY'S RECORD</p><h2>{todayPlanCompleted || todayCompletedWorkout ? "Main session and additional movement" : "Movement recorded today"}</h2></div><span>{todayActivities.length + (todayPlan.kind === "rest" ? 0 : 1)} sessions</span></header>{todayPlan.kind !== "rest" && <article className="primary-session completed"><i><Check size={14}/></i><div><small>MAIN SESSION</small><strong>{todayPlan.title}</strong><span>{todayPlanCompleted || todayCompletedWorkout ? "Completed" : "Planned"}</span></div></article>}{todayActivities.map((activity) => <article key={activity.id} className="completed"><i>{activity.kind === "bike" ? <Bike size={14}/> : activity.kind === "run" ? <Footprints size={14}/> : activity.kind === "walk" ? <PersonStanding size={14}/> : <HeartPulse size={14}/>}</i><div><small>ADDITIONAL ACTIVITY</small><strong>{activity.kind === "bike" ? "Bike ride" : activity.kind === "run" ? "Run" : activity.kind === "walk" ? "Walk" : "Recovery"}</strong><span>{[activity.duration ? `${activity.duration} min` : "", activity.distance ? `${displayDistance(activity.distance).toFixed(1)} ${distanceUnit}` : ""].filter(Boolean).join(" · ") || "Logged"}</span></div></article>)}</section>}
           {weatherStatus && <p className="weather-status" role="status">{weatherStatus}</p>}
 
           {(todayPlan.sessions?.length ?? 0) > 0 && <section className="day-session-stack compact"><header><div><p className="eyebrow">TODAY'S SESSION STACK</p><h2>Main focus plus supporting work</h2></div><span>{1 + (todayPlan.sessions?.length ?? 0)} sessions</span></header><article className="primary-session"><i>1</i><div><small>MAIN FOCUS</small><strong>{todayPlan.title}</strong><span>{todayPlan.kind}</span></div></article>{todayPlan.sessions?.map((item, index) => <article key={item.id} className={item.status}><i>{index + 2}</i><div><small>{item.role.toUpperCase()}</small><strong>{item.title}</strong><span>{[item.distance ? `${displayDistance(item.distance).toFixed(1)} ${distanceUnit}` : "", item.duration ? `${item.duration} min` : "", item.kind].filter(Boolean).join(" · ")}</span></div></article>)}</section>}
