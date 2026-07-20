@@ -474,7 +474,8 @@ function readPlan(): PlanDay[] {
     return defaults.map((fallback) => {
       const item = saved.find((candidate) => candidate.date === fallback.date);
       if (!item) return fallback;
-      return { ...item, title: workoutDisplayName(item.title), status: item.status ?? "planned", sessions: Array.isArray(item.sessions) ? item.sessions : [], workout: item.kind === "strength" ? (item.workout?.length ? item.workout : fallback.workout ?? resetExercises(starterExercises)) : undefined };
+      const savedWorkoutIsUsable = item.workout?.length && item.workout.every((exercise) => Array.isArray(exercise.sets));
+      return { ...item, title: workoutDisplayName(item.title), status: item.status ?? "planned", sessions: Array.isArray(item.sessions) ? item.sessions : [], workout: item.kind === "strength" ? (savedWorkoutIsUsable ? item.workout : fallback.workout ?? resetExercises(starterExercises)) : undefined };
     });
   } catch { return initialWeekPlan(); }
 }
