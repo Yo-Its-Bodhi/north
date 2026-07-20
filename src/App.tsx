@@ -216,9 +216,9 @@ function canonicalJson(value: unknown): string {
 async function persistAccountJson(storageKey: string, collection: string, data: unknown, force = false) {
   const serialized = JSON.stringify(data);
   const stored = localStorage.getItem(storageKey);
+  if (stored !== serialized) localStorage.setItem(storageKey, serialized);
   const document = await northRepository.get(collection, "primary");
   if (!force && stored === serialized && document && canonicalJson(document.data) === canonicalJson(data)) return false;
-  localStorage.setItem(storageKey, serialized);
   await northRepository.put(collection, "primary", data);
   return true;
 }
@@ -2554,7 +2554,7 @@ function App() {
     }
   }
 
-  const coreScreen = ["today", "journey", "training", "nova-workout-builder", "nova", "you", "settings"].includes(screen);
+  const coreScreen = ["today", "journey", "training", "nova-workout-builder", "nova-routine-builder", "workout-library", "workout-template", "nova", "you", "settings"].includes(screen);
   const activeTourStep = tourStep >= 0 ? productTourSteps[tourStep] : null;
 
   if (!entryComplete) return <Onboarding onComplete={completeOnboarding} onLocalPreview={import.meta.env.DEV ? () => setEntryComplete(true) : undefined} />;
@@ -2814,7 +2814,12 @@ function App() {
       {screen === "nova-workout-builder" && (
         <section className="screen nova-workout-builder-screen">
           <button className="back-button" onClick={() => setScreen("training")}><ArrowLeft size={17} /> Training</button>
-          <header><span><Sparkles size={21} /></span><div><p className="eyebrow">NOVA WORKOUT STUDIO</p><h1>Let&apos;s build your next session.</h1><p>Tell Nova what you want from this workout. You choose whether to use the suggestion or begin blank.</p></div></header>
+          <header><span><Sparkles size={21}/></span><div><p className="eyebrow">NOVA WORKOUT STUDIO</p><h1>Let&apos;s build your next session.</h1><p>Tell Nova what you want from this workout. You choose whether to use the suggestion or begin blank.</p></div></header>
+          <nav className="routine-library-switcher" aria-label="Workout library">
+            <button onClick={() => { setTemplateSource("personal"); setScreen("workout-library"); }}><Heart size={16} /> My workouts</button>
+            <button onClick={() => { setTemplateSource("north"); setScreen("workout-library"); }}><Dumbbell size={16} /> Premade workouts</button>
+            <button onClick={() => { setTemplateSource("personal"); setScreen("workout-library"); }}><NotebookPen size={16} /> Edit existing</button>
+          </nav>
           <section className="nova-builder-form">
             <label className="wide"><span>Workout name</span><input value={novaWorkoutDraft.name} onChange={(event) => setNovaWorkoutDraft((draft) => ({ ...draft, name: event.target.value }))} placeholder="e.g. Saturday strength" aria-label="Workout name" /></label>
             <label><span>What do you want to train?</span><select value={novaWorkoutDraft.focus} onChange={(event) => setNovaWorkoutDraft((draft) => ({ ...draft, focus: event.target.value }))}>{workoutFocuses.filter((focus) => focus !== "All").map((focus) => <option key={focus}>{focus}</option>)}</select></label>

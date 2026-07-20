@@ -2085,10 +2085,19 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
 .primary-nav{background:var(--north-surface-raised)}
 .primary-nav button{color:var(--north-text-secondary)}
 .primary-nav button.active{color:var(--north-action-primary);background:var(--north-surface-accent)}
+.routine-library-switcher{display:flex;flex-wrap:wrap;gap:var(--north-space-2);margin:0 0 var(--north-space-5);padding:var(--north-space-3) 0;border-top:1px solid var(--north-divider);border-bottom:1px solid var(--north-divider)}
+.routine-library-switcher button{min-height:44px;padding:0 var(--north-space-3);border:1px solid var(--north-divider);border-radius:var(--north-radius-control);display:inline-flex;align-items:center;gap:7px;color:var(--north-text-primary);background:var(--north-surface-raised);font:800 12px/1 "DM Sans",sans-serif;cursor:pointer}
+.routine-library-switcher button:hover{border-color:var(--north-active-divider);color:var(--north-action-primary);background:var(--north-surface-accent)}
 @media(min-width:1024px){
   .primary-nav{background:var(--north-rail-surface);border-color:color-mix(in srgb,var(--north-rail-text) 12%,transparent)}
   .primary-nav::before{color:var(--north-rail-text)}
   .primary-nav button{color:var(--north-rail-text-muted)}
   .primary-nav button:hover{color:var(--north-rail-text);background:color-mix(in srgb,var(--north-rail-text) 8%,transparent)}
   .primary-nav button.active{color:var(--north-rail-text);background:var(--north-rail-active);box-shadow:inset 3px 0 0 var(--north-action-primary)}
+  .member-shell .nova-workout-builder-screen,.member-shell .nova-routine-builder-screen,.member-shell .workout-template-screen{width:min(100%,980px)}
+  .member-shell .workout-library-screen{width:100%;max-width:none}
+  .member-shell .workout-library-screen .template-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(min-width:1280px){
+  .member-shell .workout-library-screen .template-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
 }

@@ -150,6 +150,22 @@ try {
     await page.setViewportSize({ width: 430, height: 932 });
   });
 
+  await check("Build workout keeps routine libraries and desktop navigation available", async () => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(base);
+    await page.getByRole("button", { name: "Build workout", exact: true }).click();
+    for (const action of ["My workouts", "Premade workouts", "Edit existing"]) await page.getByRole("button", { name: action, exact: true }).waitFor();
+    await page.locator(".routine-library-switcher").getByRole("button", { name: "Premade workouts", exact: true }).click();
+    await page.locator(".workout-library-screen").waitFor();
+    const libraryColumns = await page.locator(".workout-library-screen .template-grid").evaluate((grid) => getComputedStyle(grid).gridTemplateColumns.split(" ").length);
+    assert.equal(libraryColumns, 4, "wide desktop workout library should use four card columns");
+    await page.getByRole("button", { name: "Build workout", exact: true }).click();
+    await page.getByRole("button", { name: "Open Expert Studio", exact: true }).click();
+    await page.locator(".workout-template-screen").waitFor();
+    assert.equal(await page.locator(".primary-nav:visible").count(), 1, "desktop rail must remain available in Expert Studio");
+    await page.setViewportSize({ width: 430, height: 932 });
+  });
+
   await check("workout library supports search, preview, schedule, and start actions", async () => {
     await page.goto(base);
     await page.getByRole("button", { name: "Training", exact: true }).last().click();
@@ -164,6 +180,30 @@ try {
     await page.getByRole("button", { name: /Library/ }).click();
     const actions = page.locator(".template-grid > article").first().locator(".template-quick-actions button");
     assert.equal(await actions.count(), 3);
+  });
+
+  await check("scheduling workouts on separate days survives an immediate refresh", async () => {
+    await page.goto(base);
+    await page.getByRole("button", { name: "Training", exact: true }).last().click();
+    await page.getByRole("button", { name: /Edit workout/ }).click();
+    await page.getByRole("button", { name: /Premade workouts/ }).click();
+    await page.getByRole("heading", { name: "Find the right session." }).waitFor();
+    const templates = page.locator(".template-grid > article");
+    const firstTemplate = templates.nth(0);
+    const secondTemplate = templates.nth(1);
+    const firstName = (await firstTemplate.locator(".template-open > strong").textContent())?.trim();
+    const secondName = (await secondTemplate.locator(".template-open > strong").textContent())?.trim();
+    assert.ok(firstName && secondName, "scheduled templates need visible names");
+    await firstTemplate.getByRole("button", { name: "Schedule", exact: true }).click();
+    await page.locator(".schedule-picker > div > button").first().click();
+    await page.getByRole("button", { name: "Training", exact: true }).last().click();
+    await page.locator(".workout-builder-option.premade").click();
+    await page.getByRole("heading", { name: "Find the right session." }).waitFor();
+    await secondTemplate.getByRole("button", { name: "Schedule", exact: true }).click();
+    await page.locator(".schedule-picker > div > button").nth(1).click();
+    await page.reload();
+    const scheduledTitles = await page.evaluate(() => JSON.parse(localStorage.getItem("north-week-plan-v1") ?? "[]").slice(0, 2).map((day) => day.title));
+    assert.deepEqual(scheduledTitles, [firstName, secondName]);
   });
 
   await check("Nova creates an evidence-linked reply and an approval-gated action", async () => {
