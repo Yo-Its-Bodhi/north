@@ -6,6 +6,8 @@ import { chromium } from "playwright-core";
 const port = 4174;
 const base = `http://127.0.0.1:${port}`;
 const chrome = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
+const torontoDateParts = Object.fromEntries(new Intl.DateTimeFormat("en-CA", { timeZone: "America/Toronto", year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(new Date()).map((part) => [part.type, part.value]));
+const testDate = `${torontoDateParts.year}-${torontoDateParts.month}-${torontoDateParts.day}`;
 const server = spawn("npm.cmd", ["run", "dev", "--", "--host", "127.0.0.1", "--port", String(port)], { shell: true, stdio: ["ignore", "pipe", "pipe"] });
 let serverOutput = "";
 server.stdout.on("data", (chunk) => { serverOutput += chunk; });
@@ -50,12 +52,12 @@ try {
     if (path === "/v1/nova/conversations/browser-conversation/messages") return route.fulfill({ json: { messages: [] } });
     if (path === "/v1/nova/conversations/browser-conversation/respond") {
       const text = JSON.parse(route.request().postData() ?? "{}").text;
-      if (text === "Add a 60-minute bike ride after my lift") return route.fulfill({ json: { userMessage: { id: "bike-user-message", role: "user", content: text, created_at: new Date().toISOString() }, assistant: { id: "bike-assistant-message", role: "assistant", content: "I prepared the ride for your approval.", evidence: ["Today's saved strength plan"], confidence: "high", created_at: new Date().toISOString() }, proposal: { id: "bike-proposal", source_message_id: "bike-assistant-message", action_type: "adjust_plan_day", risk_level: "meaningful", summary: "Add a 60-minute steady bike ride after today’s strength session", reason: "You explicitly asked to add this ride.", payload: { date: "2026-07-19", title: "Upper body strength", sessions: [{ kind: "bike", title: "60-minute steady bike ride", role: "secondary", duration: "60", distance: "", note: "5 min easy warm-up · 50 min steady Zone 2 · 5 min easy cool-down" }] }, status: "pending" } } });
+      if (text === "Add a 60-minute bike ride after my lift") return route.fulfill({ json: { userMessage: { id: "bike-user-message", role: "user", content: text, created_at: new Date().toISOString() }, assistant: { id: "bike-assistant-message", role: "assistant", content: "I prepared the ride for your approval.", evidence: ["Today's saved strength plan"], confidence: "high", created_at: new Date().toISOString() }, proposal: { id: "bike-proposal", source_message_id: "bike-assistant-message", action_type: "adjust_plan_day", risk_level: "meaningful", summary: "Add a 60-minute steady bike ride after today’s strength session", reason: "You explicitly asked to add this ride.", payload: { date: testDate, title: "Upper body strength", sessions: [{ kind: "bike", title: "60-minute steady bike ride", role: "secondary", duration: "60", distance: "", note: "5 min easy warm-up · 50 min steady Zone 2 · 5 min easy cool-down" }] }, status: "pending" } } });
       return route.fulfill({ json: { userMessage: { id: "test-user-message", role: "user", content: "I am short on time today", created_at: new Date().toISOString() }, assistant: { id: "test-assistant-message", role: "assistant", content: "I can record how you are arriving, but you stay in control.", evidence: ["Today's saved plan"], confidence: "moderate", created_at: new Date().toISOString() }, proposal: { id: "test-proposal", source_message_id: "test-assistant-message", action_type: "add_check_in", risk_level: "meaningful", summary: "Record today's check-in", reason: "This gives the plan useful recovery context.", payload: { date: "2026-07-18", energy: 3, soreness: 2, note: "Short on time" }, status: "pending" } } });
     }
     if (path === "/v1/nova/proposals/test-proposal/approve") return route.fulfill({ json: { id: "test-proposal", action_type: "add_check_in", risk_level: "meaningful", summary: "Record today's check-in", reason: "This gives the plan useful recovery context.", payload: { date: "2026-07-18", energy: 3, soreness: 2, note: "Short on time" }, status: "approved" } });
     if (path === "/v1/nova/proposals/test-proposal/applied") return route.fulfill({ json: { proposalId: "test-proposal", status: "applied" } });
-    if (path === "/v1/nova/proposals/bike-proposal/approve") return route.fulfill({ json: { id: "bike-proposal", action_type: "adjust_plan_day", risk_level: "meaningful", summary: "Add a 60-minute steady bike ride after today’s strength session", reason: "You explicitly asked to add this ride.", payload: { date: "2026-07-19", title: "Upper body strength", sessions: [{ kind: "bike", title: "60-minute steady bike ride", role: "secondary", duration: "60", distance: "", note: "5 min easy warm-up · 50 min steady Zone 2 · 5 min easy cool-down" }] }, status: "approved" } });
+    if (path === "/v1/nova/proposals/bike-proposal/approve") return route.fulfill({ json: { id: "bike-proposal", action_type: "adjust_plan_day", risk_level: "meaningful", summary: "Add a 60-minute steady bike ride after today’s strength session", reason: "You explicitly asked to add this ride.", payload: { date: testDate, title: "Upper body strength", sessions: [{ kind: "bike", title: "60-minute steady bike ride", role: "secondary", duration: "60", distance: "", note: "5 min easy warm-up · 50 min steady Zone 2 · 5 min easy cool-down" }] }, status: "approved" } });
     if (path === "/v1/nova/proposals/bike-proposal/applied") return route.fulfill({ json: { proposalId: "bike-proposal", status: "applied" } });
     if (path.includes("/resolve")) return route.fulfill({ json: { ok: true } });
     return route.fulfill({ json: { status: "applied", documents: [], serverTime: new Date().toISOString() } });
@@ -128,6 +130,26 @@ try {
     await page.evaluate(() => localStorage.setItem("north-theme", "off-white"));
   });
 
+  await check("desktop navigation rail keeps every destination label legible", async () => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.reload();
+    const contrast = await page.locator(".primary-nav").evaluate((rail) => {
+      const parse = (value) => value.match(/[\d.]+/g)?.slice(0, 3).map(Number) ?? [];
+      const luminance = (rgb) => {
+        const values = rgb.map((value) => { const channel = value / 255; return channel <= .03928 ? channel / 12.92 : ((channel + .055) / 1.055) ** 2.4; });
+        return .2126 * values[0] + .7152 * values[1] + .0722 * values[2];
+      };
+      const railLuminance = luminance(parse(getComputedStyle(rail).backgroundColor));
+      return [...rail.querySelectorAll("button")].map((button) => {
+        const label = button.textContent?.trim() ?? "unnamed destination";
+        const textLuminance = luminance(parse(getComputedStyle(button).color));
+        return { label, ratio: (Math.max(railLuminance, textLuminance) + .05) / (Math.min(railLuminance, textLuminance) + .05) };
+      });
+    });
+    for (const destination of contrast) assert.ok(destination.ratio >= 4.5, `${destination.label} rail contrast is ${destination.ratio.toFixed(2)}:1`);
+    await page.setViewportSize({ width: 430, height: 932 });
+  });
+
   await check("workout library supports search, preview, schedule, and start actions", async () => {
     await page.goto(base);
     await page.getByRole("button", { name: "Training", exact: true }).last().click();
@@ -166,8 +188,8 @@ try {
     await page.getByRole("button", { name: "Send to Nova" }).click();
     await page.getByText("Add a 60-minute steady bike ride after today’s strength session").waitFor();
     await page.getByRole("button", { name: "Review & confirm" }).click();
-    await page.waitForFunction(() => JSON.parse(localStorage.getItem("north-week-plan-v1") ?? "[]").find((item) => item.date === "2026-07-19")?.sessions?.some((session) => session.title === "60-minute steady bike ride"));
-    const day = await page.evaluate(() => JSON.parse(localStorage.getItem("north-week-plan-v1") ?? "[]").find((item) => item.date === "2026-07-19"));
+    await page.waitForFunction((date) => JSON.parse(localStorage.getItem("north-week-plan-v1") ?? "[]").find((item) => item.date === date)?.sessions?.some((session) => session.title === "60-minute steady bike ride"), testDate);
+    const day = await page.evaluate((date) => JSON.parse(localStorage.getItem("north-week-plan-v1") ?? "[]").find((item) => item.date === date), testDate);
     assert.equal(day.kind, "strength");
     assert.ok(Array.isArray(day.workout) && day.workout.length > 0);
     assert.equal(day.sessions?.[0]?.title, "60-minute steady bike ride");
@@ -210,16 +232,11 @@ try {
   await check("an interrupted workout survives a full page reload", async () => {
     await page.goto(base);
     await page.getByRole("button", { name: "Training", exact: true }).last().click();
-    if (await page.getByRole("button", { name: /Start workout/ }).count() === 0) {
-      const days = page.locator(".training-rhythm-strip button");
-      for (let index = 0; index < await days.count(); index += 1) {
-        await days.nth(index).click();
-        if (await page.getByRole("button", { name: /Start workout/ }).count()) break;
-      }
-    }
-    await page.getByRole("button", { name: /Start workout/ }).click();
-    const startButton = page.getByRole("button", { name: /Start workout/ }).last();
-    if (await startButton.isVisible().catch(() => false)) await startButton.click();
+    if (!await page.locator(".training-details-drawer .kind-picker").isVisible().catch(() => false)) await page.getByRole("button", { name: /Edit workout/ }).click();
+    await page.locator(".training-details-drawer .kind-picker button").filter({ hasText: /^strength$/i }).click();
+    await page.getByRole("button", { name: /Start workout|Continue setup/ }).click();
+    await page.getByRole("heading", { name: /Ready when you are|Record what happened/ }).waitFor();
+    await page.locator(".prepare-save-actions").getByRole("button", { name: /Start workout/ }).click();
     await page.locator(".workout-screen").waitFor();
     const firstInput = page.locator(".simple-set-logger input, .set-row:not(.set-head) input").first();
     await firstInput.fill("77");
@@ -228,11 +245,12 @@ try {
     await page.reload();
     if (await page.locator(".workout-screen").count() === 0) {
       await page.getByRole("button", { name: "Training", exact: true }).last().click();
-      if (await page.getByRole("button", { name: /Resume workout/ }).count() === 0) {
+      if (!await page.getByRole("button", { name: /Resume workout/ }).isVisible().catch(() => false)) {
         const days = page.locator(".training-rhythm-strip button");
         for (let index = 0; index < await days.count(); index += 1) {
           await days.nth(index).click();
-          if (await page.getByRole("button", { name: /Resume workout/ }).count()) break;
+          await page.waitForTimeout(50);
+          if (await page.getByRole("button", { name: /Resume workout/ }).isVisible().catch(() => false)) break;
         }
       }
       await page.getByRole("button", { name: /Resume workout/ }).click();

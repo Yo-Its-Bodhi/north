@@ -43,13 +43,23 @@ North should feel calm, decisive, personal, and exceptionally easy to use with o
 
 ## P1 — visual system
 
-- [x] Create semantic design tokens for typography, spacing, radius, elevation, borders, focus, success, warning, and danger.
-- [ ] Reduce the number of unrelated card styles and gradients; define three deliberate surface levels.
-- [ ] Standardize primary, secondary, quiet, destructive, icon, segmented, and chip buttons.
+- [x] Create semantic design tokens for spacing, radius, elevation, surface, text, action, focus, success, warning, danger, and desktop-rail states.
+- [~] Reduce the number of unrelated card styles and gradients; the three semantic surface levels now exist, but legacy screen-specific cards still need migration.
+- [~] Standardize primary, secondary, quiet, destructive, icon, segmented, and chip buttons; primary/secondary/icon foundations exist, while destructive, segmented, and chip variants remain screen-specific.
 - [ ] Make all touch targets at least 44×44px with visible keyboard focus.
-- [ ] Strengthen contrast and reduce excessive pale-on-pale presentation.
+- [~] Strengthen contrast and reduce excessive pale-on-pale presentation; desktop rail contrast is now token-enforced and core surfaces have distinct roles, but each destination needs visual review and migration.
 - [ ] Use icons consistently: one family, consistent stroke, size, container, and semantic color.
 - [x] Define responsive mobile, tablet, and desktop layouts instead of only widening the phone shell.
+
+### Visual-system execution plan
+
+1. [x] Establish semantic roles and repair the desktop navigation rail’s dark-on-dark text regression.
+2. [x] Define the three-surface contract: canvas for page backgrounds, raised for actionable/grouped content, and subtle for supporting or nested information.
+3. [ ] Migrate Today and Training to the surface contract; remove legacy gradient cards except intentional training-direction and achievement moments.
+4. [ ] Migrate Journey, Nova, You, Account, Settings, workout flows, library, and onboarding using the same contract.
+5. [ ] Replace remaining bespoke buttons, pills, borders, shadows, and radii with the semantic primitives; preserve only meaningful status and achievement color.
+6. [ ] Raise gym-floor metadata and control labels to the 12px minimum except compact, nonessential labels.
+7. [ ] Add desktop and mobile visual checks for the rail, surface separation, focus, contrast, and all destination states.
 
 ## P1 — Nova
 

@@ -2050,3 +2050,45 @@ h1,.screen>h1,.destination-screen>h1,.workout-library-screen>h1,.programs-screen
   .primary-nav .desktop-only-nav-item{display:flex}
   .primary-nav button.active{color:var(--surface-solid);background:color-mix(in srgb,var(--surface-solid) 12%,transparent);box-shadow:inset 3px 0 0 var(--blue)}
 }
+
+/* Design-system foundation: semantic roles keep contrast stable across palettes. */
+:root{
+  --north-surface-canvas:var(--surface-solid);
+  --north-surface-raised:var(--surface-solid);
+  --north-surface-subtle:var(--surface);
+  --north-surface-accent:color-mix(in srgb,var(--blue) 9%,var(--surface-solid));
+  --north-text-primary:var(--ink);
+  --north-text-secondary:var(--muted);
+  --north-action-primary:var(--blue);
+  --north-action-primary-foreground:#fff;
+  --north-state-success:#2f8a67;
+  --north-state-warning:#a96f2d;
+  --north-state-danger:#a85151;
+  --north-focus:color-mix(in srgb,var(--blue) 52%,transparent);
+  --north-rail-surface:#183840;
+  --north-rail-text:#f1f0ea;
+  --north-rail-text-muted:rgba(241,240,234,.74);
+  --north-rail-active:rgba(241,240,234,.14);
+  --north-radius-chip:999px;
+  --north-elevation-raised:0 12px 28px color-mix(in srgb,var(--navy) 12%,transparent);
+}
+:root[data-theme="night"]{
+  --north-surface-accent:color-mix(in srgb,var(--blue) 14%,var(--surface-solid));
+  --north-action-primary-foreground:#10272b;
+  --north-rail-surface:#102f32;
+  --north-rail-text:#eff2ed;
+  --north-rail-text-muted:rgba(239,242,237,.76);
+  --north-rail-active:rgba(239,242,237,.14);
+}
+
+button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline-color:var(--north-focus)}
+.primary-nav{background:var(--north-surface-raised)}
+.primary-nav button{color:var(--north-text-secondary)}
+.primary-nav button.active{color:var(--north-action-primary);background:var(--north-surface-accent)}
+@media(min-width:1024px){
+  .primary-nav{background:var(--north-rail-surface);border-color:color-mix(in srgb,var(--north-rail-text) 12%,transparent)}
+  .primary-nav::before{color:var(--north-rail-text)}
+  .primary-nav button{color:var(--north-rail-text-muted)}
+  .primary-nav button:hover{color:var(--north-rail-text);background:color-mix(in srgb,var(--north-rail-text) 8%,transparent)}
+  .primary-nav button.active{color:var(--north-rail-text);background:var(--north-rail-active);box-shadow:inset 3px 0 0 var(--north-action-primary)}
+}
