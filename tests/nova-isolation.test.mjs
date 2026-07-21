@@ -4,6 +4,7 @@ import test from "node:test";
 
 const migration=fs.readFileSync(new URL("../db/migrations/0012_nova_intelligence_hub.sql",import.meta.url),"utf8");
 const routes=fs.readFileSync(new URL("../server/nova-routes.mjs",import.meta.url),"utf8");
+const appSource=fs.readFileSync(new URL("../src/App.tsx",import.meta.url),"utf8");
 
 test("Nova migration is additive and every private table belongs to an account",()=>{
   assert.doesNotMatch(migration,/\b(drop|truncate)\s+(table|schema)\b/i);
@@ -49,4 +50,16 @@ test("Nova normalizes today proposals against the account timezone",()=>{
   assert.match(routes,/function normalizeProposalDate/);
   assert.match(routes,/currentDateIso/);
   assert.match(routes,/formatToParts\(new Date\(\)\)/);
+});
+
+test("Nova can persist explicitly requested reusable workouts",()=>{
+  assert.match(routes,/saveToMyWorkouts:true/);
+  assert.match(routes,/payload\.saveToMyWorkouts=payload\.saveToMyWorkouts===true/);
+  assert.match(appSource,/persistAccountJson\(PERSONAL_TEMPLATES_KEY, "personal-workouts", nextTemplates, true\)/);
+  assert.match(appSource,/personal-nova-\$\{proposal\.id\}/);
+});
+
+test("resolved Nova proposal cards leave the chat viewport",()=>{
+  assert.match(appSource,/apiProposal: undefined, appliedAt/);
+  assert.match(appSource,/message\.apiProposal\?\.status === "pending"/);
 });
