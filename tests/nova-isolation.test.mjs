@@ -54,9 +54,10 @@ test("Nova normalizes today proposals against the account timezone",()=>{
 
 test("Nova can persist explicitly requested reusable workouts",()=>{
   assert.match(routes,/saveToMyWorkouts:true/);
-  assert.match(routes,/payload\.saveToMyWorkouts=payload\.saveToMyWorkouts===true/);
+  assert.match(routes,/\["create_workout","adjust_plan_day"\].*payload\.saveToMyWorkouts=payload\.saveToMyWorkouts===true/);
   assert.match(appSource,/persistAccountJson\(PERSONAL_TEMPLATES_KEY, "personal-workouts", nextTemplates, true\)/);
   assert.match(appSource,/personal-nova-\$\{proposal\.id\}/);
+  assert.match(appSource,/const detailedWorkout = proposedExercises/);
 });
 
 test("resolved Nova proposal cards leave the chat viewport",()=>{

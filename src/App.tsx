@@ -1578,10 +1578,19 @@ function App() {
         setWeeklyReviews((items) => [entry, ...items.filter((item) => item.id !== entry.id)]);targetCollection = "reviews";targetKey = entry.id;
       } else {
         const date = approved.action_type === "adjust_plan_day" && /\btoday\b/i.test(approved.summary) ? todayPlan.date : String(payload.date);const exerciseIds = Array.isArray(payload.exerciseIds) ? payload.exerciseIds.map(String) : [];
-        const workout = exerciseIds.map((id) => productionExerciseLibrary.find((item) => item.id === id)).filter((item): item is CanonicalExercise => Boolean(item)).slice(0,12).map((item) => buildExercise(toLegacyExerciseDefinition(item)));
+        const idWorkout = exerciseIds.map((id) => productionExerciseLibrary.find((item) => item.id === id)).filter((item): item is CanonicalExercise => Boolean(item)).slice(0,12).map((item) => buildExercise(toLegacyExerciseDefinition(item)));
+        const proposedExercises = payload.workout && typeof payload.workout === "object" && Array.isArray((payload.workout as { exercises?: unknown[] }).exercises) ? (payload.workout as { exercises: Array<{ name?: unknown; target?: unknown; rest?: unknown; sets?: unknown[] }> }).exercises : [];
+        const detailedWorkout = proposedExercises.slice(0,12).map((planned, index) => {
+          const name = String(planned.name ?? "");const canonical = canonicalExerciseFor(name);const definition = exerciseLibrary.find((item) => normalizeExerciseKey(item.name) === normalizeExerciseKey(name)) ?? (canonical ? toLegacyExerciseDefinition(canonical) : undefined);
+          if (!definition) return null;
+          const exercise = buildExercise(definition, `nova-${proposal.id}-${index}-${normalizeExerciseKey(name).replaceAll(" ", "-")}`);
+          const plannedSets = Array.isArray(planned.sets) ? planned.sets.slice(0,20) : [];
+          return { ...exercise, target: String(planned.target ?? exercise.target), rest: Number(planned.rest) || exercise.rest, sets: plannedSets.length ? plannedSets.map((set) => ({ ...exercise.sets[0], ...(set && typeof set === "object" ? set : {}), weight: String((set as { weight?: unknown })?.weight ?? ""), reps: String((set as { reps?: unknown })?.reps ?? ""), complete: false })) : exercise.sets };
+        }).filter((item): item is Exercise => Boolean(item));
+        const workout = detailedWorkout.length ? detailedWorkout : idWorkout;
         const sessions: PlannedSession[] = Array.isArray(payload.sessions) ? payload.sessions.slice(0, 4).map((session, index) => ({ id: `nova-${proposal.id}-${index}`, kind: session?.kind === "run" || session?.kind === "walk" || session?.kind === "recovery" ? session.kind : "bike", title: String(session?.title ?? "Planned activity"), role: session?.role === "warm-up" || session?.role === "recovery" || session?.role === "optional" ? session.role : "secondary", duration: String(session?.duration ?? ""), distance: String(session?.distance ?? ""), note: String(session?.note ?? "Planned with Nova"), status: "planned" })) : [];
         setWeeklyPlan((days) => days.map((day) => day.date === date ? { ...day, kind: "strength", title: String(payload.title), note: String(payload.note ?? day.note ?? "Planned with Nova"), status: "planned", workout: workout.length ? workout : day.workout ?? resetExercises(starterExercises), sessions: sessions.length ? [...(day.sessions ?? []), ...sessions] : day.sessions } : day));setSelectedPlanDayId(date);targetCollection = "week-plan";targetKey = date;
-        const saveToMyWorkouts = approved.action_type === "create_workout" && (payload.saveToMyWorkouts === true || /\bmy workouts\b/i.test(`${approved.summary} ${approved.reason}`));
+        const saveToMyWorkouts = payload.saveToMyWorkouts === true || /\bmy workouts\b|\bsaved and scheduled\b|\bsave(?:d)?\b.{0,40}\bworkout\b/i.test(`${approved.summary} ${approved.reason}`);
         if (saveToMyWorkouts) {
           const templateId = `personal-nova-${proposal.id}`;
           const template: WorkoutTemplate = {
