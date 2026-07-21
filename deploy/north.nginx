@@ -3,6 +3,17 @@ server {
     listen [::]:80;
     server_name north.bodhix.io;
 
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    server_name north.bodhix.io;
+
+    ssl_certificate /etc/letsencrypt/live/north.bodhix.io/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/north.bodhix.io/privkey.pem;
+
     root /opt/north/dist;
     index index.html;
     client_max_body_size 2m;

@@ -82,7 +82,7 @@ export const workoutTemplates: WorkoutTemplate[] = blueprints.flatMap((blueprint
     const equipment = [...new Set(exercises.map((item) => exerciseLibrary.find((exercise) => exercise.name === item.exerciseName)?.equipment ?? "Other"))];
     return {
       id: `${blueprint.slug}-${level.toLowerCase()}-${duration}`,
-      name: `${duration}-Minute ${blueprint.name}`,
+      name: blueprint.name,
       description: `${level} ${blueprint.focus.toLowerCase()} session built for ${blueprint.goal.toLowerCase()}.`,
       focus: blueprint.focus,
       goal: blueprint.goal,
@@ -99,3 +99,12 @@ export const workoutTemplates: WorkoutTemplate[] = blueprints.flatMap((blueprint
 export const workoutFocuses = ["All", ...new Set(workoutTemplates.map((workout) => workout.focus))];
 export const workoutGoals = ["All", ...new Set(workoutTemplates.map((workout) => workout.goal))];
 export const workoutLevels = ["All", ...levels];
+
+export function estimatedWorkoutMinutes(template: WorkoutTemplate) {
+  const seconds = template.exercises.reduce((total, exercise) => total + exercise.sets * (45 + exercise.rest), 0);
+  return Math.max(10, Math.round(seconds / 60 + 5));
+}
+
+export function workoutDisplayName(name: string) {
+  return name.replace(/^\d+[-\s]*(?:minute|min)\s+/i, "");
+}

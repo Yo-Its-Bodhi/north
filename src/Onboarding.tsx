@@ -54,7 +54,9 @@ export default function Onboarding({ onComplete, onLocalPreview }: Props) {
       const next = kind === "register" ? await registerNorthAccount(username, password, name, accessCode) : kind === "login" ? await loginNorthAccount(username, password) : await recoverNorthAccount(username, recoveryCode, password);
       setSession(next); setName((value) => value || next.user.displayName); setRecoveryCode(next.recoveryCode || "");
       if (kind === "login") {
-        const restored = await pullNorth(NORTH_API_BASE, next.accessToken);
+        // Restore the account before a new device's UI defaults can compete
+        // with the member's real plan and saved workouts.
+        const restored = await pullNorth(NORTH_API_BASE, next.accessToken, "1970-01-01T00:00:00.000Z", true);
         if (restored.restored > 0) {
           localStorage.setItem(`north-onboarding-complete:${next.user.id}`, new Date().toISOString());
           location.reload();

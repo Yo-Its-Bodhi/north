@@ -34,6 +34,7 @@ try {
       localStorage.setItem("north-account-session-v1", JSON.stringify(account));
       localStorage.setItem(`north-onboarding-complete:${account.user.id}`, "complete");
       localStorage.setItem(`north-product-tour-v1:${account.user.id}`, "complete");
+      localStorage.setItem("north-release-notes-dismissed", "north-0.4-nova-intelligence-hub");
       localStorage.setItem("north-profile-v1", JSON.stringify({ name: "Visual Test", direction: "Build strength and consistency", trainingDays: 3, units: "imperial", bodyWeightUnit: "lb", distanceUnit: "km", reducedMotion: true, connectedServices: [], dismissedInsights: [], memoryCorrections: {} }));
     }, { account });
     await context.route("**/v1/**", (route) => route.fulfill({ json: { status: "applied", documents: [], devices: [], connections: [], types: [], currentDeviceId: "visual" } }));
@@ -59,7 +60,7 @@ try {
         screen: signature(".screen"),
         heading: signature(".screen h1"),
         hero: signature(".direction-panel, .training-hero"),
-        navigation: signature(".bottom-nav"),
+        navigation: signature(".primary-nav"),
       };
     });
     await context.close();

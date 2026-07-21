@@ -31,7 +31,7 @@ export type SyncConflict = {
   status: "open" | "local" | "remote";
 };
 
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 function ownerDatabaseName() {
   try {
@@ -70,10 +70,9 @@ export function openNorthDatabase() {
         documents.createIndex("collection", "collection", { unique: false });
         documents.createIndex("updatedAt", "updatedAt", { unique: false });
       }
-      if (!database.objectStoreNames.contains("outbox")) {
-        const outbox = database.createObjectStore("outbox", { keyPath: "mutationId" });
-        outbox.createIndex("nextAttemptAt", "nextAttemptAt", { unique: false });
-      }
+      const outbox = database.objectStoreNames.contains("outbox") ? request.transaction!.objectStore("outbox") : database.createObjectStore("outbox", { keyPath: "mutationId" });
+      if (!outbox.indexNames.contains("nextAttemptAt")) outbox.createIndex("nextAttemptAt", "nextAttemptAt", { unique: false });
+      if (!outbox.indexNames.contains("documentKey")) outbox.createIndex("documentKey", "documentKey", { unique: false });
       if (!database.objectStoreNames.contains("conflicts")) database.createObjectStore("conflicts", { keyPath: "conflictId" });
       if (!database.objectStoreNames.contains("meta")) database.createObjectStore("meta", { keyPath: "key" });
     };
@@ -108,8 +107,14 @@ export const northRepository = {
     const updatedAt = new Date().toISOString();
     const document: NorthDocument<T> = { key, collection, id, data, version: (existing?.version ?? 0) + 1, updatedAt };
     store.put(document);
-    if (queue) transaction.objectStore("outbox").put({ mutationId: key, documentKey: key, collection, operation: "put", data, baseVersion: existing?.version ?? 0, createdAt: updatedAt, attempts: 0, nextAttemptAt: updatedAt } satisfies OutboxMutation);
+    if (queue) {
+      const outbox = transaction.objectStore("outbox");
+      const staleKeys = await requestResult(outbox.index("documentKey").getAllKeys(key));
+      staleKeys.forEach((staleKey) => outbox.delete(staleKey));
+      outbox.put({ mutationId: crypto.randomUUID(), documentKey: key, collection, operation: "put", data, baseVersion: existing?.version ?? 0, createdAt: updatedAt, attempts: 0, nextAttemptAt: updatedAt } satisfies OutboxMutation);
+    }
     await transactionDone(transaction);
+    if (queue && typeof window !== "undefined") window.dispatchEvent(new Event("north:account-change"));
     return document;
   },
 
@@ -122,8 +127,12 @@ export const northRepository = {
     const updatedAt = new Date().toISOString();
     const document: NorthDocument = { key, collection, id, data: existing?.data ?? null, version: (existing?.version ?? 0) + 1, updatedAt, deletedAt: updatedAt };
     store.put(document);
-    transaction.objectStore("outbox").put({ mutationId: key, documentKey: key, collection, operation: "delete", baseVersion: existing?.version ?? 0, createdAt: updatedAt, attempts: 0, nextAttemptAt: updatedAt } satisfies OutboxMutation);
+    const outbox = transaction.objectStore("outbox");
+    const staleKeys = await requestResult(outbox.index("documentKey").getAllKeys(key));
+    staleKeys.forEach((staleKey) => outbox.delete(staleKey));
+    outbox.put({ mutationId: crypto.randomUUID(), documentKey: key, collection, operation: "delete", baseVersion: existing?.version ?? 0, createdAt: updatedAt, attempts: 0, nextAttemptAt: updatedAt } satisfies OutboxMutation);
     await transactionDone(transaction);
+    if (typeof window !== "undefined") window.dispatchEvent(new Event("north:account-change"));
   },
 
   async pendingMutations() {
@@ -136,7 +145,9 @@ export const northRepository = {
     const database = await openNorthDatabase();
     const transaction = database.transaction(["documents", "outbox"], "readwrite");
     transaction.objectStore("documents").put(document);
-    transaction.objectStore("outbox").delete(document.key);
+    const outbox = transaction.objectStore("outbox");
+    const pendingKeys = await requestResult(outbox.index("documentKey").getAllKeys(document.key));
+    pendingKeys.forEach((pendingKey) => outbox.delete(pendingKey));
     await transactionDone(transaction);
   },
 
@@ -147,11 +158,11 @@ export const northRepository = {
     await transactionDone(transaction);
   },
 
-  async retry(mutation: OutboxMutation, error: string) {
+  async retry(mutation: OutboxMutation, error: string, minimumDelay = 0) {
     const database = await openNorthDatabase();
     const transaction = database.transaction("outbox", "readwrite");
     const attempts = mutation.attempts + 1;
-    const delay = Math.min(300_000, 1000 * 2 ** attempts);
+    const delay = Math.max(minimumDelay, Math.min(300_000, 1000 * 2 ** attempts));
     transaction.objectStore("outbox").put({ ...mutation, attempts, lastError: error, nextAttemptAt: new Date(Date.now() + delay).toISOString() });
     await transactionDone(transaction);
   },
@@ -169,6 +180,19 @@ export const northRepository = {
     return requestResult(transaction.objectStore("conflicts").getAll()) as Promise<SyncConflict[]>;
   },
 };
+
+export async function deleteCurrentNorthDatabase() {
+  const databaseName = ownerDatabaseName();
+  const existing = databasePromises.get(databaseName);
+  if (existing) (await existing).close();
+  databasePromises.delete(databaseName);
+  await new Promise<void>((resolve, reject) => {
+    const request = indexedDB.deleteDatabase(databaseName);
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(request.error ?? new Error("North local database could not be erased"));
+    request.onblocked = () => reject(new Error("Close other North tabs before erasing this local copy."));
+  });
+}
 
 const legacyCollections: Record<string, string> = {
   "north-active-session-v1": "active-session",

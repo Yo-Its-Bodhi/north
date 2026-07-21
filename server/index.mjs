@@ -1,10 +1,14 @@
 import crypto from "node:crypto";
 import Fastify from "fastify";
+import { existsSync } from "node:fs";
 import cors from "@fastify/cors";
 import jwt from "@fastify/jwt";
 import rateLimit from "@fastify/rate-limit";
 import bcrypt from "bcryptjs";
 import pg from "pg";
+import { registerNovaRoutes } from "./nova-routes.mjs";
+
+if (existsSync(".env.local")) process.loadEnvFile(".env.local");
 
 const { Pool } = pg;
 const required = ["DATABASE_URL", "JWT_SECRET"].filter((name) => !process.env[name]);
@@ -13,7 +17,7 @@ if (required.length) throw new Error(`Missing environment variables: ${required.
 const app = Fastify({ logger: true, bodyLimit: 2_000_000, trustProxy: true });
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const OWNER_USERNAME = String(process.env.NORTH_OWNER_USERNAME || "druwbi").trim().toLowerCase();
-await app.register(cors, { origin: process.env.CORS_ORIGIN?.split(",") ?? true });
+await app.register(cors, { origin: process.env.CORS_ORIGIN?.split(",") ?? true, methods: ["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"], allowedHeaders: ["Content-Type", "Authorization", "Idempotency-Key", "X-North-Device-Id", "X-North-Device-Name"] });
 await app.register(jwt, { secret: process.env.JWT_SECRET });
 await app.register(rateLimit, { global: true, max: 180, timeWindow: "1 minute" });
 
@@ -30,7 +34,7 @@ function requestDevice(request) {
 async function upsertDevice(client, ownerUserId, request) {
   const device = requestDevice(request);
   const existing = await client.query("select owner_user_id,revoked_at from devices where id=$1", [device.id]);
-  if (existing.rows[0] && existing.rows[0].owner_user_id !== ownerUserId) throw new Error("Device identity belongs to another account");
+  if (existing.rows[0] && (existing.rows[0].owner_user_id !== ownerUserId || existing.rows[0].revoked_at)) { device.id = crypto.randomUUID(); existing.rows.length = 0; }
   if (!existing.rows[0]) await client.query("insert into devices(id,owner_user_id,name,user_agent,last_ip) values($1,$2,$3,$4,$5)", [device.id, ownerUserId, device.name, request.headers["user-agent"] ?? null, request.ip]);
   else await client.query("update devices set name=$1,user_agent=$2,last_ip=$3,last_seen_at=now() where id=$4", [device.name, request.headers["user-agent"] ?? null, request.ip, device.id]);
   return { ...device, revokedAt: existing.rows[0]?.revoked_at ?? null };
@@ -125,7 +129,7 @@ app.post("/v1/auth/register", { config: { rateLimit: { max: 8, timeWindow: "15 m
 });
 
 app.post("/v1/auth/login", { config: { rateLimit: { max: 12, timeWindow: "15 minutes" } } }, async (request, reply) => {
-  const { username, password } = request.body ?? {};
+  const { username, password, timezone } = request.body ?? {};
   const normalizedUsername = String(username ?? "").trim().toLowerCase();
   if (normalizedUsername === OWNER_USERNAME) await pool.query("update app_users u set is_admin=true,status='active',updated_at=now() from local_credentials c where c.owner_user_id=u.id and c.username=$1 and u.deleted_at is null", [OWNER_USERNAME]);
   const result = await pool.query(
@@ -135,6 +139,11 @@ app.post("/v1/auth/login", { config: { rateLimit: { max: 12, timeWindow: "15 min
   );
   const user = result.rows[0];
   if (!user || !(await bcrypt.compare(String(password ?? ""), user.password_hash))) return reply.code(401).send({ error: "Invalid username or password." });
+  if (user.status !== "active") return reply.code(403).send({ error: "Account access is unavailable." });
+  if (timezone && /^[A-Za-z_]+(?:\/[A-Za-z0-9_+\-]+)+$/.test(String(timezone))) {
+    user.timezone = String(timezone);
+    await pool.query("update app_users set timezone=$1,updated_at=now() where id=$2", [user.timezone, user.id]);
+  }
   const client = await pool.connect();
   try { return await issueSession(client, user, request); } finally { client.release(); }
 });
@@ -192,6 +201,13 @@ app.get("/v1/me", { preHandler: app.authenticate }, async (request, reply) => {
     "select u.*, c.username from app_users u join local_credentials c on c.owner_user_id=u.id where u.id=$1 and u.deleted_at is null",
     [request.user.sub],
   );
+  return result.rows[0] ? publicUser(result.rows[0]) : reply.code(404).send({ error: "Account not found." });
+});
+
+app.patch("/v1/me/timezone", { preHandler: app.authenticate }, async (request, reply) => {
+  const timezone = String(request.body?.timezone ?? "");
+  if (!/^[A-Za-z_]+(?:\/[A-Za-z0-9_+\-]+)+$/.test(timezone)) return reply.code(400).send({ error: "A valid IANA timezone is required." });
+  const result = await pool.query(`update app_users u set timezone=$1,updated_at=now() from local_credentials c where c.owner_user_id=u.id and u.id=$2 returning u.*,c.username`, [timezone, request.user.sub]);
   return result.rows[0] ? publicUser(result.rows[0]) : reply.code(404).send({ error: "Account not found." });
 });
 
@@ -674,7 +690,7 @@ app.delete("/v1/admin/content/:id", { preHandler: app.requireAdmin }, async (req
   return reply.code(204).send();
 });
 
-app.post("/v1/sync/mutations", { preHandler: app.authenticate }, async (request, reply) => {
+app.post("/v1/sync/mutations", { preHandler: app.authenticate, config: { rateLimit: { max: 600, timeWindow: "1 minute" } } }, async (request, reply) => {
   const idempotencyKey = request.headers["idempotency-key"];
   const mutation = request.body ?? {};
   if (!idempotencyKey || !mutation.documentKey || !mutation.collection || !["put", "delete"].includes(mutation.operation)) return reply.code(400).send({ error: "Invalid mutation." });
@@ -686,17 +702,21 @@ app.post("/v1/sync/mutations", { preHandler: app.authenticate }, async (request,
     const current = await client.query("select * from sync_documents where owner_user_id=$1 and document_key=$2 for update", [request.user.sub, mutation.documentKey]);
     const remote = current.rows[0];
     if (remote && Number(mutation.baseVersion ?? 0) !== Number(remote.version)) {
-      const conflict = await client.query(`insert into sync_conflicts(owner_user_id,device_id,document_key,collection,base_version,remote_version,local_data,remote_data)
-        values($1,$2,$3,$4,$5,$6,$7,$8) returning id`, [request.user.sub, request.device?.id ?? null, mutation.documentKey, mutation.collection, Number(mutation.baseVersion ?? 0), Number(remote.version), mutation.data ?? null, remote.data]);
-      await client.query("commit");
-      return reply.code(409).send({ status: "conflict", conflictId: conflict.rows[0].id, remote: mapDocument(remote) });
+      const mutationTime = new Date(mutation.createdAt).getTime();
+      const remoteTime = new Date(remote.updated_at).getTime();
+      if (!Number.isFinite(mutationTime) || mutationTime <= remoteTime) {
+        const response = { status: "superseded", document: mapDocument(remote) };
+        await client.query("insert into document_mutations(owner_user_id,idempotency_key,response) values($1,$2,$3)", [request.user.sub, idempotencyKey, response]);
+        await client.query("commit");
+        return response;
+      }
     }
     const result = await client.query(
       `insert into sync_documents(owner_user_id,document_key,collection,data,version,deleted_at)
-       values($1,$2,$3,$4,1,case when $5='delete' then now() else null end)
+       values($1,$2,$3,$4::jsonb,1,case when $5='delete' then now() else null end)
        on conflict(owner_user_id,document_key) do update set collection=excluded.collection,data=excluded.data,
        version=sync_documents.version+1,updated_at=now(),deleted_at=excluded.deleted_at returning *`,
-      [request.user.sub, mutation.documentKey, mutation.collection, mutation.operation === "delete" ? null : mutation.data, mutation.operation],
+      [request.user.sub, mutation.documentKey, mutation.collection, JSON.stringify(mutation.operation === "delete" ? null : mutation.data), mutation.operation],
     );
     const response = { status: "applied", document: mapDocument(result.rows[0]) };
     await client.query("insert into document_mutations(owner_user_id,idempotency_key,response) values($1,$2,$3)", [request.user.sub, idempotencyKey, response]);
@@ -714,7 +734,7 @@ app.post("/v1/sync/conflicts/:id/resolve", { preHandler: app.authenticate }, asy
   return { resolved: true, status };
 });
 
-app.get("/v1/sync/documents", { preHandler: app.authenticate }, async (request) => {
+app.get("/v1/sync/documents", { preHandler: app.authenticate, config: { rateLimit: { max: 600, timeWindow: "1 minute" } } }, async (request) => {
   const since = request.query?.since || "1970-01-01T00:00:00.000Z";
   const result = await pool.query("select * from sync_documents where owner_user_id=$1 and updated_at > $2 order by updated_at", [request.user.sub, since]);
   return { documents: result.rows.map(mapDocument), serverTime: new Date().toISOString() };
@@ -723,6 +743,8 @@ app.get("/v1/sync/documents", { preHandler: app.authenticate }, async (request) 
 function mapDocument(row) {
   return { key: row.document_key, collection: row.collection, id: row.document_key.split(":").slice(1).join(":"), data: row.data, version: Number(row.version), updatedAt: row.updated_at, deletedAt: row.deleted_at };
 }
+
+registerNovaRoutes(app,{pool});
 
 app.addHook("onClose", async () => pool.end());
 await app.listen({ port: Number(process.env.PORT ?? 8080), host: process.env.HOST ?? "127.0.0.1" });
