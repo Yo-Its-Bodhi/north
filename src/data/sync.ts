@@ -70,8 +70,20 @@ export async function pullNorth(apiBase: string, accessToken: string, since = "1
   const result = await response.json() as { documents: NorthDocument[]; serverTime: string };
   const pendingDocumentKeys = new Set((await northRepository.pendingMutations()).map((mutation) => mutation.documentKey));
   let restored = 0;
+  const now = Date.now();
+  const recentlyModifiedWindow = 30_000; // 30 seconds - grace period for recently modified documents
+  
   for (const document of result.documents) {
+    // Skip if there's a pending mutation for this document
     if (!preferAccount && pendingDocumentKeys.has(document.key)) continue;
+    
+    // Skip if this document was modified locally in the last 30 seconds (avoid race conditions)
+    const local = await northRepository.get(document.collection, document.id);
+    if (local && (now - new Date(local.updatedAt).getTime()) < recentlyModifiedWindow) {
+      // Local version is recent, skip pulling the older server version
+      continue;
+    }
+    
     await northRepository.acceptRemote(document);
     restored += 1;
     if (document.collection === "settings" && document.id === "theme") { if (document.deletedAt) localStorage.removeItem("north-theme"); else localStorage.setItem("north-theme", String(document.data)); continue; }

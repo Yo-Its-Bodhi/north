@@ -33,7 +33,9 @@ const formatDate = (value?: string) => value ? new Intl.DateTimeFormat("en-CA", 
 const formatBytes = (value?: number | string) => { const bytes = Number(value || 0); if (bytes < 1024) return `${bytes} B`; const units = ["KB","MB","GB","TB"]; const unit = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)) - 1, units.length - 1); return `${(bytes / 1024 ** (unit + 1)).toFixed(unit > 0 ? 1 : 0)} ${units[unit]}`; };
 
 export default function Admin() {
-  const account = readNorthSession();
+  const session = readNorthSession();
+  const account = session?.user;
+  const isAdmin = session?.isAdmin ?? false;
   const [tab, setTab] = useState<Tab>("overview");
   const [overview, setOverview] = useState<Overview | null>(null);
   const [users, setUsers] = useState<AdminUser[]>([]);
@@ -134,7 +136,7 @@ export default function Admin() {
   async function createDuplicateReview(candidate: DuplicateCandidate) { const reason = window.prompt("Why should these accounts be reviewed as possible duplicates?"); if (!reason) return; await adminRequest("/v1/admin/duplicate-reviews", { method: "POST", body: JSON.stringify({ primaryUserId: candidate.primary_user_id, duplicateUserId: candidate.duplicate_user_id, reason }) }); await loadDuplicateReviews(); await loadAudit(); }
   async function decideDuplicateReview(review: DuplicateReview, decision: "approved" | "rejected") { const reason = window.prompt(`Reason this review is ${decision}:`); if (!reason) return; await adminRequest(`/v1/admin/duplicate-reviews/${review.id}`, { method: "PATCH", body: JSON.stringify({ decision, reason }) }); await loadDuplicateReviews(); await loadAudit(); }
 
-  if (!account) return <main className="admin-gate"><Shield /><h1>North administration</h1><p>Sign in to North with the owner account before opening this console.</p><a href="/">Go to North</a></main>;
+  if (!account || !isAdmin) return <main className="admin-gate"><Shield /><h1>North administration</h1><p>{!account ? "Sign in to North with the owner account before opening this console." : "Only the owner account (druwbi) can access administration tools. Sign in as the owner to continue."}</p><a href="/">Go to North</a></main>;
 
   const tabs: Array<{ id: Tab; label: string; icon: typeof Users }> = [{ id: "overview", label: "Overview", icon: Activity }, { id: "users", label: "Users", icon: Users }, { id: "content", label: "Content", icon: BookOpen }, { id: "operations", label: "Operations", icon: Server }, { id: "support", label: "Support", icon: Shield }, { id: "conflicts", label: "Conflicts", icon: RefreshCw }, { id: "codes", label: "Codes", icon: Ticket }, { id: "settings", label: "Settings", icon: Settings }, { id: "audit", label: "Audit", icon: Clipboard }];
   return <main className="admin-shell">

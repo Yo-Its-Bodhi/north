@@ -1,5 +1,13 @@
 export type NorthUser = { id: string; username: string; displayName: string; timezone: string };
-export type NorthSession = { user: NorthUser; accessToken: string; refreshToken: string; recoveryCode?: string; device?: { id: string; name: string } };
+
+export interface NorthSession {
+  user: NorthUser;
+  device?: { id: string; name: string };
+  accessToken: string;
+  refreshToken: string;
+  recoveryCode?: string;
+  isAdmin?: boolean;
+}
 
 const SESSION_KEY = "north-account-session-v1";
 const DEVICE_KEY = "north-device-id-v1";
@@ -41,7 +49,13 @@ function saveSession(session: NorthSession | null) {
 }
 
 async function sessionRequest(path: string, body: unknown) {
-  const response = await fetch(`${NORTH_API_BASE}${path}`, { method: "POST", headers: { "Content-Type": "application/json", ...northDeviceHeaders() }, body: JSON.stringify(body) });
+  let response: Response;
+  try {
+    response = await fetch(`${NORTH_API_BASE}${path}`, { method: "POST", headers: { "Content-Type": "application/json", ...northDeviceHeaders() }, body: JSON.stringify(body) });
+  } catch (error) {
+    if (error instanceof TypeError) throw new Error("North sign-in service is unavailable. Start the local API and database, then try again.");
+    throw error;
+  }
   const result = await response.json().catch(() => ({})) as NorthSession & { error?: string };
   if (!response.ok) throw new Error(result.error || `Account request returned ${response.status}`);
   return saveSession(result) as NorthSession;

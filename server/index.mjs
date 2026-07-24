@@ -22,7 +22,7 @@ await app.register(jwt, { secret: process.env.JWT_SECRET });
 await app.register(rateLimit, { global: true, max: 180, timeWindow: "1 minute" });
 
 const sha256 = (value) => crypto.createHash("sha256").update(value).digest("hex");
-const publicUser = (row) => ({ id: row.id, username: row.username, displayName: row.display_name, timezone: row.timezone });
+const publicUser = (row) => ({ id: row.id, username: row.username, displayName: row.display_name, timezone: row.timezone, isAdmin: row.is_admin ?? false });
 const accessToken = (user) => app.jwt.sign({ sub: user.id, username: user.username }, { expiresIn: "15m" });
 const createRecoveryCode = () => crypto.randomBytes(20).toString("hex").toUpperCase().match(/.{1,8}/g).join("-");
 
@@ -131,7 +131,10 @@ app.post("/v1/auth/register", { config: { rateLimit: { max: 8, timeWindow: "15 m
 app.post("/v1/auth/login", { config: { rateLimit: { max: 12, timeWindow: "15 minutes" } } }, async (request, reply) => {
   const { username, password, timezone } = request.body ?? {};
   const normalizedUsername = String(username ?? "").trim().toLowerCase();
-  if (normalizedUsername === OWNER_USERNAME) await pool.query("update app_users u set is_admin=true,status='active',updated_at=now() from local_credentials c where c.owner_user_id=u.id and c.username=$1 and u.deleted_at is null", [OWNER_USERNAME]);
+  // Ensure owner account gets admin flag
+  if (normalizedUsername === OWNER_USERNAME) {
+    await pool.query("update app_users u set is_admin=true,status='active',updated_at=now() from local_credentials c where c.owner_user_id=u.id and c.username=$1 and u.deleted_at is null", [OWNER_USERNAME]);
+  }
   const result = await pool.query(
     `select u.*, c.username, c.password_hash from local_credentials c
      join app_users u on u.id=c.owner_user_id where c.username=$1 and u.deleted_at is null`,

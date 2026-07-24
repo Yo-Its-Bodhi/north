@@ -1,10 +1,12 @@
 import { exerciseLibrary } from "./exercises";
+import { productionExerciseLibrary, normalizeExerciseKey } from "../exerciseDatabase/libraryExercises";
 
 export type WorkoutLevel = "Beginner" | "Intermediate" | "Advanced";
 export type WorkoutGoal = "Strength" | "Muscle" | "General fitness" | "Conditioning" | "Mobility";
 
 export type WorkoutTemplateExercise = {
   exerciseName: string;
+  canonicalExerciseId?: string;
   sets: number;
   reps: string;
   rest: number;
@@ -69,6 +71,10 @@ function chooseExercise(blueprint: Blueprint, category: string, index: number, s
   return pool[(seed + index * 3) % pool.length];
 }
 
+const canonicalByName = new Map(productionExerciseLibrary.flatMap((exercise) =>
+  [exercise.canonicalName, exercise.displayName, ...exercise.aliases].map((name) => [normalizeExerciseKey(name), exercise.id] as const),
+));
+
 export const workoutTemplates: WorkoutTemplate[] = blueprints.flatMap((blueprint, blueprintIndex) =>
   levels.flatMap((level, levelIndex) => durations.map((duration, durationIndex) => {
     const exerciseCount = duration <= 20 ? 4 : duration <= 45 ? 5 : 6;
@@ -77,7 +83,7 @@ export const workoutTemplates: WorkoutTemplate[] = blueprints.flatMap((blueprint
       const exercise = chooseExercise(blueprint, category, index, seed);
       const sets = level === "Beginner" ? 2 : level === "Intermediate" ? 3 : 4;
       const strength = blueprint.goal === "Strength";
-      return { exerciseName: exercise.name, sets, reps: blueprint.goal === "Mobility" ? "30–60 sec" : strength ? "5–8" : "8–15", rest: blueprint.goal === "Mobility" ? 30 : strength ? 120 : 75 };
+      return { exerciseName: exercise.name, canonicalExerciseId: canonicalByName.get(normalizeExerciseKey(exercise.name)), sets, reps: blueprint.goal === "Mobility" ? "30–60 sec" : strength ? "5–8" : "8–15", rest: blueprint.goal === "Mobility" ? 30 : strength ? 120 : 75 };
     });
     const equipment = [...new Set(exercises.map((item) => exerciseLibrary.find((exercise) => exercise.name === item.exerciseName)?.equipment ?? "Other"))];
     return {

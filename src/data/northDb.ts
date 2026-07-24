@@ -144,7 +144,16 @@ export const northRepository = {
   async acceptRemote(document: NorthDocument) {
     const database = await openNorthDatabase();
     const transaction = database.transaction(["documents", "outbox"], "readwrite");
-    transaction.objectStore("documents").put(document);
+    const store = transaction.objectStore("documents");
+    const existing = await requestResult(store.get(document.key)) as NorthDocument | undefined;
+    
+    // Don't overwrite if local document is newer
+    if (existing && new Date(existing.updatedAt).getTime() > new Date(document.updatedAt).getTime()) {
+      await transactionDone(transaction);
+      return;
+    }
+    
+    store.put(document);
     const outbox = transaction.objectStore("outbox");
     const pendingKeys = await requestResult(outbox.index("documentKey").getAllKeys(document.key));
     pendingKeys.forEach((pendingKey) => outbox.delete(pendingKey));

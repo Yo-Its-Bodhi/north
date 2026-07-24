@@ -1,3 +1,128 @@
+/* The brand source images are large; constrain them before the stylesheet cutoff. */
+:root{
+  --north-canvas:var(--surface-solid);
+  --north-workspace:color-mix(in srgb,var(--surface-solid) 94%,var(--surface));
+  --north-panel:color-mix(in srgb,var(--surface-solid) 88%,var(--blue) 3%);
+  --north-input:color-mix(in srgb,var(--surface-solid) 76%,var(--blue) 5%);
+  --north-raised:color-mix(in srgb,var(--surface-solid) 94%,var(--blue) 4%);
+  --north-divider:color-mix(in srgb,var(--line) 88%,transparent);
+  --north-active-divider:color-mix(in srgb,var(--blue) 46%,var(--line));
+  --north-shadow-panel:0 12px 30px color-mix(in srgb,var(--navy) 9%,transparent);
+  --north-shadow-raised:0 22px 52px color-mix(in srgb,var(--navy) 20%,transparent);
+  --canvas:var(--north-canvas);
+  --panel:var(--north-panel);
+  --input:var(--north-input);
+  --bg:var(--north-canvas);
+  --text:var(--ink);
+}
+
+/* Authoritative palette layer. Persisted IDs stay stable while each theme gets a distinct identity. */
+:root[data-palette="off-white"]{--ink:#1f2a33!important;--muted:#68747d!important;--blue:#3f7899!important;--navy:#243e50!important;--surface:rgba(252,252,249,.78)!important;--surface-solid:#f9f8f4!important;--line:rgba(38,60,74,.13)!important;--shadow:0 20px 60px rgba(35,55,68,.12)!important}
+:root[data-palette="rosewater"]{--ink:#472c36!important;--muted:#7d6570!important;--blue:#bc6380!important;--navy:#6b3049!important;--surface:rgba(255,250,251,.78)!important;--surface-solid:#fff9fa!important;--line:rgba(102,48,69,.14)!important;--shadow:0 20px 60px rgba(108,48,73,.12)!important}
+:root[data-palette="cloud"]{--ink:#203743!important;--muted:#687e89!important;--blue:#497f9b!important;--navy:#2c5269!important;--surface:rgba(250,253,255,.78)!important;--surface-solid:#f8fbfc!important;--line:rgba(41,79,98,.14)!important;--shadow:0 20px 60px rgba(40,77,96,.12)!important}
+:root[data-palette="sage"]{--ink:#263830!important;--muted:#62756a!important;--blue:#5b8e6e!important;--navy:#3b614d!important;--surface:rgba(251,253,248,.78)!important;--surface-solid:#fafcf7!important;--line:rgba(54,91,69,.14)!important;--shadow:0 20px 60px rgba(52,87,66,.12)!important}
+:root[data-palette="teal"]{--ink:#dff2ef!important;--muted:#a2c0bc!important;--blue:#61c7c4!important;--navy:#174b50!important;--surface:rgba(19,58,60,.78)!important;--surface-solid:#123437!important;--line:rgba(190,231,225,.14)!important;--shadow:0 24px 70px rgba(0,0,0,.36)!important;--energy-gradient:linear-gradient(120deg,#174b50,#61c7c4)!important;--nova-gradient:linear-gradient(110deg,#61c7c4,#82d4cf)!important}
+:root[data-palette="carbon"]{--ink:#f0f0ed!important;--muted:#a8aaa8!important;--blue:#b6a0df!important;--navy:#302d38!important;--surface:rgba(31,33,37,.78)!important;--surface-solid:#1d1f22!important;--line:rgba(255,255,255,.12)!important;--shadow:0 24px 70px rgba(0,0,0,.48)!important;--energy-gradient:linear-gradient(120deg,#302d38,#b6a0df)!important;--nova-gradient:linear-gradient(110deg,#b6a0df,#95a8c6)!important}
+:root[data-palette="midnight"]{--ink:#eef3ff!important;--muted:#a9b8d5!important;--blue:#6e9dff!important;--navy:#1b315e!important;--surface:rgba(18,34,70,.78)!important;--surface-solid:#111f40!important;--line:rgba(196,214,255,.14)!important;--shadow:0 24px 70px rgba(0,0,0,.44)!important;--energy-gradient:linear-gradient(120deg,#1b315e,#6e9dff)!important;--nova-gradient:linear-gradient(110deg,#6e9dff,#8d8bea)!important}
+:root[data-palette="plum"]{--ink:#fff0ed!important;--muted:#c9aaa5!important;--blue:#e27b69!important;--navy:#4c2323!important;--surface:rgba(43,23,24,.8)!important;--surface-solid:#2b1718!important;--north-canvas:#190d0e!important;--north-workspace:#211213!important;--line:rgba(255,218,211,.13)!important;--shadow:0 24px 70px rgba(0,0,0,.48)!important;--energy-gradient:linear-gradient(120deg,#4c2323,#e27b69)!important;--nova-gradient:linear-gradient(110deg,#e27b69,#d99a87)!important}
+:root[data-palette="plum"] .member-shell{background:var(--north-workspace)!important}
+:root[data-palette="pine"]{--ink:#f6edf7!important;--muted:#c5adbf!important;--blue:#d78bc3!important;--navy:#51304f!important;--surface:rgba(51,32,53,.78)!important;--surface-solid:#322034!important;--line:rgba(247,214,245,.13)!important;--shadow:0 24px 70px rgba(0,0,0,.43)!important;--energy-gradient:linear-gradient(120deg,#51304f,#d78bc3)!important;--nova-gradient:linear-gradient(110deg,#d78bc3,#ad9adb)!important}
+:root[data-palette] body{background:radial-gradient(circle at 72% -10%,color-mix(in srgb,var(--blue) 16%,transparent),transparent 36%),linear-gradient(155deg,color-mix(in srgb,var(--surface-solid) 82%,var(--navy)),var(--surface-solid) 50%,color-mix(in srgb,var(--surface-solid) 88%,var(--blue)))!important}
+:root[data-palette] .direction-panel{box-shadow:0 22px 50px color-mix(in srgb,var(--navy) 34%,transparent)!important}
+:root[data-palette] .direction-panel .direction-panel-action{color:var(--surface-solid)!important;background:linear-gradient(105deg,color-mix(in srgb,var(--blue) 78%,var(--navy)),var(--blue))!important;box-shadow:0 13px 28px color-mix(in srgb,var(--navy) 34%,transparent)!important}
+:root[data-palette] :is(.onboarding-primary,.today-snapshot>div>span,.training-hero .activity-icon,.momentum-panel>svg,.journey-mark){background:var(--energy-gradient)!important;box-shadow:0 10px 26px color-mix(in srgb,var(--navy) 30%,transparent)!important}
+:root[data-palette] .completion-mark{background:var(--energy-gradient)!important;box-shadow:0 18px 42px color-mix(in srgb,var(--navy) 38%,transparent)!important}
+
+/* Shared depth system: canvas, working panel, editable field, and raised overlay. */
+.app-shell,.member-shell{background:var(--north-workspace)}
+:root .app-shell :is(.plan-editor,.routine-builder-settings,.nova-builder-form,.nova-exercise-step,.nova-routine-setup,.exercise-picker,.exercise-picker-v2,.routine-exercise-picker,.program-config,.library-controls,.preference-panel,.settings-group,.account-panel,.personal-measurements,.photo-add,.weekly-load-card,.today-weather,.milestone-summary,.four-week-chart,.normalized-exercise-details,.dynamic-set-logger>article,.exercise-detail-section,.exercise-today-card,.exercise-quick-guide){border-color:var(--north-divider);background:var(--north-panel);box-shadow:var(--north-shadow-panel)}
+:root .app-shell :is(input:not([type]),input[type="text"],input[type="number"],input[type="email"],input[type="password"],input[type="search"],input[type="date"],textarea,select),:root .onboarding-card :is(input:not([type]),input[type="text"],input[type="number"],input[type="email"],input[type="password"],textarea,select){border-color:var(--north-divider);background:var(--north-input);box-shadow:inset 0 1px 0 color-mix(in srgb,var(--surface-solid) 58%,transparent)}
+:root .app-shell :is(input:not([type]),input[type="text"],input[type="number"],input[type="email"],input[type="password"],input[type="search"],input[type="date"],textarea,select):focus,:root .onboarding-card :is(input:not([type]),input[type="text"],input[type="number"],input[type="email"],input[type="password"],textarea,select):focus{border-color:var(--north-active-divider);box-shadow:0 0 0 3px color-mix(in srgb,var(--blue) 12%,transparent),inset 0 1px 0 color-mix(in srgb,var(--surface-solid) 58%,transparent)}
+:root :is(.schedule-picker,.exercise-finish-dialog,.release-notes,.nova-intelligence-hub,.product-tour>article,.admin-drawer,.exercise-filter-drawer){border-color:var(--north-active-divider);background:var(--north-raised);box-shadow:var(--north-shadow-raised)}
+:root .onboarding-shell{background:radial-gradient(circle at 12% 0,color-mix(in srgb,var(--blue) 14%,transparent),transparent 34rem),radial-gradient(circle at 90% 90%,color-mix(in srgb,var(--navy) 10%,transparent),transparent 34rem),var(--north-workspace);color:var(--ink)}
+:root .onboarding-card{border-color:var(--north-divider);background:var(--north-raised);box-shadow:var(--north-shadow-raised)}
+:root .auth-card:has(.welcome-lockup){width:min(100%,520px);height:auto;min-height:min(760px,calc(100dvh - 36px));padding:42px 40px 32px;border-radius:24px;display:flex;overflow:visible}
+:root .auth-card:has(.welcome-lockup)::before,:root .auth-card:has(.welcome-lockup)::after{display:none}
+:root .app-shell .training-tools-drawer{border-color:var(--north-divider);background:var(--north-panel);box-shadow:var(--north-shadow-panel)}
+.template-title-editor :is(input,textarea),.nova-input input,.search-field input{box-shadow:none!important}
+.topbar .brand{width:116px;height:46px;padding:0;display:grid;place-items:center;overflow:hidden}.topbar .brand-lockup{width:116px;height:auto;grid-area:1/1;display:block;object-fit:contain}.topbar .brand-lockup-dark{display:none}:root[data-theme="night"] .topbar .brand-lockup-light{display:none}:root[data-theme="night"] .topbar .brand-lockup-dark{display:block}@media(min-width:1024px){.member-shell .topbar .brand{display:none}}
+
+/* Desktop application frame: permanent navigation rail and full workspace shell. */
+@media(min-width:1024px){
+  body{padding:0;background:var(--surface-solid)}
+  .member-shell{width:calc(100% - 232px)!important;max-width:none;min-height:100dvh;margin:0 0 0 232px!important;border:0!important;border-radius:0!important;box-shadow:none!important}
+  .member-shell .topbar{height:76px;padding:14px 48px;border-bottom:1px solid var(--line);background:var(--surface-solid)}
+  .member-shell .screen{width:min(100%,1240px);margin:0;padding:48px 56px 64px}
+  .primary-nav{position:fixed;z-index:30;top:0;right:auto;bottom:0;left:0;transform:none;width:232px;height:100dvh;padding:24px 14px;display:flex;flex-direction:column;align-items:stretch;border:0;border-right:1px solid var(--line);border-radius:0;background:var(--navy);box-shadow:none;backdrop-filter:none}
+  .primary-nav::before{content:"NORTH";margin:4px 14px 38px;color:var(--surface-solid);font:800 16px/1 "Manrope",sans-serif;letter-spacing:.16em}
+  .primary-nav button{min-height:52px;padding:0 14px;display:flex;flex-direction:row;justify-content:flex-start;gap:12px;color:color-mix(in srgb,var(--surface-solid) 66%,transparent);font-size:13px;text-align:left}
+  .primary-nav button:hover{color:var(--surface-solid);background:color-mix(in srgb,var(--surface-solid) 8%,transparent)}
+  .primary-nav button.active{color:var(--surface-solid);background:color-mix(in srgb,var(--surface-solid) 10%,transparent);box-shadow:inset 3px 0 0 var(--blue)}
+}
+
+/* Desktop workout editing is a workspace: routine canvas left, inspector and library right. */
+@media(min-width:1024px){
+  .member-shell .workout-template-screen:has(.template-title-editor){width:min(100%,1280px);max-width:none;display:grid;grid-template-columns:370px minmax(0,1fr);grid-template-rows:auto auto auto auto auto auto auto auto;gap:0 26px;align-items:start;position:relative}
+  .member-shell .workout-template-screen:has(.template-title-editor)>.back-button{grid-column:1/-1;grid-row:1}
+  .member-shell .workout-template-screen:has(.template-title-editor)>.nova-studio-header{grid-column:1/-1;grid-row:2}
+  .member-shell .workout-template-screen:has(.template-title-editor)>.template-metrics{grid-column:1/-1;grid-row:3}
+  .member-shell .workout-template-screen:has(.template-title-editor)>.eyebrow{grid-column:1/-1;grid-row:4}
+  .member-shell .workout-template-screen:has(.template-title-editor)::before{grid-column:1/-1;grid-row:5/7;align-self:stretch;z-index:0;content:"";border:1px solid var(--north-divider);border-radius:12px;background:var(--north-panel);box-shadow:var(--north-shadow-panel);pointer-events:none}
+  .member-shell .workout-template-screen:has(.template-title-editor)>.template-title-editor{grid-column:1/-1;grid-row:5;z-index:1;margin:0;padding:0;display:grid;grid-template-columns:minmax(0,.82fr) minmax(0,1.18fr);gap:0;overflow:hidden;border:0;border-radius:0;background:transparent}
+  .member-shell .workout-template-screen:has(.template-title-editor)>.template-title-editor>label{min-width:0;height:76px;padding:10px 14px 0;display:grid;grid-template-rows:12px 1fr;gap:4px}
+  .member-shell .workout-template-screen:has(.template-title-editor)>.template-title-editor>label+label{border-left:1px solid var(--line)}
+  .member-shell .workout-template-screen:has(.template-title-editor)>.template-title-editor>label>span{display:block;color:var(--muted);font-size:8px;font-weight:900;letter-spacing:.1em;text-transform:uppercase}
+  .member-shell .workout-template-screen:has(.template-title-editor)>.template-title-editor input{align-self:start;height:20px;margin:0;padding:0;border:0;border-radius:0;background:transparent;font-family:"DM Sans",sans-serif;font-size:16px;font-weight:700;line-height:20px}
+  .member-shell .workout-template-screen:has(.template-title-editor)>.template-title-editor textarea{height:48px;min-height:48px;margin:0;padding:0;border:0;border-radius:0;background:transparent;font-family:"DM Sans",sans-serif;font-size:16px;font-weight:700;line-height:20px;resize:none}
+  .member-shell .workout-template-screen:has(.template-title-editor)>.routine-builder-settings{grid-column:1/-1;grid-row:6;z-index:1;margin:0;padding:12px 14px;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));align-content:start;position:static;border:0;border-top:1px solid var(--north-divider);border-radius:0;background:transparent;box-shadow:none}
+  .member-shell .workout-template-screen:has(.template-title-editor)>.routine-builder-settings label:last-child,.member-shell .workout-template-screen:has(.template-title-editor)>.routine-builder-settings>.routine-equipment-field{grid-column:auto}
+  .member-shell .workout-template-screen:has(.template-title-editor) .equipment-multiselect>div{max-height:220px;padding:6px 8px 8px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;overflow:auto}
+  .member-shell .workout-template-screen:has(.template-title-editor) .equipment-multiselect>div label{min-height:28px!important;padding:0 4px;display:flex;align-items:center;gap:6px;font-size:10px;line-height:1.2}
+  .member-shell .workout-template-screen:has(.template-title-editor) .equipment-multiselect input[type="checkbox"]{width:14px!important;height:14px!important;min-width:14px;min-height:14px!important;max-height:14px!important;margin:0;padding:0;flex:0 0 14px;accent-color:var(--blue)}
+  .member-shell .workout-template-screen:has(.template-title-editor)>.equipment-line{display:none}
+  .member-shell .workout-template-screen:has(.template-title-editor)>.template-exercises{grid-column:2;grid-row:7;margin:18px 0 0;align-self:start}
+  .member-shell .workout-template-screen:has(.template-title-editor)>.add-template-row{grid-column:1;grid-row:7;width:100%;margin:18px 0 0;min-height:44px;position:static;z-index:auto}
+  .member-shell .workout-template-screen:has(.template-title-editor)>.routine-exercise-picker{display:none!important}
+  .member-shell .workout-template-screen:has(.template-title-editor):has(.exercise-picker-v2)>.add-template-row{display:none}
+  .member-shell .workout-template-screen:has(.template-title-editor)>.exercise-picker-v2{grid-column:1;grid-row:7;align-self:start;max-height:calc(100dvh - 176px);margin-top:18px;overflow:auto;padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--surface-solid);position:sticky;top:92px}
+  .member-shell .workout-template-screen:has(.template-title-editor)>.routine-save-state{grid-column:2;grid-row:8;margin:14px 0 0}
+  .member-shell .workout-template-screen:has(.template-title-editor)>.apply-day-note,.member-shell .workout-template-screen:has(.template-title-editor)>.template-action-grid,.member-shell .workout-template-screen:has(.template-title-editor)>.danger-button{grid-column:1/-1}
+  .member-shell .workout-template-screen:has(.template-title-editor)>.template-exercises article.editing{position:relative;min-height:112px;padding:12px 14px 12px 13px;border:1px solid var(--line);border-radius:10px;background:color-mix(in srgb,var(--surface-solid) 90%,var(--blue) 3%)}
+  .member-shell .workout-template-screen:has(.template-title-editor)>.template-exercises article.editing:nth-child(even){background:color-mix(in srgb,var(--surface-solid) 94%,var(--blue) 1%)}
+  .member-shell .workout-template-screen:has(.template-title-editor)>.template-exercises article.editing>.template-exercise-editor{display:grid;grid-template-columns:minmax(0,1fr) 32px;grid-template-rows:auto auto;gap:8px 10px;align-items:center;position:relative}
+  .member-shell .workout-template-screen:has(.template-title-editor)>.template-exercises .routine-movement-name{grid-column:1;grid-row:1;padding:0}
+  .member-shell .workout-template-screen:has(.template-title-editor)>.template-exercises .routine-movement-name{display:grid!important;grid-template-columns:max-content minmax(0,1fr);align-items:baseline;gap:8px;min-width:0}
+  .member-shell .workout-template-screen:has(.template-title-editor)>.template-exercises .routine-movement-name strong{min-width:0}
+  .member-shell .workout-template-screen:has(.template-title-editor)>.template-exercises .routine-movement-name small{min-width:0;margin:0!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .member-shell .workout-template-screen:has(.template-title-editor)>.template-exercises .template-exercise-editor>div:nth-child(2){grid-column:1;grid-row:2;margin:0}
+  .member-shell .workout-template-screen:has(.template-title-editor)>.template-exercises .template-row-actions{display:contents}
+  .member-shell .workout-template-screen:has(.template-title-editor)>.template-exercises .template-row-actions button:nth-child(1),.member-shell .workout-template-screen:has(.template-title-editor)>.template-exercises .template-row-actions button:nth-child(2){position:absolute;left:-44px;width:28px;height:22px;padding:0;display:grid;place-items:center;border:1px solid var(--line);border-radius:6px;background:var(--surface-solid);font-size:12px}
+  .member-shell .workout-template-screen:has(.template-title-editor)>.template-exercises .template-row-actions button:nth-child(1){top:33px}
+  .member-shell .workout-template-screen:has(.template-title-editor)>.template-exercises .template-row-actions button:nth-child(2){top:59px}
+  .member-shell .workout-template-screen:has(.template-title-editor)>.template-exercises .template-row-actions button:last-child{grid-column:2;grid-row:1/3;width:32px;height:32px;padding:0;align-self:center;display:grid;place-items:center;border:1px solid color-mix(in srgb,#b75555 38%,var(--line));border-radius:8px;background:transparent}
+  .member-shell .workout-template-screen:has(.template-title-editor)>.template-action-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:0;margin-top:16px;overflow:hidden;border:1px solid var(--line);border-radius:10px;background:var(--surface-solid)}
+  .member-shell .workout-template-screen:has(.template-title-editor)>.template-action-grid button{min-width:0;min-height:48px;margin:0;padding:0 12px;border:0;border-radius:0;box-shadow:none;font-size:11px}
+  .member-shell .workout-template-screen:has(.template-title-editor)>.template-action-grid button+button{border-left:1px solid var(--line)}
+  .member-shell .workout-template-screen:has(.template-title-editor)>.template-action-grid .primary-button{color:var(--surface-solid);background:var(--blue)}
+  .member-shell .workout-template-screen:has(.template-title-editor)>.template-action-grid .secondary-button,.member-shell .workout-template-screen:has(.template-title-editor)>.template-action-grid .template-owner-action{color:var(--ink);background:transparent}
+  .member-shell .workout-template-screen:has(.template-title-editor)>.template-action-grid .template-owner-action{display:flex;align-items:center;justify-content:center;gap:6px}
+}
+.routine-builder-settings input,.routine-builder-settings select,.exercise-picker-v2 input,.exercise-picker-v2 select{width:100%;min-height:38px;border:1px solid var(--line);border-radius:9px;color:var(--ink);background:var(--surface);font:600 11px "DM Sans",sans-serif;outline:0}.exercise-picker-v2 .search-field{display:grid;grid-template-columns:18px minmax(0,1fr);gap:8px;align-items:center;padding:0 10px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}.exercise-picker-v2 .search-field input{min-height:40px;padding:0;border:0;border-radius:0;background:transparent}.exercise-picker-v2 .exercise-filter-desktop{display:grid;gap:8px;margin-top:10px}.exercise-picker-v2 .exercise-filter-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.exercise-picker-v2 .exercise-filter-desktop label{min-width:0;display:grid;gap:4px;color:var(--muted);font-size:8px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}.exercise-picker-v2 .picker-quick-filters{display:flex;flex-wrap:wrap;gap:5px;overflow:visible;padding-bottom:2px}.exercise-picker-v2 .picker-quick-filters button{min-height:30px;padding:0 8px;border:1px solid var(--line);border-radius:7px;color:var(--muted);background:transparent;font-size:9px;white-space:nowrap}.exercise-picker-v2 .picker-quick-filters button.active{color:var(--surface-solid);border-color:var(--blue);background:var(--blue)}.exercise-picker-v2 .picker-v2-results{display:grid;gap:6px;max-height:430px;margin-top:8px;overflow:auto}.exercise-picker-v2 .picker-v2-results article{display:grid;grid-template-columns:minmax(0,1fr) 38px;border:1px solid var(--line);border-radius:9px;overflow:hidden;background:var(--surface)}.exercise-picker-v2 .picker-v2-main{min-width:0;padding:9px;border:0;color:var(--ink);background:transparent;text-align:left}.exercise-picker-v2 .picker-v2-main strong,.exercise-picker-v2 .picker-v2-main span,.exercise-picker-v2 .picker-v2-main small{display:block}.exercise-picker-v2 .picker-v2-main strong{font-size:11px}.exercise-picker-v2 .picker-v2-main span,.exercise-picker-v2 .picker-v2-main small{margin-top:3px;color:var(--muted);font-size:8px}.exercise-picker-v2 .picker-v2-add{border:0;border-left:1px solid var(--line);color:var(--blue);background:color-mix(in srgb,var(--blue) 10%,transparent)}.exercise-picker-v2 .picker-v2-add:disabled{opacity:.4}
+
+@media(min-width:1024px){.member-shell .workout-template-screen .template-metrics{grid-template-columns:repeat(5,minmax(0,1fr));gap:16px;padding:19px 0;background:linear-gradient(180deg,transparent,color-mix(in srgb,var(--blue) 5%,transparent) 50%,transparent)}.member-shell .workout-template-screen .template-metrics div{text-align:center}.member-shell .workout-template-screen .template-metrics span{font-size:9px}.member-shell .workout-template-screen .template-metrics strong{margin-top:5px;font-size:14px}.member-shell .workout-template-screen .template-metrics .template-metric-name strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}}
+
+/* Keep Today’s direction artwork contained and its content above the image. */
+.direction-panel{position:relative;isolation:isolate;min-height:214px;margin:20px 0 26px;padding:24px;display:flex;align-items:flex-end;overflow:hidden;border:1px solid var(--line);border-radius:14px;background:var(--navy);color:#fff}.direction-run-art{position:absolute;z-index:-2;inset:0;width:100%;height:100%;display:block;object-fit:cover}.direction-run-overlay{position:absolute;z-index:-1;inset:0;background:linear-gradient(90deg,rgba(5,12,14,.94) 0%,rgba(5,12,14,.62) 52%,rgba(5,12,14,.18) 100%)}.direction-panel-copy{position:relative;z-index:1;max-width:360px}.direction-panel-copy .eyebrow{margin:0 0 8px;color:#fff}.direction-panel-copy h2{margin:0;font:800 30px/1 "Barlow Condensed",sans-serif;letter-spacing:0}.direction-panel-copy>p:not(.eyebrow){margin:7px 0 0;color:rgba(255,255,255,.82);font-size:12px}.direction-panel .resume-progress{margin:15px 0 12px;color:#fff}.direction-panel .progress-track{background:rgba(255,255,255,.28)}.direction-panel-action{min-width:208px;min-height:46px;color:var(--surface-solid);background:color-mix(in srgb,var(--blue) 72%,var(--navy))}
+@media(max-width:700px){.direction-panel{min-height:214px;margin:20px 0 26px;padding:24px 14px}.direction-panel-copy{max-width:300px}.direction-panel-copy h2{font-size:28px}}
+
+/* Required Today controls must load before the browser's stylesheet size cutoff. */
+.today-week-pulse{position:relative;display:grid;grid-template-columns:minmax(0,1fr) 82px;gap:20px;margin:30px 0 28px;padding:24px 0 20px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.today-week-pulse-copy .eyebrow{margin:0 0 8px;color:var(--blue)}.today-week-pulse-copy h2{max-width:300px;margin:0;font:800 26px/1 "Barlow Condensed",sans-serif;letter-spacing:0}.today-week-pulse-copy p:not(.eyebrow){max-width:290px;margin:8px 0 0;color:var(--muted);font-size:12px;line-height:1.45}
+.week-pulse-orbit{width:82px;height:82px;display:grid;place-content:center;position:relative;border-radius:50%;background:conic-gradient(var(--blue) var(--week-progress),color-mix(in srgb,var(--line) 78%,transparent) 0)}.week-pulse-orbit::after{position:absolute;inset:7px;content:"";border-radius:inherit;background:var(--surface-solid)}.week-pulse-orbit b,.week-pulse-orbit small{z-index:1;text-align:center}.week-pulse-orbit b{font:800 17px/1 "Barlow Condensed",sans-serif}.week-pulse-orbit small{margin-top:3px;color:var(--muted);font-size:6px;font-weight:900;letter-spacing:.08em}
+.week-pulse-days{grid-column:1/-1;display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-top:3px}.week-pulse-days button{min-height:47px;padding:5px 0;border:1px solid transparent;border-radius:8px;display:grid;place-items:center;gap:2px;color:var(--muted);background:transparent;cursor:pointer}.week-pulse-days button span{font:800 10px/1 "DM Sans",sans-serif}.week-pulse-days button i{height:13px;color:var(--blue);font-style:normal}.week-pulse-days button.today{border-color:color-mix(in srgb,var(--blue) 45%,var(--line));color:var(--blue);background:color-mix(in srgb,var(--blue) 8%,transparent)}
+.today-record{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:0 0 28px}.today-record>header{grid-column:1/-1;display:flex;align-items:end;justify-content:space-between;gap:12px}.today-record-item{min-width:0;min-height:94px;padding:14px;border:1px solid var(--line);border-radius:10px;display:grid;grid-template-columns:30px minmax(0,1fr) 16px;gap:10px;align-items:center;color:var(--ink);background:var(--surface);text-align:left;cursor:pointer}.today-record-item>span{width:30px;height:30px;display:grid;place-items:center;border-radius:50%;color:var(--blue);background:color-mix(in srgb,var(--blue) 10%,transparent)}.today-record-item small,.today-record-item p{margin:0;color:var(--muted);font-size:10px}.today-record-item strong{display:block;margin:3px 0;color:var(--ink);font-size:13px}.today-record-item>svg{color:var(--muted)}
+@media(max-width:700px){.today-record{grid-template-columns:1fr}.today-week-pulse{grid-template-columns:minmax(0,1fr) 70px;gap:14px}.week-pulse-orbit{width:70px;height:70px}.week-pulse-days button{min-height:42px}}
+
 @media(min-width:1024px){
   .app-shell{width:min(calc(100% - 64px),1520px)!important;min-height:calc(100vh - 64px);margin:32px auto;border:1px solid color-mix(in srgb,var(--line) 80%,transparent);border-radius:16px;box-shadow:0 28px 70px color-mix(in srgb,var(--navy) 15%,transparent);overflow:hidden}
   .topbar{height:82px;padding:17px 36px 12px;border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--surface-solid) 90%,transparent)}
@@ -413,6 +538,8 @@ h2 { letter-spacing: -.025em; }
 .schedule-picker > div > button span { color: var(--blue); font-size: 12px; font-weight: 800; text-transform: uppercase; }
 .schedule-picker > div > button small { display: block; margin-top: 3px; color: var(--muted); font-size: 8px; font-weight: 700; text-transform: none; }
 .schedule-picker > div > button strong { overflow: hidden; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+.workout-template-screen > .back-button { margin-bottom: 12px; }
+.workout-template-screen > .template-metrics { margin-top: 0; }
 .template-metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; margin: 28px 0 16px; padding: 17px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); text-align: center; }
 .template-metrics span, .template-metrics strong { display: block; }
 .template-metrics span { color: var(--muted); font-size: 8px; letter-spacing: .1em; }
@@ -430,7 +557,7 @@ h2 { letter-spacing: -.025em; }
 .template-action-grid .primary-button, .template-action-grid .secondary-button { margin:0; min-height:46px; }
 .template-owner-action, .add-template-row { min-height:36px; display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:0 12px; border:1px solid var(--line); border-radius:11px; background:var(--surface); color:var(--blue); font-size:9px; font-weight:700; cursor:pointer; }
 .template-owner-action { width:100%; }
-.nova-workout-builder-screen{width:min(100%,620px)}.nova-workout-builder-screen>header{display:grid;grid-template-columns:48px 1fr;gap:13px;align-items:start;margin:18px 0 24px}.nova-workout-builder-screen>header>span{width:46px;height:46px;display:grid;place-items:center;border-radius:15px;color:#fff;background:var(--nova-gradient)}.nova-workout-builder-screen h1{margin:2px 0 7px;font-size:38px;line-height:.95;text-transform:uppercase}.nova-workout-builder-screen header p:last-child{margin:0;color:var(--muted);font-size:12px;line-height:1.45}.nova-builder-form{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:15px;border:2px solid var(--line);border-radius:18px;background:var(--surface)}.nova-builder-form label{min-width:0}.nova-builder-form label.wide{grid-column:1/-1}.nova-builder-form span{display:block;margin:0 0 6px;color:var(--muted);font-size:8px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}.nova-builder-form select{width:100%;height:44px;padding:0 10px;border:1px solid var(--line);border-radius:11px;color:var(--ink);background:var(--surface-solid);font-weight:700}.nova-builder-choice{margin-top:18px}.nova-builder-choice h2{margin:4px 0 12px;font-size:25px;text-transform:uppercase}.nova-builder-choice>button{width:100%;min-height:70px;margin-top:8px;padding:12px;border:1px solid var(--line);border-radius:15px;display:grid;grid-template-columns:28px 1fr 18px;gap:10px;align-items:center;color:var(--ink);background:var(--surface-solid);text-align:left;cursor:pointer}.nova-builder-choice>button>svg:first-child{color:var(--blue)}.nova-builder-choice strong,.nova-builder-choice small{display:block}.nova-builder-choice strong{font-size:12px}.nova-builder-choice small{margin-top:4px;color:var(--muted);font-size:9px;line-height:1.35}.nova-builder-choice .nova-expert-link{min-height:42px;display:flex;justify-content:center;color:var(--blue);background:transparent;font-size:10px;font-weight:800}.nova-builder-choice .nova-expert-link svg{color:inherit}@media(max-width:390px){.nova-builder-form{grid-template-columns:1fr}.nova-workout-builder-screen h1{font-size:34px}}
+.nova-workout-builder-screen{width:min(100%,620px)}.nova-studio-header{display:grid;grid-template-columns:48px 1fr;gap:13px;align-items:start;margin:18px 0 24px}.nova-studio-header>span{width:46px;height:46px;display:grid;place-items:center;border-radius:15px;color:#fff;background:var(--nova-gradient)}.nova-studio-header h1{margin:2px 0 7px;font-size:38px;line-height:.95;text-transform:uppercase}.nova-studio-header p:last-child{margin:0;color:var(--muted);font-size:12px;line-height:1.45}.nova-builder-form{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:15px;border:2px solid var(--line);border-radius:18px;background:var(--surface)}.nova-builder-form label{min-width:0}.nova-builder-form label.wide{grid-column:1/-1}.nova-builder-form span{display:block;margin:0 0 6px;color:var(--muted);font-size:8px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}.nova-builder-form select{width:100%;height:44px;padding:0 10px;border:1px solid var(--line);border-radius:11px;color:var(--ink);background:var(--surface-solid);font-weight:700}.nova-builder-choice{margin-top:18px}.nova-builder-choice h2{margin:4px 0 12px;font-size:25px;text-transform:uppercase}.nova-builder-choice>button{width:100%;min-height:70px;margin-top:8px;padding:12px;border:1px solid var(--line);border-radius:15px;display:grid;grid-template-columns:28px 1fr 18px;gap:10px;align-items:center;color:var(--ink);background:var(--surface-solid);text-align:left;cursor:pointer}.nova-builder-choice>button>svg:first-child{color:var(--blue)}.nova-builder-choice strong,.nova-builder-choice small{display:block}.nova-builder-choice strong{font-size:12px}.nova-builder-choice small{margin-top:4px;color:var(--muted);font-size:9px;line-height:1.35}.nova-builder-choice .nova-expert-link{min-height:42px;display:flex;justify-content:center;color:var(--blue);background:transparent;font-size:10px;font-weight:800}.nova-builder-choice .nova-expert-link svg{color:inherit}@media(max-width:390px){.nova-builder-form{grid-template-columns:1fr}.nova-studio-header h1{font-size:34px}}
 .template-title-editor input, .template-title-editor textarea { width: 100%; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink); outline: 0; }
 .template-title-editor input { height: 48px; padding: 0 12px; font: 700 20px "Manrope"; }
 .template-title-editor textarea { margin-top: 8px; padding: 11px; resize: none; font-size: 11px; line-height: 1.5; }
@@ -990,7 +1117,7 @@ body::before { content:""; position:fixed; inset:0; pointer-events:none; opacity
 .set-head { padding:0 9px; border:0; }
 .set-complete { opacity:1!important; border-color:rgba(85,233,140,.4)!important; background:linear-gradient(120deg,rgba(85,233,140,.11),rgba(17,215,255,.06))!important; transform:scale(.985); }
 .set-complete .set-check { background:linear-gradient(145deg,#1fca72,#53e592); box-shadow:0 7px 17px rgba(31,202,114,.3); }
-.timer-panel { position:fixed; top:82px; left:50%; z-index:30; width:min(calc(100% - 20px),740px); margin:0; transform:translateX(-50%); overflow:hidden; min-height:76px; background:linear-gradient(120deg,#071f45,#3733a5 62%,#9b2ab2); box-shadow:0 15px 34px rgba(45,40,130,.28); }
+.timer-panel { position:fixed; top:82px; left:50%; z-index:100; width:min(calc(100% - 20px),740px); margin:0; transform:translateX(-50%); overflow:hidden; min-height:76px; background:linear-gradient(120deg,#071f45,#3733a5 62%,#9b2ab2); box-shadow:0 15px 34px rgba(45,40,130,.28); }
 .completion-mark { width:84px; height:84px; background:var(--energy-gradient); box-shadow:0 0 0 12px rgba(17,215,255,.08),0 0 0 24px rgba(124,77,255,.05),0 18px 42px rgba(91,77,248,.38); animation:earnedPulse 1.8s ease-in-out infinite; }
 .review-screen>h1 { font-size:48px; background:var(--energy-gradient); -webkit-background-clip:text; background-clip:text; color:transparent; }
 .review-stats { overflow:hidden; border:0; border-radius:22px; color:white; background:linear-gradient(125deg,#071f45,#2049a0 55%,#7136c9); box-shadow:0 18px 40px rgba(30,54,125,.25); }
@@ -2070,26 +2197,706 @@ h1,.screen>h1,.destination-screen>h1,.workout-library-screen>h1,.programs-screen
   --north-state-warning:#a96f2d;
   --north-state-danger:#a85151;
   --north-focus:color-mix(in srgb,var(--blue) 52%,transparent);
-  --north-rail-surface:#183840;
-  --north-rail-text:#f1f0ea;
-  --north-rail-text-muted:rgba(241,240,234,.74);
-  --north-rail-active:rgba(241,240,234,.14);
+  --north-rail-surface:var(--navy);
+  --north-rail-text:color-mix(in srgb,var(--surface-solid) 30%,white);
+  --north-rail-text-muted:color-mix(in srgb,var(--north-rail-text) 74%,transparent);
+  --north-rail-active:color-mix(in srgb,var(--blue) 26%,transparent);
   --north-radius-chip:999px;
   --north-elevation-raised:0 12px 28px color-mix(in srgb,var(--navy) 12%,transparent);
 }
 :root[data-theme="night"]{
   --north-surface-accent:color-mix(in srgb,var(--blue) 14%,var(--surface-solid));
   --north-action-primary-foreground:#10272b;
-  --north-rail-surface:#102f32;
-  --north-rail-text:#eff2ed;
-  --north-rail-text-muted:rgba(239,242,237,.76);
-  --north-rail-active:rgba(239,242,237,.14);
+  --north-rail-surface:var(--navy);
+  --north-rail-text:color-mix(in srgb,var(--surface-solid) 30%,white);
+  --north-rail-text-muted:color-mix(in srgb,var(--north-rail-text) 76%,transparent);
+  --north-rail-active:color-mix(in srgb,var(--blue) 30%,transparent);
 }
 
 button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline-color:var(--north-focus)}
 .primary-nav{background:var(--north-surface-raised)}
 .primary-nav button{color:var(--north-text-secondary)}
 .primary-nav button.active{color:var(--north-action-primary);background:var(--north-surface-accent)}
+
+/* Sticky exercise header for workout screen */
+.exercise-header-sticky {
+  position: sticky;
+  top: 0;
+  z-index: 96;
+  background: var(--north-canvas);
+  border-bottom: 1px solid var(--north-divider);
+  padding: 0 20px 16px 20px;
+  margin: 0 -20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.exercise-header-sticky .progress-track {
+  margin: 12px 0 16px 0;
+}
+
+.exercise-header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.exercise-nav-btn {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  border: 1px solid var(--north-divider);
+  background: var(--north-raised);
+  color: var(--ink);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.exercise-nav-btn:hover:not(:disabled) {
+  background: var(--north-panel);
+  border-color: var(--north-active-divider);
+}
+
+.exercise-nav-btn:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.exercise-nav-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Workout progress bar */
+.workout-progress-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 94;
+  padding: 12px 16px;
+  background: var(--north-panel);
+  border-top: 1px solid var(--north-divider);
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.progress-bar-content {
+  max-width: 640px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.progress-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.progress-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: var(--ink);
+}
+
+.progress-mini-track {
+  height: 3px;
+  background: var(--north-divider);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-mini-track span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(120deg, #3f7899, #5a9bb5);
+  border-radius: inherit;
+  transition: width 0.3s ease;
+}
+
+.progress-expand-btn {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid var(--north-divider);
+  background: var(--north-raised);
+  color: var(--ink);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.progress-expand-btn:hover {
+  background: var(--north-panel);
+  border-color: var(--north-active-divider);
+  transform: translateY(-2px);
+}
+
+/* Routine checklist sheet */
+.routine-sheet-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 97;
+  background: rgba(0, 0, 0, 0.4);
+  animation: fade-in 0.2s ease;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.routine-checklist-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 98;
+  max-height: 70vh;
+  background: var(--north-canvas);
+  border-radius: 16px 16px 0 0;
+  border-top: 1px solid var(--north-divider);
+  box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  animation: slide-up 0.3s ease;
+  overflow: hidden;
+}
+
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.sheet-header {
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--north-divider);
+  background: var(--north-panel);
+}
+
+.sheet-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.sheet-close-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 8px;
+  background: var(--north-raised);
+  color: var(--ink);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.sheet-close-btn:hover {
+  background: color-mix(in srgb, var(--north-raised) 90%, white);
+}
+
+.exercises-checklist {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.checklist-exercise {
+  padding: 12px 12px;
+  border: none;
+  border-radius: 8px;
+  background: var(--north-raised);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  transition: all 0.2s;
+}
+
+.checklist-exercise:hover {
+  background: var(--north-panel);
+}
+
+.checklist-exercise.current {
+  background: linear-gradient(120deg, rgba(63, 120, 153, 0.15), rgba(90, 155, 181, 0.1));
+  border: 1px solid rgba(63, 120, 153, 0.3);
+  font-weight: 600;
+}
+
+.checklist-exercise.complete {
+  opacity: 0.6;
+}
+
+.checklist-status {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.status-icon {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.status-icon.complete {
+  color: #4caf50;
+  font-size: 18px;
+}
+
+.status-icon.in-progress {
+  color: #ff9800;
+  font-size: 16px;
+}
+
+.status-icon.pending {
+  color: #999;
+  font-size: 14px;
+}
+
+.checklist-exercise-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.checklist-exercise-info strong {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.checklist-exercise-info small {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.current-indicator {
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: linear-gradient(120deg, rgba(63, 120, 153, 0.2), rgba(90, 155, 181, 0.1));
+  color: #3f7899;
+  white-space: nowrap;
+}
+
+.exercise-header-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.exercise-header-info .eyebrow {
+  margin: 0 0 4px 0;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  opacity: 0.6;
+}
+
+.exercise-header-info h2 {
+  margin: 0 0 4px 0;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.exercise-header-info .set-count {
+  font-size: 12px;
+  opacity: 0.7;
+  font-weight: 500;
+}
+
+.exercise-skip-btn {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  border: 1px solid var(--north-divider);
+  background: var(--north-raised);
+  color: var(--ink);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.exercise-skip-btn:hover {
+  background: var(--north-panel);
+  border-color: var(--north-active-divider);
+}
+
+.exercise-skip-btn:active {
+  transform: scale(0.95);
+}
+
+/* Portrait orientation lock for mobile workout screen */
+@media(max-width:640px){
+  html.portrait-lock{
+    orientation:portrait;
+  }
+}
+
+/* Timer animations */
+@keyframes pulse-timer {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(255, 68, 68, 0.4);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 0 0 8px rgba(255, 68, 68, 0);
+  }
+}
+
+@keyframes color-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.timer-panel.timer-final-10 {
+  background: linear-gradient(120deg, #8b0000, #ff4444);
+  animation: pulse-timer 1s infinite, color-pulse 1.5s ease-in-out infinite;
+}
+
+.timer-panel.timer-final-10 strong {
+  animation: color-pulse 1.5s ease-in-out infinite;
+  font-weight: 900;
+}
+
+/* Missing data highlighting for workout set logging */
+.field-missing input {
+  background-color: rgba(255, 193, 7, 0.25);
+  border-color: rgba(255, 193, 7, 0.6);
+}
+
+.field-missing input:focus {
+  background-color: rgba(255, 193, 7, 0.35);
+  border-color: #ffc107;
+  box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.15);
+}
+
+.set-has-missing strong {
+  color: #ff9800;
+  font-weight: 700;
+}
+
+.set-has-missing strong::after {
+  content: " ⚠️";
+  font-size: 0.85em;
+  margin-left: 4px;
+}
+
+/* Pre-submit review screen */
+.pre-submit-review {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.review-header {
+  margin-bottom: 24px;
+}
+
+.review-header h2 {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.review-header p {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.review-warning {
+  display: flex;
+  gap: 12px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  border-radius: 8px;
+  background: rgba(255, 193, 7, 0.1);
+  border: 1px solid rgba(255, 193, 7, 0.3);
+  color: #ff9800;
+}
+
+.review-warning.missing-data {
+  background: rgba(255, 87, 34, 0.1);
+  border-color: rgba(255, 87, 34, 0.3);
+  color: #ff5722;
+}
+
+.review-warning strong {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.review-warning p {
+  font-size: 12px;
+  margin: 0;
+}
+
+.exercises-review {
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.review-exercise {
+  border: 1px solid var(--north-divider);
+  border-radius: 8px;
+  background: var(--north-raised);
+  overflow: hidden;
+}
+
+.review-exercise.review-complete {
+  border-color: rgba(76, 175, 80, 0.3);
+  background: rgba(76, 175, 80, 0.05);
+}
+
+.review-exercise.review-missing {
+  border-color: rgba(255, 193, 7, 0.3);
+  background: rgba(255, 193, 7, 0.05);
+}
+
+.review-exercise-header {
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  transition: background 0.2s;
+}
+
+.review-exercise-header:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.review-exercise-status {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.status-icon {
+  flex-shrink: 0;
+}
+
+.status-icon.complete {
+  color: #4caf50;
+}
+
+.status-icon.incomplete {
+  color: #999;
+}
+
+.review-exercise-info h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.review-exercise-info p {
+  margin: 2px 0 0 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.review-expand-trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.missing-badge {
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: rgba(255, 193, 7, 0.2);
+  color: #ff9800;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.review-exercise-details {
+  padding: 0 16px 16px 16px;
+  border-top: 1px solid var(--north-divider);
+  background: var(--north-canvas);
+}
+
+.review-sets-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.review-set {
+  padding: 10px 8px;
+  border: 1px solid var(--north-divider);
+  border-radius: 6px;
+  background: var(--north-raised);
+  text-align: center;
+  font-size: 12px;
+}
+
+.review-set.set-complete {
+  border-color: rgba(76, 175, 80, 0.3);
+  background: rgba(76, 175, 80, 0.05);
+}
+
+.review-set.set-missing {
+  border-color: rgba(255, 193, 7, 0.3);
+  background: rgba(255, 193, 7, 0.1);
+}
+
+.review-set strong {
+  display: block;
+  font-size: 11px;
+  margin-bottom: 6px;
+  opacity: 0.7;
+}
+
+.review-set-values {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.value-missing {
+  color: #ff9800;
+  font-weight: 600;
+}
+
+.warning-indicator {
+  font-size: 10px;
+}
+
+.set-check-icon {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  color: #4caf50;
+}
+
+.review-set {
+  position: relative;
+}
+
+.review-edit-btn {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--north-divider);
+  background: var(--north-panel);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--blue);
+  transition: all 0.2s;
+}
+
+.review-edit-btn:hover {
+  background: var(--north-raised);
+  border-color: var(--blue);
+}
+
+.review-actions {
+  display: flex;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid var(--north-divider);
+}
+
+.review-actions button {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-secondary {
+  background: var(--north-panel);
+  color: var(--ink);
+  border: 1px solid var(--north-divider);
+}
+
+.btn-secondary:hover {
+  background: color-mix(in srgb, var(--north-panel) 90%, white);
+}
+
+.btn-primary {
+  background: linear-gradient(120deg, #3f7899, #5a9bb5);
+  color: white;
+  box-shadow: 0 4px 12px rgba(63, 120, 153, 0.3);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(63, 120, 153, 0.4);
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
 .routine-library-switcher{display:flex;flex-wrap:wrap;gap:var(--north-space-2);margin:0 0 var(--north-space-5);padding:var(--north-space-3) 0;border-top:1px solid var(--north-divider);border-bottom:1px solid var(--north-divider)}
 .routine-library-switcher button{min-height:44px;padding:0 var(--north-space-3);border:1px solid var(--north-divider);border-radius:var(--north-radius-control);display:inline-flex;align-items:center;gap:7px;color:var(--north-text-primary);background:var(--north-surface-raised);font:800 12px/1 "DM Sans",sans-serif;cursor:pointer}
 .routine-library-switcher button:hover{border-color:var(--north-active-divider);color:var(--north-action-primary);background:var(--north-surface-accent)}
@@ -2107,3 +2914,77 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
 @media(min-width:1280px){
   .member-shell .workout-library-screen .template-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
 }
+
+/* Shared hierarchy: editing, choosing, and scanning use different surface roles. */
+:root{
+  --north-surface-workspace:color-mix(in srgb,var(--surface-solid) 88%,var(--blue));
+  --north-surface-input:color-mix(in srgb,var(--surface-solid) 94%,var(--blue));
+  --north-surface-scan:color-mix(in srgb,var(--blue) 4%,var(--surface-solid));
+  --north-surface-scan-strong:color-mix(in srgb,var(--blue) 8%,var(--surface-solid));
+  --north-divider-active:color-mix(in srgb,var(--blue) 28%,var(--line));
+}
+:root[data-theme="night"]{
+  --north-surface-workspace:color-mix(in srgb,var(--surface-solid) 82%,var(--blue));
+  --north-surface-input:color-mix(in srgb,var(--surface-solid) 90%,var(--blue));
+  --north-surface-scan:color-mix(in srgb,var(--blue) 8%,var(--surface-solid));
+  --north-surface-scan-strong:color-mix(in srgb,var(--blue) 14%,var(--surface-solid));
+}
+
+/* A workspace contains editable information; an input is visibly one level deeper. */
+.plan-editor,.nova-builder-form,.nova-routine-setup,.nova-exercise-step,.program-config,.library-controls,.exercise-picker,.exercise-picker-v2,.normalized-exercise-details,.settings-group,.photo-add,.weekly-load-card{
+  border-color:var(--north-divider-active);
+  background:var(--north-surface-workspace);
+}
+.plan-editor input,.plan-editor textarea,.activity-form input,.activity-form textarea,.template-title-editor input,.template-title-editor textarea,.template-exercise-editor label input,.nova-builder-form input,.nova-builder-form select,.exercise-filter-grid select,.dynamic-set-logger select,.dynamic-set-logger input,.search-field,.library-filter-toggle,.library-sort,.timeline-toolbar summary,.timeline-date-control,.photo-add>input{
+  border-color:color-mix(in srgb,var(--blue) 18%,var(--line));
+  background:var(--north-surface-input);
+}
+.plan-editor input:focus,.plan-editor textarea:focus,.activity-form input:focus,.activity-form textarea:focus,.template-title-editor input:focus,.template-title-editor textarea:focus,.template-exercise-editor label input:focus,.nova-builder-form input:focus,.nova-builder-form select:focus,.exercise-filter-grid select:focus,.dynamic-set-logger select:focus,.dynamic-set-logger input:focus,.search-field:focus-within,.photo-add>input:focus{
+  border-color:var(--blue);
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--blue) 13%,transparent);
+}
+
+/* Repeated records get a quiet alternating rhythm, not loud striping. */
+.timeline article,.timeline-entry,.recent-sessions>button,.history-list>button,.program-list>button,.suggestion-list article,.milestone-list article,.activity-trend-list>div,.exercise-trend-list article,.strength-progress>div,.expanded-week-list article>button,.exercise-today-card article{
+  margin-inline:-8px;
+  padding-inline:8px;
+  border-radius:10px;
+}
+.timeline article:nth-of-type(even),.timeline-entry:nth-of-type(even),.recent-sessions>button:nth-of-type(even),.history-list>button:nth-of-type(even),.program-list>button:nth-of-type(even),.suggestion-list article:nth-of-type(even),.milestone-list article:nth-of-type(even),.activity-trend-list>div:nth-of-type(even),.exercise-trend-list article:nth-of-type(even),.strength-progress>div:nth-of-type(even),.expanded-week-list article:nth-of-type(even)>button,.exercise-today-card article:nth-of-type(even){
+  background:var(--north-surface-scan);
+}
+.timeline article:hover,.timeline-entry:hover,.recent-sessions>button:hover,.history-list>button:hover,.program-list>button:hover,.suggestion-list article:hover,.milestone-list article:hover,.activity-trend-list>div:hover,.exercise-trend-list article:hover,.strength-progress>div:hover,.expanded-week-list article>button:hover{
+  background:var(--north-surface-scan-strong);
+}
+.timeline article>span,.timeline-entry>span,.recent-sessions>button>span,.activity-trend-list>div>span,.strength-progress>div>span,.suggestion-list article>span,.milestone-list article>span{
+  background:color-mix(in srgb,var(--blue) 11%,var(--surface-solid));
+}
+
+/* Builder rows are dense editable records, so each one gets a clearly bounded working lane. */
+.template-exercises{display:grid;gap:8px;border-top:0}
+.template-exercises article,.planned-workout-prescriptions>article{
+  padding:13px;
+  border:1px solid var(--line);
+  border-radius:13px;
+  background:var(--north-surface-input);
+}
+.template-exercises article:nth-of-type(even),.planned-workout-prescriptions>article:nth-of-type(even){
+  background:var(--north-surface-scan);
+}
+.template-exercises article:hover,.planned-workout-prescriptions>article:hover{
+  border-color:var(--north-divider-active);
+}
+.template-exercises article>span{background:color-mix(in srgb,var(--blue) 13%,var(--surface-solid))}
+.add-template-row,.planned-workout-edit,.training-add-session{
+  border-color:var(--north-divider-active);
+  background:var(--north-surface-scan);
+}
+.add-template-row:hover,.planned-workout-edit:hover,.training-add-session:hover{
+  background:var(--north-surface-scan-strong);
+}
+
+/* Search results are choices: alternating rows plus a dedicated add zone makes that obvious. */
+.picker-v2-results article{border-color:var(--line);background:var(--north-surface-input)}
+.picker-v2-results article:nth-of-type(even){background:var(--north-surface-scan)}
+.picker-v2-results article:hover{border-color:var(--north-divider-active);background:var(--north-surface-scan-strong)}
+.picker-v2-add{background:color-mix(in srgb,var(--blue) 15%,var(--surface-solid))}

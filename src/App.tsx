@@ -60,6 +60,7 @@ import {
 } from "lucide-react";
 import { exerciseCategories, exerciseEquipment, exerciseLibrary, type ExerciseDefinition } from "./data/exercises";
 import { estimatedWorkoutMinutes, workoutDisplayName, workoutFocuses, workoutGoals, workoutLevels, workoutTemplates, type WorkoutTemplate } from "./data/workouts";
+import { migrateWorkoutTemplate, resolveWorkoutTemplateExercise } from "./data/workoutExerciseIdentity";
 import { programs, type ProgramDefinition } from "./data/programs";
 import { milestoneCategories, milestoneDefinitions, type MilestoneMetric } from "./data/milestones";
 import { deriveEarnedMoments } from "./data/celebrations";
@@ -75,6 +76,9 @@ import { getApprovedExerciseDemo, getExerciseMedia } from "./data/exerciseMedia"
 import AnatomyMap from "./components/AnatomyMap";
 import { BrandLoader, LoginBrandReveal } from "./components/BrandMotion";
 import { DynamicSetLogger } from "./components/DynamicSetLogger";
+import { PreSubmitReview } from "./components/PreSubmitReview";
+import { WorkoutProgressBar } from "./components/WorkoutProgressBar";
+import { RoutineChecklistSheet } from "./components/RoutineChecklistSheet";
 import { ExercisePickerV2 } from "./components/ExercisePickerV2";
 import { NormalizedExerciseDetails } from "./components/NormalizedExerciseDetails";
 import { toLegacyExerciseDefinition } from "./exerciseDatabase/compatibility";
@@ -85,12 +89,14 @@ import type { Exercise as CanonicalExercise } from "./exerciseDatabase/types";
 import { approveNovaProposal, archiveNovaConversation, createNovaGoal, createNovaMemory, deleteNovaMemory, getNovaBootstrap, getNovaStatus, loadNovaConversation, recordNovaProposalApplied, rejectNovaProposal, sendNovaMessage, updateNovaGoal, updateNovaMemory, type NovaApiProposal, type NovaApiStatus, type NovaGoal, type NovaMemory } from "./data/novaApi";
 import "./components/AnatomyMap.css";
 
-type Screen = "today" | "journey" | "training" | "week-plan" | "nova" | "nova-workout-builder" | "nova-routine-builder" | "you" | "account" | "settings" | "prepare" | "exercise-detail" | "workout" | "review" | "workout-library" | "workout-template" | "programs" | "program-detail" | "progression" | "workout-history" | "session-detail" | "activity-log" | "coach-import" | "check-in" | "weekly-review" | "test-log";
+const fullExerciseLibrary = productionExerciseLibrary.map(toLegacyExerciseDefinition);
+
+type Screen = "today" | "journey" | "training" | "week-plan" | "nova" | "nova-workout-builder" | "nova-routine-builder" | "you" | "account" | "settings" | "prepare" | "exercise-detail" | "workout" | "workout-review" | "review" | "workout-library" | "workout-template" | "programs" | "program-detail" | "progression" | "workout-history" | "session-detail" | "activity-log" | "coach-import" | "check-in" | "weekly-review" | "test-log";
 type ThemeName = "off-white" | "rosewater" | "cloud" | "sage" | "teal" | "carbon" | "midnight" | "plum" | "pine";
 
 const themeOptions: Array<{ id: ThemeName; name: string; mode: "light" | "dark" }> = [
-  { id: "off-white", name: "Off-white", mode: "light" }, { id: "rosewater", name: "Rosewater", mode: "light" }, { id: "cloud", name: "Cloud", mode: "light" }, { id: "sage", name: "Sage", mode: "light" },
-  { id: "teal", name: "Teal", mode: "dark" }, { id: "carbon", name: "Carbon", mode: "dark" }, { id: "midnight", name: "Midnight", mode: "dark" }, { id: "plum", name: "Plum", mode: "dark" }, { id: "pine", name: "Pine", mode: "dark" },
+  { id: "off-white", name: "Porcelain", mode: "light" }, { id: "rosewater", name: "Rosewater", mode: "light" }, { id: "cloud", name: "Mist", mode: "light" }, { id: "sage", name: "Moss", mode: "light" },
+  { id: "teal", name: "Tide", mode: "dark" }, { id: "carbon", name: "Graphite", mode: "dark" }, { id: "midnight", name: "Cobalt", mode: "dark" }, { id: "plum", name: "Ember", mode: "dark" }, { id: "pine", name: "Plum", mode: "dark" },
 ];
 
 const RELEASE_NOTES_ID = "north-0.4-nova-intelligence-hub";
@@ -161,6 +167,8 @@ type Exercise = {
   passed: boolean;
   canonicalExerciseId?: string;
   trackingTemplateId?: string;
+  resolutionStatus?: "resolved" | "unresolved";
+  originalSavedName?: string;
 };
 type Session = {
   planDayId?: string;
@@ -321,12 +329,37 @@ function buildExercise(template: ExerciseDefinition, id = `${template.name.toLow
   };
 }
 
+function definitionForTemplateExercise(planned: WorkoutTemplate["exercises"][number]): ExerciseDefinition {
+  const resolution = resolveWorkoutTemplateExercise(planned);
+  if (resolution.status === "resolved") return toLegacyExerciseDefinition(resolution.canonical);
+  return {
+    name: planned.exerciseName,
+    category: "Other",
+    equipment: "Unknown",
+    aliases: [],
+    target: `${planned.sets} sets · ${planned.reps}`,
+    rest: planned.rest,
+    weight: "",
+    previous: "No history yet",
+    cue: "Exercise details need repair before training.",
+    locations: ["Gym"],
+    difficulty: "Beginner",
+    movementPattern: "Unknown",
+    substitutions: [],
+    safetyNote: "This saved exercise could not be matched to the current catalogue. Choose a replacement before training.",
+  };
+}
+
 function exercisesFromTemplate(template: WorkoutTemplate): Exercise[] {
   return template.exercises.map((planned, index) => {
-    const definition = exerciseLibrary.find((exercise) => exercise.name === planned.exerciseName) ?? exerciseLibrary[0];
+    const resolution = resolveWorkoutTemplateExercise(planned);
+    const definition = definitionForTemplateExercise(planned);
     const exercise = buildExercise(definition, `${template.id}-${index}-${planned.exerciseName.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`);
     return {
       ...exercise,
+      canonicalExerciseId: resolution.status === "resolved" ? resolution.canonicalExerciseId : undefined,
+      resolutionStatus: resolution.status,
+      originalSavedName: planned.exerciseName,
       target: `${planned.sets} sets · ${planned.reps}${planned.reps.includes("sec") ? "" : " reps"}`,
       rest: planned.rest,
       sets: Array.from({ length: planned.sets }, () => ({ weight: definition.weight, reps: "", complete: false })),
@@ -504,7 +537,7 @@ function readPersonalTemplates(): WorkoutTemplate[] {
   try {
     const value = JSON.parse(localStorage.getItem(PERSONAL_TEMPLATES_KEY) ?? "[]");
     const parsed = Array.isArray(value) ? value as WorkoutTemplate[] : [];
-    return parsed.filter((template) => template.id && template.name && Array.isArray(template.exercises)).map((template) => ({ ...template, source: "personal" }));
+    return parsed.filter((template) => template.id && template.name && Array.isArray(template.exercises)).map((template) => migrateWorkoutTemplate({ ...template, source: "personal" }));
   } catch { return []; }
 }
 
@@ -543,6 +576,10 @@ function readProgressionTransaction(): ProgressionTransaction | null {
   catch { return null; }
 }
 
+function NovaStudioHeader({ title, description }: { title: string; description: string }) {
+  return <header className="nova-studio-header"><span><Sparkles size={21} /></span><div><p className="eyebrow">NOVA WORKOUT STUDIO</p><h1>{title}</h1><p>{description}</p></div></header>;
+}
+
 function App() {
   const [entryComplete, setEntryComplete] = useState(() => {
     const account = readNorthSession();
@@ -563,6 +600,7 @@ function App() {
   const [timer, setTimer] = useState(0);
   const [timerRunning, setTimerRunning] = useState(false);
   const [timerControlsOpen, setTimerControlsOpen] = useState(false);
+  const [routineSheetOpen, setRoutineSheetOpen] = useState(false);
   const [workoutSubmitOpen, setWorkoutSubmitOpen] = useState(false);
   const [workoutClock, setWorkoutClock] = useState(() => Date.now());
   const [recorderStatus, setRecorderStatus] = useState("");
@@ -693,6 +731,110 @@ function App() {
     document.addEventListener("visibilitychange", preserve);
     return () => { window.removeEventListener("pagehide", preserve); document.removeEventListener("visibilitychange", preserve); };
   }, []);
+
+  useEffect(() => {
+    // Lock screen orientation to portrait when on workout screen for better mobile UX
+    const lockOrientation = async () => {
+      const isWorkoutScreen = screen === "workout";
+      try {
+        if (isWorkoutScreen && window.screen?.orientation?.lock) {
+          await window.screen.orientation.lock("portrait-primary");
+        } else if (!isWorkoutScreen && window.screen?.orientation?.unlock) {
+          await window.screen.orientation.unlock();
+        }
+      } catch (err) {
+        // Orientation lock not supported on this device
+        console.debug("Screen orientation lock not available", err);
+      }
+      // Also set CSS class for media query handling
+      document.documentElement.classList.toggle("portrait-lock", isWorkoutScreen);
+    };
+    void lockOrientation();
+  }, [screen]);
+
+  useEffect(() => {
+    // Timer vibration feedback at final 10 seconds and on completion
+    if (timer === 10 || timer === 5 || timer === 1) {
+      try {
+        if (navigator.vibrate) {
+          navigator.vibrate(100);
+        }
+      } catch (err) {
+        console.debug("Vibration not available", err);
+      }
+    } else if (timer === 0 && timerControlsOpen) {
+      // Double vibration on timer complete
+      try {
+        if (navigator.vibrate) {
+          navigator.vibrate([100, 50, 100]);
+        }
+      } catch (err) {
+        console.debug("Vibration not available", err);
+      }
+    }
+  }, [timer, timerControlsOpen]);
+
+  useEffect(() => {
+    // Arrow key navigation in workout screen
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (screen !== "workout" || !current) return;
+      
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        if (currentIndex > 0) {
+          setSession((s) => ({ ...s, currentId: session.exercises[currentIndex - 1].id }));
+        }
+      } else if (event.key === "ArrowRight") {
+        event.preventDefault();
+        if (currentIndex < session.exercises.length - 1) {
+          setSession((s) => ({ ...s, currentId: session.exercises[currentIndex + 1].id }));
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [screen, current, currentIndex, session.exercises]);
+
+  useEffect(() => {
+    // Swipe gesture navigation in workout screen
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    const handleTouchStart = (event: TouchEvent) => {
+      if (screen !== "workout") return;
+      touchStartX = event.changedTouches[0].screenX;
+    };
+
+    const handleTouchEnd = (event: TouchEvent) => {
+      if (screen !== "workout" || !current) return;
+      touchEndX = event.changedTouches[0].screenX;
+      
+      const swipeDistance = touchStartX - touchEndX;
+      const minSwipeDistance = 50; // minimum swipe distance
+
+      if (Math.abs(swipeDistance) > minSwipeDistance) {
+        if (swipeDistance > 0) {
+          // Left swipe: next exercise
+          if (currentIndex < session.exercises.length - 1) {
+            setSession((s) => ({ ...s, currentId: session.exercises[currentIndex + 1].id }));
+          }
+        } else {
+          // Right swipe: previous exercise
+          if (currentIndex > 0) {
+            setSession((s) => ({ ...s, currentId: session.exercises[currentIndex - 1].id }));
+          }
+        }
+      }
+    };
+
+    window.addEventListener("touchstart", handleTouchStart);
+    window.addEventListener("touchend", handleTouchEnd);
+    return () => {
+      window.removeEventListener("touchstart", handleTouchStart);
+      window.removeEventListener("touchend", handleTouchEnd);
+    };
+  }, [screen, current, currentIndex, session.exercises]);
 
   useEffect(() => {
     if (!entryComplete || !readNorthSession()) return;
@@ -879,12 +1021,12 @@ function App() {
     [session.exercises],
   );
   const returnQueue = session.exercises.filter((item) => item.passed && !item.sets.every((set) => set.complete));
-  const filteredLibrary = exerciseLibrary.filter((item) => {
+  const filteredLibrary = fullExerciseLibrary.filter((item) => {
     const query = exerciseSearch.trim().toLowerCase();
     const matchesQuery = !query || `${item.name} ${item.category} ${item.equipment} ${item.aliases.join(" ")}`.toLowerCase().includes(query);
     return matchesQuery && (exerciseCategory === "All" || item.category === exerciseCategory) && (exerciseEquipmentFilter === "All" || item.equipment === exerciseEquipmentFilter);
   });
-  const novaExerciseMatches = novaExerciseSearch.trim() ? exerciseLibrary.filter((item) => `${item.name} ${item.category} ${item.equipment} ${item.aliases.join(" ")}`.toLowerCase().includes(novaExerciseSearch.trim().toLowerCase())).slice(0, 12) : [];
+  const novaExerciseMatches = novaExerciseSearch.trim() ? fullExerciseLibrary.filter((item) => `${item.name} ${item.category} ${item.equipment} ${item.aliases.join(" ")}`.toLowerCase().includes(novaExerciseSearch.trim().toLowerCase())).slice(0, 12) : [];
   const selectedHistory = history.find((item) => item.finishedAt === selectedHistoryId) ?? null;
   const selectedPlanDay = weeklyPlan.find((item) => item.id === selectedPlanDayId) ?? weeklyPlan[0];
   const currentWeekStart = weekStartFor(isoDate(new Date()));
@@ -968,7 +1110,7 @@ function App() {
   const selectedTemplateIssues = [
     ...(!selectedTemplate.name.trim() ? ["Give this workout a name."] : []),
     ...(!selectedTemplate.exercises.length ? ["Add at least one exercise."] : []),
-    ...(selectedTemplate.exercises.some((exercise) => !exerciseLibrary.some((definition) => definition.name === exercise.exerciseName)) ? ["Choose every movement from North's exercise library."] : []),
+    ...(selectedTemplate.exercises.some((exercise) => !exercise.canonicalExerciseId && !canonicalExerciseFor(exercise.exerciseName)) ? ["Repair unresolved exercises before training."] : []),
     ...(selectedTemplate.exercises.some((exercise) => exercise.sets < 1 || !exercise.reps.trim() || exercise.rest < 0) ? ["Check the sets, reps and rest prescriptions."] : []),
   ];
   const selectedProgram = programs.find((program) => program.id === selectedProgramId) ?? programs[0];
@@ -1331,6 +1473,7 @@ function App() {
 
   function beginWorkout() {
     if (!session.exercises.length) { setRecorderStatus("Add at least one exercise before starting this workout."); return; }
+    if (session.exercises.some((exercise) => exercise.resolutionStatus === "unresolved")) { setRecorderStatus("Repair every unresolved exercise before starting this workout."); return; }
     const exercises = session.exercises.map(prefillFromPreviousPerformance);
     if (session.planDayId) setWeeklyPlan((days) => days.map((day) => day.id === session.planDayId ? { ...day, workout: resetExercises(exercises) } : day));
     setSession((value) => ({ ...value, exercises, startedAt: value.startedAt ?? new Date().toISOString() }));
@@ -1603,7 +1746,7 @@ function App() {
             duration: Number(payload.duration) || plannedMinutes(workout),
             equipment: [...new Set(workout.map((exercise) => exerciseLibrary.find((definition) => definition.name === exercise.name)?.equipment).filter((item): item is string => Boolean(item) && item !== "None"))],
             location: payload.location === "Home" || payload.location === "Anywhere" ? payload.location : "Gym",
-            exercises: workout.map((exercise) => ({ exerciseName: exercise.name, sets: exercise.sets.length, reps: exercise.target.replace(/^\d+\s+sets?\s+[^\p{L}\p{N}]*/iu, "").replace(/\s+reps?$/i, ""), rest: exercise.rest })),
+            exercises: workout.map((exercise) => ({ exerciseName: exercise.name, canonicalExerciseId: exercise.canonicalExerciseId, sets: exercise.sets.length, reps: exercise.target.replace(/^\d+\s+sets?\s+[^\p{L}\p{N}]*/iu, "").replace(/\s+reps?$/i, ""), rest: exercise.rest })),
             source: "personal",
           };
           if (!template.equipment.length) template.equipment = ["Any equipment"];
@@ -1946,7 +2089,7 @@ function App() {
   }
 
   function createPersonalWorkout() {
-    const workout: WorkoutTemplate = { id: `personal-custom-${crypto.randomUUID()}`, name: "My new workout", description: "Built by me in North.", focus: "Full body", goal: "General fitness", level: "Beginner", duration: 45, equipment: ["Any equipment"], location: "Anywhere", exercises: [{ exerciseName: exerciseLibrary[0].name, sets: 3, reps: "8–12", rest: 75 }], source: "personal" };
+    const workout: WorkoutTemplate = { id: `personal-custom-${crypto.randomUUID()}`, name: "My new workout", description: "Built by me in North.", focus: "Full body", goal: "General fitness", level: "Beginner", duration: 45, equipment: ["Any equipment"], location: "Anywhere", exercises: [{ exerciseName: exerciseLibrary[0].name, canonicalExerciseId: canonicalExerciseFor(exerciseLibrary[0].name)?.id, sets: 3, reps: "8–12", rest: 75 }], source: "personal" };
     setPersonalTemplates((templates) => [workout, ...templates]);
     setFavoriteTemplateIds((ids) => ids.includes(workout.id) ? ids : [...ids, workout.id]);
     setSelectedTemplateId(workout.id); setTemplateEditing(true); setBuilderPickerOpen(false); setBuilderStatus("Saved automatically to My Workouts."); setScreen("workout-template");
@@ -1975,7 +2118,7 @@ function App() {
       setNovaRoutineStatus(`${novaExerciseDraft.definition.name} is already in this routine.`);
       return;
     }
-    const exercise = { exerciseName: novaExerciseDraft.definition.name, sets: novaExerciseDraft.sets, reps: novaExerciseDraft.target.trim() || "8–12", rest: Math.max(0, novaExerciseDraft.rest) };
+    const exercise = { exerciseName: novaExerciseDraft.definition.name, canonicalExerciseId: canonicalExerciseFor(novaExerciseDraft.definition.name)?.id, sets: novaExerciseDraft.sets, reps: novaExerciseDraft.target.trim() || "8–12", rest: Math.max(0, novaExerciseDraft.rest) };
     const exercises = [...selectedTemplate.exercises, exercise];
     const equipment = [...new Set(exercises.map((item) => exerciseLibrary.find((definition) => definition.name === item.exerciseName)?.equipment).filter((item): item is string => Boolean(item) && item !== "None"))];
     patchPersonalTemplate({ exercises, equipment: equipment.length ? equipment : ["Any equipment"] });
@@ -2026,12 +2169,17 @@ function App() {
   }
 
   function addTemplateExercise(definition: ExerciseDefinition) {
-    if (selectedTemplate.exercises.some((exercise) => exercise.exerciseName === definition.name)) { setBuilderStatus(`${definition.name} is already in this workout.`); return; }
+    const canonicalExerciseId = canonicalExerciseFor(definition.name)?.id;
+    if (selectedTemplate.exercises.some((exercise) => exercise.canonicalExerciseId === canonicalExerciseId || exercise.exerciseName === definition.name)) { setBuilderStatus(`${definition.name} is already in this workout.`); return; }
     const targetReps = definition.target.match(/·\s*(.+?)\s*reps/i)?.[1] ?? definition.target.match(/(\d+[–-]\d+)/)?.[1] ?? "8–12";
-    const exercises = [...selectedTemplate.exercises, { exerciseName: definition.name, sets: 3, reps: targetReps, rest: definition.rest }];
+    const replacementIndex = selectedTemplate.exercises.findIndex((exercise) => resolveWorkoutTemplateExercise(exercise).status === "unresolved");
+    const replacement = { exerciseName: definition.name, canonicalExerciseId, sets: 3, reps: targetReps, rest: definition.rest };
+    const exercises = replacementIndex >= 0
+      ? selectedTemplate.exercises.map((exercise, index) => index === replacementIndex ? replacement : exercise)
+      : [...selectedTemplate.exercises, replacement];
     const detectedEquipment = [...new Set(exercises.map((exercise) => exerciseLibrary.find((item) => item.name === exercise.exerciseName)?.equipment).filter((item): item is string => Boolean(item) && item !== "None"))];
     patchPersonalTemplate({ exercises, equipment: detectedEquipment.length ? detectedEquipment : ["Any equipment"] });
-    setBuilderStatus(`${definition.name} added and saved.`);
+    setBuilderStatus(replacementIndex >= 0 ? `${definition.name} replaced the unresolved exercise and was saved.` : `${definition.name} added and saved.`);
   }
 
   function openExercisePreview(definition: ExerciseDefinition) {
@@ -2695,7 +2843,7 @@ function App() {
             {selectedPlanDay.kind === "strength" && <section className="workout-edit-station"><header><div><p className="eyebrow">WORKOUT EDIT STATION</p><h3>Choose it. Build it. Make it yours.</h3></div><SlidersHorizontal size={20} /></header><div><button className="premade" onClick={() => { setTemplateSource("north"); setScreen("workout-library"); }}><span><Sparkles size={17} /></span><b><strong>Premade workouts</strong><small>Browse by area, goal or time</small></b><ArrowRight size={15} /></button><button className="personal" onClick={() => { setTemplateSource("personal"); setScreen("workout-library"); }}><span><Heart size={17} /></span><b><strong>My workouts</strong><small>Saved, favourite and custom</small></b><ArrowRight size={15} /></button></div><p>Your current movements stay editable below. Choosing a workout replaces only this selected day.</p></section>}
             <div className="kind-picker">{(["strength", "bike", "walk", "run", "recovery", "rest"] as ActivityKind[]).map((kind) => <button key={kind} className={selectedPlanDay.kind === kind ? "active" : ""} onClick={() => patchPlanDay({ kind, title: kind === "strength" ? "Strength session" : kind === "bike" ? "Bike ride" : kind === "walk" ? "Walk" : kind === "run" ? "Run" : kind === "recovery" ? "Recovery and mobility" : "Rest", workout: kind === "strength" ? (selectedPlanDay.workout?.length ? selectedPlanDay.workout : resetExercises(starterExercises)) : undefined })}>{kind}</button>)}</div>
             <label><span>Session</span><input value={selectedPlanDay.title} onChange={(event) => patchPlanDay({ title: event.target.value })} /></label><label><span>Plan note</span><textarea rows={2} value={selectedPlanDay.note} onChange={(event) => patchPlanDay({ note: event.target.value })} placeholder="Anything worth knowing before the day begins?" /></label>
-            {selectedPlanDay.kind === "strength" && <section className="planned-workout-prescriptions"><header><div><p className="eyebrow">EXERCISE PRESCRIPTIONS</p><h3>Edit every detail</h3></div><span>{selectedWorkout.length} exercises</span></header><button className="planned-workout-edit" type="button" onClick={() => setPlannedPickerOpen((open) => !open)}>{plannedPickerOpen ? <X size={15} /> : <Plus size={15} />}{plannedPickerOpen ? "Close exercise picker" : "Edit this workout"}</button>{plannedPickerOpen && <section className="exercise-picker planned-exercise-picker"><label className="search-field"><Search size={17} /><input value={exerciseSearch} onChange={(event) => setExerciseSearch(event.target.value)} placeholder={`Search ${exerciseLibrary.length} exercises`} /></label><div className="picker-filters">{exerciseCategories.map((category) => <button key={category} className={exerciseCategory === category ? "active" : ""} onClick={() => setExerciseCategory(category)}>{category}</button>)}</div><div className="picker-results">{filteredLibrary.map((exercise) => <button key={exercise.name} onClick={() => addPlannedExercise(exercise)}><span><strong>{exercise.name}</strong><small>{exercise.category} · {exercise.equipment} · {exercise.target}</small></span><Plus size={17} /></button>)}</div></section>}{selectedWorkout.map((exercise) => <article key={exercise.id}><div className="planned-exercise-title"><strong>{exercise.name}</strong><button type="button" onClick={() => removePlannedExercise(exercise.id)} aria-label={`Remove ${exercise.name}`} title={`Remove ${exercise.name}`}><Trash2 size={15} /></button></div><div><label><span>Sets</span><input type="number" min="1" max="10" value={exercise.sets.length} onChange={(event) => resizePlannedExercise(exercise, Number(event.target.value) || 1)} /></label><label><span>Reps, time, or distance</span><input value={exercise.target.replace(/^\d+\s*sets?\s*·?\s*/i, "")} onChange={(event) => patchPlannedExercise(exercise.id, { target: `${exercise.sets.length} sets · ${event.target.value}` })} placeholder="8–12 reps, 30 sec, 400 m" /></label><label><span>Rest (sec)</span><input type="number" min="0" max="600" value={exercise.rest} onChange={(event) => patchPlannedExercise(exercise.id, { rest: Math.max(0, Number(event.target.value) || 0) })} /></label></div></article>)}</section>}
+            {selectedPlanDay.kind === "strength" && <section className="planned-workout-prescriptions"><header><div><p className="eyebrow">EXERCISE PRESCRIPTIONS</p><h3>Edit every detail</h3></div><span>{selectedWorkout.length} exercises</span></header><button className="planned-workout-edit" type="button" onClick={() => setPlannedPickerOpen((open) => !open)}>{plannedPickerOpen ? <X size={15} /> : <Plus size={15} />}{plannedPickerOpen ? "Close exercise picker" : "Edit this workout"}</button>{selectedWorkout.map((exercise) => <article key={exercise.id}><div className="planned-exercise-title"><strong>{exercise.name}</strong><button type="button" onClick={() => removePlannedExercise(exercise.id)} aria-label={`Remove ${exercise.name}`} title={`Remove ${exercise.name}`}><Trash2 size={15} /></button></div><div><label><span>Sets</span><input type="number" min="1" max="10" value={exercise.sets.length} onChange={(event) => resizePlannedExercise(exercise, Number(event.target.value) || 1)} /></label><label><span>Reps, time, or distance</span><input value={exercise.target.replace(/^\d+\s*sets?\s*·?\s*/i, "")} onChange={(event) => patchPlannedExercise(exercise.id, { target: `${exercise.sets.length} sets · ${event.target.value}` })} placeholder="8–12 reps, 30 sec, 400 m" /></label><label><span>Rest (sec)</span><input type="number" min="0" max="600" value={exercise.rest} onChange={(event) => patchPlannedExercise(exercise.id, { rest: Math.max(0, Number(event.target.value) || 0) })} /></label></div></article>)}</section>}
             <section className="day-session-stack"><header><div><p className="eyebrow">SESSION STACK</p><h3>Everything planned today</h3></div><button type="button" onClick={() => setStackComposerOpen((open) => !open)}><Plus size={14} /> Add session</button></header><article className="primary-session"><i>1</i><div><small>MAIN FOCUS</small><strong>{selectedPlanDay.title}</strong><span>{selectedPlanDay.kind}</span></div></article>{(selectedPlanDay.sessions ?? []).map((item, index) => <article key={item.id} className={item.status}><i>{index + 2}</i><div><small>{item.role.toUpperCase()}</small><strong>{item.title}</strong><span>{[item.distance ? `${displayDistance(item.distance).toFixed(1)} ${distanceUnit}` : "", item.duration ? `${item.duration} min` : "", item.kind].filter(Boolean).join(" · ")}</span></div><div className="stack-actions"><button type="button" onClick={() => openPlannedSession(item)}>{item.kind === "strength" ? "Prepare" : "Log"}</button><button type="button" onClick={() => patchPlannedSession(item.id, { status: item.status === "skipped" ? "planned" : "skipped" })}>{item.status === "skipped" ? "Restore" : "Skip"}</button><button type="button" aria-label={`Remove ${item.title}`} onClick={() => removePlannedSession(item.id)}><X size={14} /></button></div></article>)}{stackComposerOpen && <div className="stack-composer"><div><label><span>Type</span><select value={draftPlannedSession.kind} onChange={(event) => { const kind = event.target.value as PlannedSession["kind"]; setDraftPlannedSession((value) => ({ ...value, kind, title: kind === "bike" ? "Zone 2 bike ride" : kind === "strength" ? "Strength session" : kind === "walk" ? "Walk" : kind === "run" ? "Run" : "Recovery session" })); }}><option value="bike">Bike</option><option value="strength">Strength</option><option value="walk">Walk</option><option value="run">Run</option><option value="recovery">Recovery</option></select></label><label><span>Purpose</span><select value={draftPlannedSession.role} onChange={(event) => setDraftPlannedSession((value) => ({ ...value, role: event.target.value as SessionRole }))}><option value="warm-up">Warm-up</option><option value="secondary">Secondary</option><option value="recovery">Recovery</option><option value="optional">Optional</option></select></label></div><label><span>Session name</span><input value={draftPlannedSession.title} onChange={(event) => setDraftPlannedSession((value) => ({ ...value, title: event.target.value }))} /></label><div><label><span>Distance ({distanceUnit})</span><DeferredUnitInput storedValue={draftPlannedSession.distance} formatValue={displayDistance} storeValue={storeDistance} onCommit={(distance) => setDraftPlannedSession((value) => ({ ...value, distance }))} label={`Planned distance in ${distanceUnit}`} /></label><label><span>Duration (min)</span><input inputMode="numeric" value={draftPlannedSession.duration} onChange={(event) => setDraftPlannedSession((value) => ({ ...value, duration: event.target.value }))} /></label></div><label><span>Notes or intensity</span><input value={draftPlannedSession.note} onChange={(event) => setDraftPlannedSession((value) => ({ ...value, note: event.target.value }))} placeholder="Zone 2, easy pace, route…" /></label><button type="button" className="primary-button" onClick={addPlannedSession}>Add to this day</button></div>}</section>
             <div className="plan-actions"><button onClick={() => movePlanDay(-1)} disabled={weeklyPlan[0].id === selectedPlanDay.id}><ArrowLeft size={13} /> Earlier</button><button onClick={() => movePlanDay(1)} disabled={weeklyPlan[weeklyPlan.length - 1].id === selectedPlanDay.id}>Later <ArrowRight size={13} /></button><button onClick={() => patchPlanDay({ status: selectedPlanDay.status === "skipped" ? "planned" : "skipped" })}>{selectedPlanDay.status === "skipped" ? "Restore" : "Skip"}</button></div><div className="plan-save-row"><button type="button" onClick={() => void saveSelectedWorkout()} disabled={syncing}><Save size={16}/>{syncing ? "Saving…" : "Save this workout"}</button><span>{planSaveStatus}</span></div>{selectedPlanDay.kind !== "rest" && <button className="primary-button" onClick={beginPlannedDay}>{selectedPlanDay.kind === "strength" ? "Prepare this workout" : `Log ${selectedPlanDay.kind}`}<ArrowRight size={16} /></button>}{selectedPlanDay.kind === "rest" && <p className="rest-message"><BedDouble size={17} /> Rest is part of the plan, not a missed day.</p>}
           </section>}
@@ -2848,7 +2996,7 @@ function App() {
       {screen === "nova-workout-builder" && (
         <section className="screen nova-workout-builder-screen">
           <button className="back-button" onClick={() => setScreen("training")}><ArrowLeft size={17} /> Training</button>
-          <header><span><Sparkles size={21}/></span><div><p className="eyebrow">NOVA WORKOUT STUDIO</p><h1>Let&apos;s build your next session.</h1><p>Tell Nova what you want from this workout. You choose whether to use the suggestion or begin blank.</p></div></header>
+          <NovaStudioHeader title="Let&apos;s build your next session." description="Tell Nova what you want from this workout. You choose whether to use the suggestion or begin blank." />
           <nav className="routine-library-switcher" aria-label="Workout library">
             <button onClick={() => { setTemplateSource("personal"); setScreen("workout-library"); }}><Heart size={16} /> My workouts</button>
             <button onClick={() => { setTemplateSource("north"); setScreen("workout-library"); }}><Dumbbell size={16} /> Premade workouts</button>
@@ -2869,7 +3017,7 @@ function App() {
       {screen === "nova-routine-builder" && (
         <section className="screen nova-routine-builder-screen">
           <button className="back-button" onClick={() => setScreen("nova-workout-builder")}><ArrowLeft size={17} /> Setup</button>
-          <header className="nova-routine-heading"><div><p className="eyebrow">NOVA SIMPLE BUILDER</p><h1>{selectedTemplate.name}</h1><p>Add one movement at a time. Your setup stays fixed while you build.</p></div><span><Sparkles size={21} /></span></header>
+          <NovaStudioHeader title={selectedTemplate.name} description="Add one movement at a time. Your setup stays fixed while you build." />
           <section className="nova-routine-setup" aria-label="Locked workout setup"><span>{selectedTemplate.focus}</span><span>{selectedTemplate.goal}</span><span>{selectedTemplate.duration} min</span><span>{selectedTemplate.location}</span><span>{selectedTemplate.equipment.join(" · ")}</span></section>
           <section className="nova-routine-progress"><div><span>ROUTINE</span><strong>{selectedTemplate.exercises.length} exercise{selectedTemplate.exercises.length === 1 ? "" : "s"} added</strong></div><div><span>NOW ADDING</span><strong>Exercise {selectedTemplate.exercises.length + 1}</strong></div></section>
           <section className="nova-exercise-step">
@@ -2888,9 +3036,10 @@ function App() {
       {screen === "workout-template" && (
         <section className="screen workout-template-screen">
           <button className="back-button" onClick={() => setScreen(templateEditing && selectedTemplate.source === "personal" ? "nova-workout-builder" : "workout-library")}><ArrowLeft size={17} /> {templateEditing && selectedTemplate.source === "personal" ? "Nova builder" : "Library"}</button>
+          {templateEditing && selectedTemplate.source === "personal" && <NovaStudioHeader title="Build your workout." description="Choose every movement, prescription, and order for this reusable workout." />}
+          <section className="template-metrics"><div className="template-metric-name"><span>WORKOUT</span><strong>{selectedTemplate.name}</strong></div><div><span>FOCUS</span><strong>{selectedTemplate.focus}</strong></div><div><span>EST. TOTAL</span><strong>~{estimatedWorkoutMinutes(selectedTemplate)} min</strong></div><div><span>GOAL</span><strong>{selectedTemplate.goal}</strong></div><div><span>PLACE</span><strong>{selectedTemplate.location}</strong></div></section>
           <p className="eyebrow">{selectedTemplate.focus.toUpperCase()} · {selectedTemplate.level.toUpperCase()}</p>
-          {templateEditing && selectedTemplate.source === "personal" ? <><div className="template-title-editor"><input value={selectedTemplate.name} onChange={(event) => patchPersonalTemplate({ name: event.target.value })} aria-label="Workout name" /><textarea rows={2} value={selectedTemplate.description} onChange={(event) => patchPersonalTemplate({ description: event.target.value })} aria-label="Workout description" /></div><section className="routine-builder-settings"><label><span>Focus</span><input value={selectedTemplate.focus} onChange={(event) => patchPersonalTemplate({ focus: event.target.value })}/></label><label><span>Goal</span><select value={selectedTemplate.goal} onChange={(event) => patchPersonalTemplate({ goal: event.target.value as WorkoutTemplate["goal"] })}>{workoutGoals.filter((goal) => goal !== "All").map((goal) => <option key={goal}>{goal}</option>)}</select></label><label><span>Level</span><select value={selectedTemplate.level} onChange={(event) => patchPersonalTemplate({ level: event.target.value as WorkoutTemplate["level"] })}>{workoutLevels.filter((level) => level !== "All").map((goal) => <option key={goal}>{goal}</option>)}</select></label><label><span>Duration (mins)</span><DeferredIntegerInput value={selectedTemplate.duration} min={5} max={240} onCommit={(duration) => patchPersonalTemplate({ duration })} label="Workout duration in minutes" /></label><label><span>Location</span><select value={selectedTemplate.location} onChange={(event) => patchPersonalTemplate({ location: event.target.value as WorkoutTemplate["location"] })}><option>Gym</option><option>Home</option><option>Anywhere</option></select></label><div className="routine-equipment-field"><span>Available equipment</span><details className="equipment-multiselect"><summary>{selectedTemplate.equipment.join(" · ")}</summary><div>{exerciseEquipment.map((equipment) => <label key={equipment}><input type="checkbox" checked={selectedTemplate.equipment.includes(equipment)} onChange={() => toggleTemplateEquipment(equipment)} /><span>{equipment}</span></label>)}</div></details></div></section></> : <><h1>{selectedTemplate.name}</h1><p className="lead">{selectedTemplate.description}</p></>}
-          <section className="template-metrics"><div><span>EST. TOTAL</span><strong>~{estimatedWorkoutMinutes(selectedTemplate)} min</strong></div><div><span>GOAL</span><strong>{selectedTemplate.goal}</strong></div><div><span>PLACE</span><strong>{selectedTemplate.location}</strong></div></section>
+          {templateEditing && selectedTemplate.source === "personal" ? <><div className="template-title-editor"><label><span>Workout name</span><input value={selectedTemplate.name} onChange={(event) => patchPersonalTemplate({ name: event.target.value })} aria-label="Workout name" /></label><label><span>Description</span><textarea rows={2} value={selectedTemplate.description} onChange={(event) => patchPersonalTemplate({ description: event.target.value })} aria-label="Workout description" /></label></div><section className="routine-builder-settings"><label><span>Focus</span><input value={selectedTemplate.focus} onChange={(event) => patchPersonalTemplate({ focus: event.target.value })}/></label><label><span>Goal</span><select value={selectedTemplate.goal} onChange={(event) => patchPersonalTemplate({ goal: event.target.value as WorkoutTemplate["goal"] })}>{workoutGoals.filter((goal) => goal !== "All").map((goal) => <option key={goal}>{goal}</option>)}</select></label><label><span>Level</span><select value={selectedTemplate.level} onChange={(event) => patchPersonalTemplate({ level: event.target.value as WorkoutTemplate["level"] })}>{workoutLevels.filter((level) => level !== "All").map((goal) => <option key={goal}>{goal}</option>)}</select></label><label><span>Duration (mins)</span><DeferredIntegerInput value={selectedTemplate.duration} min={5} max={240} onCommit={(duration) => patchPersonalTemplate({ duration })} label="Workout duration in minutes" /></label><label><span>Location</span><select value={selectedTemplate.location} onChange={(event) => patchPersonalTemplate({ location: event.target.value as WorkoutTemplate["location"] })}><option>Gym</option><option>Home</option><option>Anywhere</option></select></label><div className="routine-equipment-field"><span>Available equipment</span><details className="equipment-multiselect"><summary>{selectedTemplate.equipment.join(" · ")}</summary><div>{exerciseEquipment.map((equipment) => <label key={equipment}><input type="checkbox" checked={selectedTemplate.equipment.includes(equipment)} onChange={() => toggleTemplateEquipment(equipment)} /><span>{equipment}</span></label>)}</div></details></div></section></> : <><h1>{selectedTemplate.name}</h1><p className="lead">{selectedTemplate.description}</p></>}
           <p className="equipment-line"><strong>Equipment:</strong> {selectedTemplate.equipment.join(", ")}</p>
           <section className="template-exercises">
             {selectedTemplate.exercises.map((exercise, index) => { const definition = exerciseLibrary.find((item) => item.name === exercise.exerciseName); return <article key={`${exercise.exerciseName}-${index}`} className={templateEditing ? "editing" : ""}><span>{String(index + 1).padStart(2, "0")}</span>{templateEditing && selectedTemplate.source === "personal" ? <div className="template-exercise-editor"><div className="routine-movement-name"><strong>{exercise.exerciseName}</strong><small>{definition ? `${definition.category} · ${definition.equipment} · ${definition.movementPattern}` : "Choose a library movement"}</small></div><div><label>Sets<DeferredIntegerInput value={exercise.sets} min={1} max={10} onCommit={(sets) => patchTemplateExercise(index, { sets })} label={`${exercise.exerciseName} sets`} /></label><label>Target<input value={exercise.reps} onChange={(event) => patchTemplateExercise(index, { reps: event.target.value })} placeholder="8–12 reps, 30 sec, 400 m" aria-label={`${exercise.exerciseName} reps, time, or distance target`} /></label><label>Rest<DeferredIntegerInput value={exercise.rest} min={0} max={600} onCommit={(rest) => patchTemplateExercise(index, { rest })} label={`${exercise.exerciseName} rest seconds`} /></label></div><div className="template-row-actions"><button onClick={() => moveTemplateExercise(index, -1)} disabled={index === 0}>↑</button><button onClick={() => moveTemplateExercise(index, 1)} disabled={index === selectedTemplate.exercises.length - 1}>↓</button><button onClick={() => removeTemplateExercise(index)} disabled={selectedTemplate.exercises.length === 1}><Trash2 size={13} /></button></div></div> : <div><strong>{exercise.exerciseName}</strong><small>{exercise.sets} sets · {exercise.reps}{exercise.reps.includes("sec") ? "" : " reps"} · {exercise.rest}s rest</small></div>}</article>; })}
@@ -3125,12 +3274,33 @@ function App() {
       {screen === "workout" && current && (
         <section className="screen workout-screen">
           <div className="workout-header">
-            <button className="back-button" onClick={() => setScreen("today")}><ArrowLeft size={17} /> Save & leave</button>
+            <button className="back-button" onClick={() => setScreen("workout-review")}><ArrowLeft size={17} /> Review</button>
             <span>{Math.floor(elapsedWorkoutSeconds / 60)}:{String(elapsedWorkoutSeconds % 60).padStart(2, "0")} · {progress}%</span>
           </div>
-          <div className="progress-track large"><span style={{ width: `${progress}%` }} /></div>
-          <p className="eyebrow">EXERCISE {currentIndex + 1} OF {session.exercises.length}</p>
-          <h1>{current.name}</h1>
+          
+          <div className="exercise-header-sticky">
+            <div className="progress-track large"><span style={{ width: `${progress}%` }} /></div>
+            <div className="exercise-header-content">
+              <button className="exercise-nav-btn" onClick={() => {
+                if (currentIndex > 0) {
+                  setSession((s) => ({ ...s, currentId: session.exercises[currentIndex - 1].id }));
+                }
+              }} disabled={currentIndex === 0} aria-label="Previous exercise"><ChevronLeft size={20} /></button>
+              <div className="exercise-header-info">
+                <p className="eyebrow">EXERCISE {currentIndex + 1} OF {session.exercises.length}</p>
+                <h2>{current.name}</h2>
+                <span className="set-count">{current.sets.filter((set) => set.complete).length}/{current.sets.length} sets</span>
+              </div>
+              <button className="exercise-nav-btn" onClick={() => {
+                if (currentIndex < session.exercises.length - 1) {
+                  setSession((s) => ({ ...s, currentId: session.exercises[currentIndex + 1].id }));
+                } else {
+                  setScreen("workout-done");
+                }
+              }} aria-label="Next exercise"><ChevronRight size={20} /></button>
+            </div>
+          </div>
+          
           <p className="lead">{current.target}</p>
 
           <section className="workout-movement-hero"><button onClick={() => { setExerciseDetailReturn("workout"); setScreen("exercise-detail"); }} aria-label={`Open ${current.name} exercise profile`}>{getApprovedExerciseDemo(current.name) ? <img src={getApprovedExerciseDemo(current.name)!} alt="" /> : <span><Dumbbell size={32}/></span>}<div><small>MOVEMENT PROFILE</small><strong>Form, muscles and history</strong><em>{exerciseLibrary.find((item) => item.name.toLowerCase() === current.name.toLowerCase())?.category ?? "Custom"} · {current.sets.filter((set) => set.complete).length}/{current.sets.length} sets</em></div><ArrowRight size={18}/></button></section>
@@ -3157,7 +3327,7 @@ function App() {
           </label>
 
           {timer > 0 && timerControlsOpen && createPortal(
-            <section className="timer-panel">
+            <section className={`timer-panel${timer <= 10 && timer > 0 ? " timer-final-10" : ""}`}>
               <div><TimerReset size={20} /><span>REST</span><strong>{Math.floor(timer / 60)}:{String(timer % 60).padStart(2, "0")}</strong></div>
               <button onClick={() => setTimer((value) => Math.max(0, value - 15))} aria-label="Remove 15 seconds from rest">−15</button>
               <button onClick={() => setTimerRunning((value) => !value)}>{timerRunning ? <Pause size={18} /> : <Play size={18} />}</button>
@@ -3189,6 +3359,40 @@ function App() {
           {available.length === 0 && returnQueue.length === 0 && (
             <button className="primary-button" onClick={() => setScreen("review")}>Review workout <ArrowRight size={17} /></button>
           )}
+
+          <WorkoutProgressBar
+            currentExerciseIndex={currentIndex}
+            totalExercises={session.exercises.length}
+            completedExercises={session.exercises.filter((e) => e.sets.every((s) => s.complete)).length}
+            onExpand={() => setRoutineSheetOpen(true)}
+          />
+
+          {routineSheetOpen && (
+            <RoutineChecklistSheet
+              exercises={session.exercises}
+              currentExerciseId={session.currentId}
+              onExerciseSelect={(exerciseId) => setSession((s) => ({ ...s, currentId: exerciseId }))}
+              onClose={() => setRoutineSheetOpen(false)}
+            />
+          )}
+        </section>
+      )}
+
+      {screen === "workout-review" && session && (
+        <section className="screen workout-review-screen">
+          <PreSubmitReview
+            session={session}
+            onEdit={(exerciseId) => {
+              setSession((s) => ({ ...s, currentId: exerciseId }));
+              setScreen("workout");
+            }}
+            onConfirm={() => {
+              setScreen("review");
+            }}
+            onCancel={() => {
+              setScreen("workout");
+            }}
+          />
         </section>
       )}
 
