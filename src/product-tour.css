@@ -1,0 +1,44 @@
+.replay-tour-button { min-height:44px; margin-top:12px; padding:0 13px; border:1px solid color-mix(in srgb,var(--blue) 20%,transparent); border-radius:11px; display:flex; align-items:center; gap:8px; color:var(--blue); background:color-mix(in srgb,var(--blue) 6%,transparent); font-weight:700; cursor:pointer; }
+.product-tour { position:fixed; z-index:300; inset:0; width:100%; height:100vh; height:100dvh; padding:max(20px,env(safe-area-inset-top)) max(20px,env(safe-area-inset-right)) max(20px,env(safe-area-inset-bottom)) max(20px,env(safe-area-inset-left)); display:grid; place-items:center; overflow:hidden; overscroll-behavior:contain; pointer-events:none; }
+body:has(.product-tour) .primary-nav { z-index:310; }
+.tour-scrim { position:absolute; inset:0; width:100%; height:100%; border:0; background:color-mix(in srgb,var(--navy) 24%,transparent); backdrop-filter:none; cursor:default; pointer-events:auto; }
+.product-tour>article { position:relative; width:min(100%,540px); max-height:100%; padding:28px; border:1px solid var(--north-active-divider); border-radius:var(--north-radius-modal); color:var(--ink); background:var(--north-raised); box-shadow:var(--north-shadow-raised); overflow-y:auto; overscroll-behavior:contain; scrollbar-width:thin; animation:tour-enter .28s ease both; pointer-events:auto; }
+@keyframes tour-enter { from { opacity:0; transform:translateY(12px) scale(.98); } }
+.product-tour>article>header { display:flex; align-items:center; justify-content:space-between; }
+.product-tour-brand { width:118px; height:42px; display:grid; align-items:center; }
+.product-tour-brand img { width:118px; height:42px; grid-area:1/1; display:block; object-fit:contain; object-position:left center; }
+.product-tour-brand-dark { display:none!important; }
+:root[data-theme="night"] .product-tour-brand-light { display:none; }
+:root[data-theme="night"] .product-tour-brand-dark { display:block!important; }
+.product-tour>article>header>button { min-height:40px; padding:0 10px; border:0; color:var(--muted); background:transparent; cursor:pointer; }
+.tour-progress { display:grid; grid-template-columns:repeat(5,1fr); gap:6px; margin:25px 0 30px; }
+.tour-progress i { height:4px; border-radius:9px; background:var(--line); }
+.tour-progress i.active { background:var(--blue); }
+.tour-icon { width:52px; height:52px; display:grid; place-items:center; border:1px solid var(--north-active-divider); border-radius:14px; color:var(--blue); background:var(--north-panel); box-shadow:var(--north-shadow-panel); }
+.tour-icon svg { width:23px; }
+.product-tour h2 { margin:0 0 12px; font:800 clamp(28px,5vw,36px)/1 "Barlow Condensed",sans-serif; letter-spacing:0; }
+.product-tour article>p:not(.onboarding-kicker) { color:var(--muted); font-size:16px; line-height:1.65; }
+.product-tour footer { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:28px; }
+.product-tour footer>button { min-height:48px; padding:0 16px; border:1px solid var(--line); border-radius:13px; display:flex; align-items:center; gap:7px; color:var(--muted); background:transparent; font-weight:700; cursor:pointer; }
+.product-tour footer>button:last-child { margin-left:auto; color:white; border:0; background:var(--navy); box-shadow:0 10px 24px color-mix(in srgb,var(--navy) 28%,transparent); }
+html[data-motion="reduced"] .product-tour>article { animation:none; }
+
+@media(max-width:520px) {
+  .product-tour { padding:max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) calc(96px + env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left)); align-items:end; }
+  .product-tour>article { padding:20px; border-radius:var(--north-radius-modal); }
+  .tour-progress { margin:14px 0 18px; }
+  .tour-icon { width:48px; height:48px; }
+  .product-tour article>p:not(.onboarding-kicker) { font-size:15px; line-height:1.55; }
+  .product-tour footer { margin-top:18px; }
+  .product-tour footer>button { padding:0 12px; font-size:12px; }
+}
+
+@media(max-height:680px) {
+  .product-tour>article { padding:18px; }
+  .tour-progress { margin:14px 0 18px; }
+  .tour-icon { width:48px; height:48px; border-radius:14px; }
+  .product-tour h2 { font-size:26px; }
+  .product-tour article>p:not(.onboarding-kicker) { font-size:14px; line-height:1.5; }
+  .product-tour footer { margin-top:16px; }
+  .product-tour footer>button { min-height:44px; }
+}

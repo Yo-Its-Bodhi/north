@@ -6,6 +6,7 @@ import jwt from "@fastify/jwt";
 import rateLimit from "@fastify/rate-limit";
 import bcrypt from "bcryptjs";
 import pg from "pg";
+import { registerCommunityRoutes } from "./community-routes.mjs";
 import { registerNovaRoutes } from "./nova-routes.mjs";
 
 if (existsSync(".env.local")) process.loadEnvFile(".env.local");
@@ -747,6 +748,7 @@ function mapDocument(row) {
   return { key: row.document_key, collection: row.collection, id: row.document_key.split(":").slice(1).join(":"), data: row.data, version: Number(row.version), updatedAt: row.updated_at, deletedAt: row.deleted_at };
 }
 
+registerCommunityRoutes(app, { pool });
 registerNovaRoutes(app,{pool});
 
 app.addHook("onClose", async () => pool.end());

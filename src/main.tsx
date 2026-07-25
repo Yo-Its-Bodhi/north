@@ -15,6 +15,7 @@ import MuscleMapPreview from "./components/MuscleMapPreview";
 import { BootIntro } from "./components/BrandMotion";
 import { hydratePublishedCatalogue } from "./data/catalogue";
 import "./styles.css";
+import "./product-tour.css";
 
 export function NorthRoot() {
   const admin = location.pathname.startsWith("/admin");

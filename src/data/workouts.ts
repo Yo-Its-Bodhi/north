@@ -3,6 +3,7 @@ import { productionExerciseLibrary, normalizeExerciseKey } from "../exerciseData
 
 export type WorkoutLevel = "Beginner" | "Intermediate" | "Advanced";
 export type WorkoutGoal = "Strength" | "Muscle" | "General fitness" | "Conditioning" | "Mobility";
+export type WorkoutDay = "Monday" | "Tuesday" | "Wednesday" | "Thursday" | "Friday" | "Saturday" | "Sunday";
 
 export type WorkoutTemplateExercise = {
   exerciseName: string;
@@ -22,8 +23,27 @@ export type WorkoutTemplate = {
   duration: number;
   equipment: string[];
   location: "Gym" | "Home" | "Anywhere";
+  preferredDay?: WorkoutDay;
   exercises: WorkoutTemplateExercise[];
-  source?: "north" | "personal";
+  source?: "north" | "personal" | "community";
+  community?: {
+    id: string;
+    sourceTemplateId: string;
+    creator: { id: string; displayName: string; username: string };
+    originalWorkoutId?: string;
+    originalCreator?: { id: string; displayName: string; username: string };
+    version: number;
+    saves: number;
+    starts: number;
+    publishedAt: string;
+    updatedAt: string;
+    ownedByViewer: boolean;
+  };
+  lineage?: {
+    sourceCommunityWorkoutId: string;
+    originalCommunityWorkoutId: string;
+    originalCreator: { id: string; displayName: string; username: string };
+  };
 };
 
 type Blueprint = {

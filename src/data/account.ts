@@ -12,7 +12,7 @@ export interface NorthSession {
 const SESSION_KEY = "north-account-session-v1";
 const DEVICE_KEY = "north-device-id-v1";
 const LAST_LOCAL_OWNER_KEY = "north-last-local-owner-v1";
-export const NORTH_API_BASE = import.meta.env?.VITE_API_BASE_URL || (location.hostname === "localhost" || location.hostname === "127.0.0.1" ? "http://127.0.0.1:8787" : import.meta.env.DEV ? `${location.protocol}//${location.hostname}:8787` : location.origin);
+export const NORTH_API_BASE = import.meta.env?.VITE_API_BASE_URL || (import.meta.env.DEV ? "/api" : location.origin);
 
 export function northDevice() {
   let id = localStorage.getItem(DEVICE_KEY);
