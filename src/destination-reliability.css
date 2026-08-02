@@ -2140,6 +2140,12 @@
   grid-row: auto;
   margin: 0;
 }
+.member-shell .today-week-pulse > .direction-panel {
+  grid-column: 1 / -1;
+  grid-row: auto;
+  width: 100%;
+  margin: var(--north-space-4) 0 0;
+}
 .member-shell .today-muscle-focus {
   min-width: 0;
   height: 220px;
@@ -2171,6 +2177,17 @@
 }
 
 @media (min-width: 1024px) {
+  .member-shell .today-week-pulse {
+    grid-column: 1;
+    grid-row: 2;
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
+  }
+  .member-shell .today-week-pulse > .direction-panel {
+    min-height: 360px;
+    padding: 32px;
+  }
   .member-shell .today-context-column {
     grid-column: 2;
     grid-row: 2;
@@ -2178,6 +2195,12 @@
     margin: 0;
     grid-template-rows: auto minmax(0, 1fr);
     gap: 14px;
+  }
+  .member-shell .today-record {
+    grid-column: 2;
+    grid-row: 2;
+    align-self: start;
+    margin-top: 392px;
   }
   .member-shell .today-muscle-focus { height: auto; min-height: 0; }
 }

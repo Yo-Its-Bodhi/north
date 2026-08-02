@@ -56,3 +56,13 @@ test("completed Journey milestones use a filled trophy badge", () => {
   assert.match(appSource, /milestone\.unlocked \? <Trophy size=\{17\} fill="currentColor"/);
   assert.match(styleSource, /chapter-milestone-list article\.unlocked > span[\s\S]*color: var\(--surface-solid\);[\s\S]*background: var\(--blue\);/);
 });
+
+test("Today places direction between the week days and next milestone", () => {
+  const source = readFileSync(new URL("../src/App.tsx", import.meta.url), "utf8");
+  const pulseStart = source.indexOf('<section className="today-week-pulse">');
+  const pulseEnd = source.indexOf('</section>', pulseStart);
+  const pulse = source.slice(pulseStart, pulseEnd);
+  assert.ok(pulseStart >= 0 && pulseEnd > pulseStart);
+  assert.ok(pulse.indexOf('className="week-pulse-days"') < pulse.indexOf('{todayDirectionPanel}'));
+  assert.ok(pulse.indexOf('{todayDirectionPanel}') < pulse.indexOf('className="week-pulse-milestone"'));
+});
