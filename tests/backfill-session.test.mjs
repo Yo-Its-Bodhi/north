@@ -42,3 +42,10 @@ test("weekly load belongs to Journey insights rather than Training", () => {
   assert.doesNotMatch(source.slice(trainingStart, trainingEnd), /What actually happened/);
   assert.doesNotMatch(source, /id: "load", label: "Weekly load"/);
 });
+
+test("primary destinations keep their theme-coloured page labels", () => {
+  const source = readFileSync(new URL("../src/App.tsx", import.meta.url), "utf8");
+  for (const label of ["TODAY", "JOURNEY", "TRAINING", "NOVA", "YOU"]) {
+    assert.match(source, new RegExp(`className="eyebrow destination-eyebrow">${label}<`));
+  }
+});

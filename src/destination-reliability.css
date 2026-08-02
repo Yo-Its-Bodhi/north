@@ -383,6 +383,13 @@
   letter-spacing: 0;
 }
 
+.member-shell .destination-eyebrow {
+  margin: 0 0 5px;
+  color: var(--blue);
+  font: 900 9px/1.2 "Manrope", sans-serif;
+  letter-spacing: .14em;
+}
+
 :root .primary-nav > button {
   min-width: 0 !important;
   min-height: 52px !important;
@@ -658,7 +665,7 @@
     .training-destination .training-page-header,
     .nova-screen .nova-page-heading,
     .you-screen .you-profile-header
-  ) p:not(.destination-subheading),
+  ) p:not(.destination-subheading):not(.destination-eyebrow),
   .member-shell .you-screen .you-profile-header small { display: none; }
   .member-shell .journey-destination .journey-page-header {
     grid-template-columns: minmax(0, 1fr) 38px;
