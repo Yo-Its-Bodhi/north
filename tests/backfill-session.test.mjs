@@ -55,10 +55,33 @@ test("Training Atlas is the primary Journey insights explorer", () => {
 test("primary destinations use the shared North-branded header system", () => {
   const source = readFileSync(new URL("../src/App.tsx", import.meta.url), "utf8");
   const styles = readFileSync(new URL("../src/destination-reliability.css", import.meta.url), "utf8");
+  const globalStyles = readFileSync(new URL("../src/styles.css", import.meta.url), "utf8");
+  const runtimeStyles = readFileSync(new URL("../src/styles/runtime-07.css", import.meta.url), "utf8");
   for (const destination of ["today", "journey", "training", "nova", "you"]) {
     assert.match(source, new RegExp(`destination-brand-header destination-brand-${destination}`));
   }
-  for (const label of ["Today", "Journey", "Training", "Nova", "You"]) assert.match(source, new RegExp(`<h1>${label}<`));
+  for (const label of ["Today", "Journey", "Training", "Build workout", "Nova", "You"]) assert.match(source, new RegExp(`<h1>${label}<`));
+  assert.match(source, /function BuildWorkoutDestinationHeader\(\)[\s\S]*nova-builder-page-header destination-brand-header destination-brand-builder/);
+  for (const screen of ["workout-library", "nova-workout-builder", "nova-routine-builder", "workout-template"]) {
+    const start = source.indexOf(`{screen === "${screen}"`);
+    const end = source.indexOf('{screen === "', start + 12);
+    assert.match(source.slice(start, end), /<BuildWorkoutDestinationHeader \/>/);
+  }
+  assert.match(source, /\["nova-routine-builder", "workout-library", "workout-template"\]\.includes\(screen\)[\s\S]*\? "nova-workout-builder"/);
+  assert.doesNotMatch(source, /className="routine-builder-launch"/);
+  assert.doesNotMatch(source, /WORKOUT LIBRARY|Find the right session\.|North workouts,.*personal template/);
+  const libraryStart = source.indexOf('{screen === "workout-library"');
+  const libraryEnd = source.indexOf('{screen === "nova-workout-builder"', libraryStart);
+  assert.doesNotMatch(source.slice(libraryStart, libraryEnd), /className="back-button"/);
+  const builderStart = source.indexOf('{screen === "nova-workout-builder"');
+  const builderEnd = source.indexOf('{screen === "nova-routine-builder"', builderStart);
+  assert.doesNotMatch(source.slice(builderStart, builderEnd), /className="back-button"/);
+  assert.match(globalStyles, /\.routine-library-switcher\{display:grid;grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
+  assert.match(globalStyles, /@media\(min-width:1024px\)\{[\s\S]*\.routine-library-switcher\{grid-template-columns:repeat\(4,minmax\(0,1fr\)\)\}/);
+  assert.match(runtimeStyles, /\.routine-library-switcher\{display:grid;grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
+  assert.match(runtimeStyles, /@media\(min-width:1024px\)\{[\s\S]*\.routine-library-switcher\{grid-template-columns:repeat\(4,minmax\(0,1fr\)\)\}/);
+  assert.match(styles, /@media \(min-width: 1024px\) \{[\s\S]*\.nova-workout-builder-screen,[\s\S]*\.nova-routine-builder-screen,[\s\S]*\.workout-library-screen,[\s\S]*\.workout-template-screen[\s\S]*> \.back-button \{ display: none; \}/);
+  assert.match(styles, /@media \(max-width: 700px\) \{[\s\S]*\.destination-brand-header \{[\s\S]*align-items: start;/);
   assert.match(source, /className="primary-nav-brand"[\s\S]*aria-label="North home"[\s\S]*lockup-horizontal-offwhite\.png/);
   assert.match(styles, /\.member-shell \.topbar-actions \{ margin-left: auto; \}/);
   assert.match(styles, /@media \(min-width: 1024px\) \{[\s\S]*\.member-shell \.topbar \.brand \{ display: none !important; \}[\s\S]*\.primary-nav-brand \{/);

@@ -624,6 +624,8 @@
   :root .member-shell :is(
     .journey-destination,
     .training-destination,
+    .builder-workspace-screen,
+    .nova-workout-builder-screen,
     .nova-screen,
     .you-screen
   ) {
@@ -2333,11 +2335,13 @@
 }
 :root .member-shell .destination-brand-journey,
 :root .member-shell .destination-brand-training,
+:root .member-shell .destination-brand-builder,
 :root .member-shell .destination-brand-nova,
 :root .member-shell .destination-brand-you { --destination-tone: var(--blue); }
 :root[data-palette="spectrum"] .member-shell .destination-brand-today { --destination-tone: var(--spectrum-orange); }
 :root[data-palette="spectrum"] .member-shell .destination-brand-journey { --destination-tone: var(--spectrum-teal); }
 :root[data-palette="spectrum"] .member-shell .destination-brand-training { --destination-tone: var(--spectrum-blue); }
+:root[data-palette="spectrum"] .member-shell .destination-brand-builder { --destination-tone: var(--spectrum-orange); }
 :root[data-palette="spectrum"] .member-shell .destination-brand-nova { --destination-tone: var(--spectrum-green); }
 :root[data-palette="spectrum"] .member-shell .destination-brand-you { --destination-tone: var(--spectrum-pink); }
 
@@ -2377,12 +2381,45 @@
   background: var(--destination-tone);
 }
 
+:root .member-shell .builder-section-title,
+:root .member-shell .nova-studio-header h2 {
+  margin: 2px 0 7px;
+  color: var(--ink);
+  font: 800 38px/.95 "Barlow Condensed", sans-serif;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+@media (min-width: 1024px) {
+  :root .member-shell :is(
+    .nova-workout-builder-screen,
+    .nova-routine-builder-screen,
+    .workout-library-screen,
+    .workout-template-screen
+  ) > .back-button { display: none; }
+
+  :root .member-shell .workout-template-screen:has(.template-title-editor) > .destination-brand-header {
+    grid-column: 1 / -1;
+    grid-row: 1;
+  }
+  :root .member-shell .workout-template-screen:has(.template-title-editor) > .template-metrics { grid-row: 2; }
+  :root .member-shell .workout-template-screen:has(.template-title-editor) > .eyebrow { grid-row: 3; }
+  :root .member-shell .workout-template-screen:has(.template-title-editor)::before { grid-row: 4 / 6; }
+  :root .member-shell .workout-template-screen:has(.template-title-editor) > .template-title-editor { grid-row: 4; }
+  :root .member-shell .workout-template-screen:has(.template-title-editor) > .routine-builder-settings { grid-row: 5; }
+  :root .member-shell .workout-template-screen:has(.template-title-editor) > .template-exercises,
+  :root .member-shell .workout-template-screen:has(.template-title-editor) > .add-template-row,
+  :root .member-shell .workout-template-screen:has(.template-title-editor) > .exercise-picker-v2 { grid-row: 6; }
+  :root .member-shell .workout-template-screen:has(.template-title-editor) > .routine-save-state { grid-row: 7; }
+}
+
 @media (max-width: 700px) {
   :root .member-shell .destination-brand-header {
     min-height: 148px;
     margin-bottom: 22px !important;
     padding: 20px 18px !important;
     gap: 12px;
+    align-items: start;
   }
   :root .member-shell .destination-brand-header::after {
     top: -30px;
@@ -2394,6 +2431,8 @@
   :root .member-shell .destination-brand-header h1 { font-size: 42px; }
   :root .member-shell .destination-brand-header .destination-subheading { margin-top: 7px; font-size: 13px; }
   :root .member-shell .destination-brand-header .destination-header-detail { max-width: 275px; font-size: 10px !important; }
+  :root .member-shell .builder-section-title,
+  :root .member-shell .nova-studio-header h2 { font-size: 34px; }
   :root .member-shell .destination-brand-nova { align-items: start; }
   :root .member-shell .destination-brand-nova .nova-heading-actions { grid-column: 1 / -1; justify-content: flex-start; }
   :root .member-shell .destination-brand-nova .nova-context-trigger { top: 18px; right: 18px; }
