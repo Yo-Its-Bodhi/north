@@ -152,6 +152,13 @@ test("Today follows the decision-first section order", () => {
   assert.doesNotMatch(pulse, /todayDirectionPanel|week-pulse-milestone/);
 });
 
+test("completed Training heroes keep their status readable over artwork", () => {
+  const styles = readFileSync(new URL("../src/destination-reliability.css", import.meta.url), "utf8");
+  assert.match(styles, /\.training-hero \.training-complete-state \{[^}]*color: var\(--training-hero-ink\)/);
+  assert.match(styles, /\.training-hero \.training-complete-state small \{[^}]*color: var\(--training-hero-muted\)/);
+  assert.doesNotMatch(styles, /\.training-complete-state \{[^}]*color: var\(--surface-solid\)/);
+});
+
 test("You separates declaration from current signals and keeps the relevance order", () => {
   const source = readFileSync(new URL("../src/App.tsx", import.meta.url), "utf8");
   const header = source.indexOf('className="you-profile-header destination-brand-header destination-brand-you"');

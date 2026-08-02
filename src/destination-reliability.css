@@ -2006,12 +2006,12 @@
   background: color-mix(in srgb, var(--surface-solid) 72%, transparent);
 }
 .member-shell .training-hero .training-hero-actions.completed { grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
-.member-shell .training-complete-state { min-width: 0; display: flex; align-items: center; gap: 10px; color: var(--surface-solid); }
-.member-shell .training-complete-state > svg { width: 34px; height: 34px; padding: 8px; flex: 0 0 34px; border-radius: 50%; color: var(--navy); background: var(--surface-solid); }
+.member-shell .training-hero .training-complete-state { min-width: 0; display: flex; align-items: center; gap: 10px; color: var(--training-hero-ink); }
+.member-shell .training-hero .training-complete-state > svg { width: 34px; height: 34px; padding: 8px; flex: 0 0 34px; border-radius: 50%; color: var(--navy); background: var(--training-hero-ink); }
 .member-shell .training-complete-state strong,
 .member-shell .training-complete-state small { display: block; }
-.member-shell .training-complete-state strong { font-size: 13px; }
-.member-shell .training-complete-state small { margin-top: 3px; color: color-mix(in srgb, var(--surface-solid) 76%, transparent); font-size: 9px; }
+.member-shell .training-hero .training-complete-state strong { color: var(--training-hero-ink); font-size: 13px; }
+.member-shell .training-hero .training-complete-state small { margin-top: 3px; color: var(--training-hero-muted); font-size: 9px; }
 
 @media (max-width: 520px) {
   .member-shell .training-destination > .training-hero { grid-template-columns: minmax(0, 1fr) 118px; grid-template-rows: auto auto; min-height: 312px; padding: 20px; gap: 8px; }
