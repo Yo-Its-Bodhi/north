@@ -2204,3 +2204,217 @@
   }
   .member-shell .today-muscle-focus { height: auto; min-height: 0; }
 }
+
+/* One North-branded destination identity across mobile and desktop. */
+:root .member-shell .destination-brand-header {
+  --destination-tone: var(--blue);
+  --destination-top-bleed: 24px;
+  position: relative;
+  isolation: isolate;
+  width: calc(100% + 20px) !important;
+  min-height: 156px;
+  margin: calc(-1 * var(--destination-top-bleed)) -10px 30px !important;
+  padding: 24px 26px !important;
+  overflow: hidden;
+  border: 0;
+  border-radius: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 20px;
+  align-items: center;
+  color: var(--ink);
+  background: color-mix(in srgb, var(--destination-tone) 9%, var(--surface-solid));
+  box-shadow: none;
+}
+:root .member-shell .destination-brand-header::after {
+  position: absolute;
+  z-index: -1;
+  top: -38px;
+  right: 64px;
+  width: 220px;
+  height: 300px;
+  content: "";
+  background: var(--destination-tone);
+  opacity: .09;
+  transform: rotate(8deg);
+  -webkit-mask: url("/svg/footprint-stamp-black.svg") center / contain no-repeat;
+  mask: url("/svg/footprint-stamp-black.svg") center / contain no-repeat;
+}
+:root .member-shell .destination-brand-header > * { position: relative; z-index: 1; }
+:root .member-shell .destination-brand-header .destination-header-copy { min-width: 0; }
+:root .member-shell .destination-brand-header .destination-eyebrow {
+  display: block;
+  margin: 0 0 7px;
+  color: var(--destination-tone);
+  font: 900 9px/1.2 "Manrope", sans-serif;
+  letter-spacing: .14em;
+}
+:root .member-shell .destination-brand-header h1 {
+  position: static !important;
+  width: auto !important;
+  height: auto !important;
+  max-width: none;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  clip: auto !important;
+  color: var(--ink);
+  font: 800 54px/.88 "Barlow Condensed", sans-serif;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  white-space: normal !important;
+}
+:root .member-shell .destination-brand-header .destination-subheading {
+  display: block;
+  margin: 9px 0 0;
+  color: var(--ink);
+  font: 700 15px/1.25 "Manrope", sans-serif;
+  letter-spacing: 0;
+}
+:root .member-shell .destination-brand-header .destination-header-detail {
+  display: block !important;
+  max-width: 600px;
+  margin: 6px 0 0 !important;
+  color: var(--muted) !important;
+  font: 500 11px/1.45 "DM Sans", sans-serif !important;
+}
+:root .member-shell .destination-brand-header small {
+  display: block;
+  margin-top: 7px;
+  color: var(--muted);
+  font-size: 9px;
+}
+:root .member-shell .destination-header-actions {
+  margin: 0 !important;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+:root .member-shell .destination-header-actions button,
+:root .member-shell .training-page-actions button {
+  min-width: 44px;
+  min-height: 44px;
+  border-color: color-mix(in srgb, var(--destination-tone) 30%, var(--north-divider));
+  color: var(--destination-tone);
+  background: color-mix(in srgb, var(--destination-tone) 8%, var(--surface-solid));
+  box-shadow: none;
+}
+:root .member-shell .destination-brand-today {
+  --destination-tone: var(--blue);
+  --destination-top-bleed: 32px;
+}
+:root .member-shell .destination-brand-journey,
+:root .member-shell .destination-brand-training,
+:root .member-shell .destination-brand-nova,
+:root .member-shell .destination-brand-you { --destination-tone: var(--blue); }
+:root[data-palette="spectrum"] .member-shell .destination-brand-today { --destination-tone: var(--spectrum-orange); }
+:root[data-palette="spectrum"] .member-shell .destination-brand-journey { --destination-tone: var(--spectrum-teal); }
+:root[data-palette="spectrum"] .member-shell .destination-brand-training { --destination-tone: var(--spectrum-blue); }
+:root[data-palette="spectrum"] .member-shell .destination-brand-nova { --destination-tone: var(--spectrum-green); }
+:root[data-palette="spectrum"] .member-shell .destination-brand-you { --destination-tone: var(--spectrum-pink); }
+
+@media (min-width: 700px) and (max-width: 1023px) {
+  :root .member-shell .destination-brand-header {
+    width: calc(100% + 68px) !important;
+    margin-inline: -34px !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  :root .member-shell .destination-brand-header {
+    --destination-top-bleed: 48px;
+    width: calc(100% + 112px) !important;
+    margin-inline: -56px !important;
+  }
+}
+
+@media (max-width: 700px) {
+  :root .member-shell .destination-brand-header {
+    min-height: 148px;
+    margin-bottom: 22px !important;
+    padding: 20px 18px !important;
+    gap: 12px;
+  }
+  :root .member-shell .destination-brand-header::after {
+    top: -30px;
+    right: 8px;
+    width: 210px;
+    height: 300px;
+    opacity: .085;
+  }
+  :root .member-shell .destination-brand-header h1 { font-size: 42px; }
+  :root .member-shell .destination-brand-header .destination-subheading { margin-top: 7px; font-size: 13px; }
+  :root .member-shell .destination-brand-header .destination-header-detail { max-width: 275px; font-size: 10px !important; }
+  :root .member-shell .destination-brand-nova { align-items: start; }
+  :root .member-shell .destination-brand-nova .nova-heading-actions { grid-column: 1 / -1; justify-content: flex-start; }
+  :root .member-shell .destination-brand-you .destination-header-actions { flex-direction: column; align-items: flex-end; }
+  :root .member-shell .destination-brand-you .you-edit-profile { min-height: 34px; }
+}
+
+@media (max-width: 350px) {
+  :root .member-shell .destination-brand-header {
+    width: calc(100% + 28px) !important;
+    margin-inline: -14px !important;
+  }
+}
+
+/* You follows personal relevance: declaration, current state, connected detail, record, memory, utilities. */
+:root .member-shell .you-screen {
+  display: flex;
+  flex-direction: column;
+}
+:root .member-shell .you-profile-header { order: 0; }
+:root .member-shell .you-declaration {
+  order: 1;
+  margin: 0 0 8px;
+  padding: 22px 0 24px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 20px;
+  align-items: center;
+  border-bottom: 1px solid var(--north-divider);
+}
+:root .member-shell .you-declaration .eyebrow { margin: 0 0 7px; color: var(--blue); }
+:root .member-shell .you-declaration p:not(.eyebrow) {
+  max-width: 680px;
+  margin: 0;
+  color: var(--ink);
+  font: 700 20px/1.35 "Manrope", sans-serif;
+}
+:root .member-shell .you-declaration small {
+  display: block;
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+}
+:root .member-shell .you-profile-editor { order: 2; margin: 16px 0 0; }
+:root .member-shell .you-wellbeing { order: 3; margin-top: 26px; }
+:root .member-shell .you-health-hub,
+:root .member-shell .you-health-report,
+:root .member-shell .you-screen > .data-status { order: 4; }
+:root .member-shell .you-training-record,
+:root .member-shell .earned-identities { order: 5; }
+:root .member-shell .you-training-record ~ .section-heading,
+:root .member-shell .you-training-record ~ .memory-controls { order: 6; }
+:root .member-shell .you-account-menu { order: 8; }
+:root .member-shell .memory-controls ~ .section-heading { order: 7; }
+:root .member-shell .you-wellbeing > header {
+  align-items: center;
+  flex-direction: row;
+}
+
+@media (max-width: 700px) {
+  :root .member-shell .you-declaration { padding: 18px 0 20px; gap: 12px; }
+  :root .member-shell .you-declaration p:not(.eyebrow) { font-size: 16px; }
+  :root .member-shell .you-declaration .you-edit-profile { align-self: start; }
+  :root .member-shell .you-wellbeing > header { align-items: center; flex-direction: row; }
+  :root .member-shell .you-wellbeing > header h2 { font-size: 22px; }
+  :root .member-shell .you-wellbeing > header button {
+    min-height: 40px;
+    padding-inline: 10px;
+    flex: 0 0 auto;
+    font-size: 11px;
+  }
+}

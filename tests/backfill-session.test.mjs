@@ -43,11 +43,12 @@ test("weekly load belongs to Journey insights rather than Training", () => {
   assert.doesNotMatch(source, /id: "load", label: "Weekly load"/);
 });
 
-test("primary destinations keep their theme-coloured page labels", () => {
+test("primary destinations use the shared North-branded header system", () => {
   const source = readFileSync(new URL("../src/App.tsx", import.meta.url), "utf8");
-  for (const label of ["TODAY", "JOURNEY", "TRAINING", "NOVA", "YOU"]) {
-    assert.match(source, new RegExp(`className="eyebrow destination-eyebrow">${label}<`));
+  for (const destination of ["today", "journey", "training", "nova", "you"]) {
+    assert.match(source, new RegExp(`destination-brand-header destination-brand-${destination}`));
   }
+  for (const label of ["Today", "Journey", "Training", "Nova", "You"]) assert.match(source, new RegExp(`<h1>${label}<`));
 });
 
 test("completed Journey milestones use a filled trophy badge", () => {
@@ -65,4 +66,22 @@ test("Today places direction between the week days and next milestone", () => {
   assert.ok(pulseStart >= 0 && pulseEnd > pulseStart);
   assert.ok(pulse.indexOf('className="week-pulse-days"') < pulse.indexOf('{todayDirectionPanel}'));
   assert.ok(pulse.indexOf('{todayDirectionPanel}') < pulse.indexOf('className="week-pulse-milestone"'));
+});
+
+test("You separates declaration from current signals and keeps the relevance order", () => {
+  const source = readFileSync(new URL("../src/App.tsx", import.meta.url), "utf8");
+  const header = source.indexOf('className="you-profile-header destination-brand-header destination-brand-you"');
+  const declaration = source.indexOf('className="you-declaration"');
+  const signals = source.indexOf('className="you-wellbeing"');
+  const record = source.indexOf('className="you-training-record"');
+  const memory = source.indexOf("WHAT NORTH HAS LEARNED", record);
+  const account = source.indexOf("ACCOUNT & APP", memory);
+  assert.ok(header < declaration && declaration < signals && signals < record && record < memory && memory < account, "You sections should follow relevance order");
+  assert.match(source, /className="you-declaration"[\s\S]*YOUR DECLARATION/);
+  assert.match(source, /className="you-wellbeing"[\s\S]*CURRENT SIGNALS/);
+});
+
+test("Journey insights omit redundant secondary panels", () => {
+  const source = readFileSync(new URL("../src/App.tsx", import.meta.url), "utf8");
+  assert.doesNotMatch(source, /insight-next-step|YOUR NEXT SIGNAL|four-week-chart/);
 });
