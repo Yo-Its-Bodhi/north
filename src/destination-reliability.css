@@ -345,8 +345,7 @@
   .training-history-calendar-layout .north-history-day { position: static; }
 }
 @media (min-width: 1024px) {
-  .training-performance-rail > .training-calendar-panel,
-  .training-performance-rail > .training-calendar-panel + .training-performance-panel { grid-column: 1 / -1; }
+  .training-performance-rail > .training-calendar-panel { grid-column: 1 / -1; }
 }
 
 .primary-nav {

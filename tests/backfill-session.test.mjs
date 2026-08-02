@@ -30,3 +30,15 @@ test("the training calendar can backfill dated activities as well as strength wo
   assert.match(source, /setScreen\("training"\);\s*\n  }\s*\n\s*function importCoachWorkout/);
   assert.doesNotMatch(source, /screen === "workout-history"/);
 });
+
+test("weekly load belongs to Journey insights rather than Training", () => {
+  const source = readFileSync(new URL("../src/App.tsx", import.meta.url), "utf8");
+  const insightsStart = source.indexOf('journeyTab === "insights"');
+  const trainingStart = source.indexOf('screen === "training"');
+  const trainingEnd = source.indexOf('screen === "week-plan"');
+  assert.ok(insightsStart >= 0 && trainingStart > insightsStart && trainingEnd > trainingStart);
+  assert.match(source.slice(insightsStart, trainingStart), /className="insights-weekly-load"/);
+  assert.match(source.slice(insightsStart, trainingStart), /What actually happened/);
+  assert.doesNotMatch(source.slice(trainingStart, trainingEnd), /What actually happened/);
+  assert.doesNotMatch(source, /id: "load", label: "Weekly load"/);
+});
