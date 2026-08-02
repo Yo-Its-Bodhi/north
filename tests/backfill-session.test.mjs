@@ -21,10 +21,12 @@ test("future sessions cannot be backfilled", () => {
 
 test("the training calendar can backfill dated activities as well as strength workouts", () => {
   const source = readFileSync(new URL("../src/App.tsx", import.meta.url), "utf8");
-  assert.match(source, /openActivity\("bike", historyCalendarDate, "workout-history"\)/);
-  assert.match(source, /openActivity\("walk", historyCalendarDate, "workout-history"\)/);
-  assert.match(source, /openActivity\("run", historyCalendarDate, "workout-history"\)/);
-  assert.match(source, /openActivity\("recovery", historyCalendarDate, "workout-history"\)/);
+  assert.match(source, /className="training-performance-panel training-calendar-panel"/);
+  assert.match(source, /openActivity\("bike", historyCalendarDate\)/);
+  assert.match(source, /openActivity\("walk", historyCalendarDate\)/);
+  assert.match(source, /openActivity\("run", historyCalendarDate\)/);
+  assert.match(source, /openActivity\("recovery", historyCalendarDate\)/);
   assert.match(source, /historyCalendarActivities\.map/);
-  assert.match(source, /activityReturnScreen === "workout-history" \? "workout-history" : "journey"/);
+  assert.match(source, /setScreen\("training"\);\s*\n  }\s*\n\s*function importCoachWorkout/);
+  assert.doesNotMatch(source, /screen === "workout-history"/);
 });
