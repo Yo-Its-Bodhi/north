@@ -79,12 +79,12 @@ export async function pullNorth(apiBase: string, accessToken: string, since = "1
     
     // Skip if this document was modified locally in the last 30 seconds (avoid race conditions)
     const local = await northRepository.get(document.collection, document.id);
-    if (local && (now - new Date(local.updatedAt).getTime()) < recentlyModifiedWindow) {
+    if (!preferAccount && local && (now - new Date(local.updatedAt).getTime()) < recentlyModifiedWindow) {
       // Local version is recent, skip pulling the older server version
       continue;
     }
     
-    await northRepository.acceptRemote(document);
+    await northRepository.acceptRemote(document, preferAccount);
     restored += 1;
     if (document.collection === "settings" && document.id === "theme") { if (document.deletedAt) localStorage.removeItem("north-theme"); else localStorage.setItem("north-theme", String(document.data)); continue; }
     if (document.collection === "settings" && document.id === "calorie-estimates") { if (document.deletedAt) localStorage.removeItem("north-calorie-estimates"); else localStorage.setItem("north-calorie-estimates", document.data ? "on" : "off"); continue; }

@@ -10,6 +10,21 @@ class NorthApi(private val baseUrl: String = "https://north.bodhix.io") {
         return org.json.JSONObject(result).getString("accessToken")
     }
 
+    fun connect(token: String, deviceId: String): org.json.JSONObject {
+        val scopes = org.json.JSONArray(listOf("workouts", "daily_movement", "sleep_recovery", "body_measurements"))
+        val preferences = org.json.JSONObject()
+            .put("workouts", true)
+            .put("dailyMovement", true)
+            .put("sleepRecovery", true)
+            .put("bodyMeasurements", false)
+        val body = org.json.JSONObject()
+            .put("status", "connected")
+            .put("scopes", scopes)
+            .put("preferences", preferences)
+            .toString()
+        return org.json.JSONObject(request("/v1/health/connections/health_connect", "PUT", body, token, deviceId))
+    }
+
     fun importAll(token: String, deviceId: String, records: org.json.JSONArray): Int {
         var uploaded = 0
         var offset = 0

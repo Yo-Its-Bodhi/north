@@ -48,7 +48,7 @@ test("pause and resume accumulate multiple persisted pauses", () => {
 test("the workout flow renders a desktop rail and pause review", () => {
   const source = readFileSync(new URL("../src/App.tsx", import.meta.url), "utf8");
   const styles = readFileSync(new URL("../src/styles.css", import.meta.url), "utf8");
-  assert.match(source, /desktopOnly=\{focusedTrainingScreen\}/);
+  assert.match(source, /desktopOnly=\{screen === "workout"\}/);
   assert.match(source, /screen === "workout" \? " workout-topbar" : ""/);
   assert.match(source, /setWorkoutTopbarHidden\(window\.scrollY > 8\)/);
   assert.match(styles, /\.workout-topbar-hidden \.topbar\{height:0/);

@@ -1,6 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { webcrypto } from "node:crypto";
+import { readFileSync } from "node:fs";
+
+const appSource = readFileSync(new URL("../src/App.tsx", import.meta.url), "utf8");
 
 class MemoryStorage {
   #values = new Map();
@@ -16,7 +19,12 @@ globalThis.location = { hostname: "localhost", origin: "http://localhost" };
 Object.defineProperty(globalThis, "navigator", { configurable: true, value: { userAgent: "North account isolation test", platform: "Test" } });
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
 
-const { loginNorthAccount, logoutNorthAccount, readNorthSession, withFreshAccess } = await import("../src/data/account.ts");
+const { loginNorthAccount, logoutNorthAccount, northSessionIsAdmin, readNorthSession, withFreshAccess } = await import("../src/data/account.ts");
+
+test("admin access follows the owner flag returned inside the session user", () => {
+  assert.equal(northSessionIsAdmin({ user: { id: "owner", username: "druwbi", displayName: "Dru", timezone: "UTC", isAdmin: true }, accessToken: "access", refreshToken: "refresh" }), true);
+  assert.equal(northSessionIsAdmin({ user: { id: "member", username: "member", displayName: "Member", timezone: "UTC", isAdmin: false }, accessToken: "access", refreshToken: "refresh" }), false);
+});
 
 test("switching accounts clears the previous account projections and adopts the server-issued device identity", async () => {
   const sessions = [
@@ -34,11 +42,26 @@ test("switching accounts clears the previous account projections and adopts the 
   assert.equal(localStorage.getItem("north-last-local-owner-v1"), "owner-b");
 });
 
-test("signing out removes credentials without deleting the signed-out account's local records", () => {
+test("signing out clears unscoped account projections before another member uses the browser", () => {
   localStorage.setItem("north-week-plan-v1", JSON.stringify([{ owner: "bravo" }]));
   logoutNorthAccount();
   assert.equal(readNorthSession(), null);
-  assert.deepEqual(JSON.parse(localStorage.getItem("north-week-plan-v1")), [{ owner: "bravo" }]);
+  assert.equal(localStorage.getItem("north-week-plan-v1"), null);
+  assert.equal(localStorage.getItem("north-last-local-owner-v1"), "owner-b");
+});
+
+test("a successful non-session response is rejected before account persistence", async () => {
+  globalThis.fetch = async () => new Response("<html>North</html>", { status: 200, headers: { "Content-Type": "text/html" } });
+  await assert.rejects(() => loginNorthAccount("alpha", "password-one"), /account API is not running/);
+  assert.equal(readNorthSession(), null);
+});
+
+test("new-account onboarding starts from clean defaults while synchronization is paused", () => {
+  assert.match(appSource, /function completeOnboarding[\s\S]*setAccountDataReady\(false\)/);
+  assert.match(appSource, /const nextPlan = initialWeekPlan\(\)\.map/);
+  assert.doesNotMatch(appSource, /function completeOnboarding[\s\S]{0,1000}setWeeklyPlan\(\(days\)/);
+  assert.match(appSource, /setTourStep\(-1\)/);
+  assert.match(appSource, /setUpdateNoticeOpen\(false\)/);
 });
 
 test("a failed protected operation is not blindly retried and duplicated", async () => {

@@ -26,12 +26,15 @@ import {
   Database,
   Download,
   Dumbbell,
+  Flame,
   Footprints,
   History,
   HeartPulse,
   Heart,
   Image,
   ListFilter,
+  ImagePlus,
+  LogOut,
   CloudSun,
   Map as MapIcon,
   MessageCircle,
@@ -47,7 +50,6 @@ import {
   Send,
   Share2,
   SlidersHorizontal,
-  SkipForward,
   Sparkles,
   Sun,
   TimerReset,
@@ -61,6 +63,7 @@ import {
 } from "lucide-react";
 import { exerciseCategories, exerciseEquipment, exerciseLibrary, type ExerciseDefinition } from "./data/exercises";
 import { estimatedWorkoutMinutes, workoutDisplayName, workoutFocuses, workoutGoals, workoutLevels, workoutTemplates, type WorkoutDay, type WorkoutTemplate } from "./data/workouts";
+import { resolveWorkoutCardImage } from "./data/workoutCardImage";
 import { migrateWorkoutTemplate, resolveWorkoutTemplateExercise } from "./data/workoutExerciseIdentity";
 import { programs, type ProgramDefinition } from "./data/programs";
 import { milestoneCategories, milestoneDefinitions, type MilestoneMetric } from "./data/milestones";
@@ -72,6 +75,7 @@ import { deleteCurrentNorthDatabase, migrateLegacyStorage, northRepository, type
 import { ensureNorthTimezone, logoutNorthAccount, NORTH_API_BASE, northDeviceHeaders, readNorthSession, withFreshAccess } from "./data/account";
 import { communityRecordToTemplate, listCommunityWorkouts, publishCommunityWorkout, recordCommunityInteraction, unpublishCommunityWorkout } from "./data/communityApi";
 import { activeWorkoutConflictsWithTemplate, activeWorkoutSecondsAt, pauseWorkoutTiming, resumeWorkoutTiming } from "./data/workoutSessionSafety";
+import { backfillSessionTiming } from "./data/backfillSession";
 import { pullNorth, resolveConflict, syncNorth, type SyncResult } from "./data/sync";
 import Onboarding, { type OnboardingResult } from "./Onboarding";
 import SyncCentre from "./SyncCentre";
@@ -89,25 +93,29 @@ import { productionExerciseLibrary, normalizeExerciseKey } from "./exerciseDatab
 import { trackingTemplates } from "./exerciseDatabase/taxonomies";
 import { createTrackingSet, defaultUnitPreferences, legacyCompatibleSet, summarizeTrackingSet, swapReasons, type LoggedTrackingSet } from "./exerciseDatabase/trackingEngine";
 import type { Exercise as CanonicalExercise } from "./exerciseDatabase/types";
+import { advanceHoldTimer, completedHoldSeconds, holdImprovementSeconds, type HoldTimerState } from "./data/holdTimer";
 import { approveNovaProposal, archiveNovaConversation, createNovaGoal, createNovaMemory, deleteNovaMemory, getNovaBootstrap, getNovaStatus, loadNovaConversation, recordNovaProposalApplied, rejectNovaProposal, sendNovaMessage, updateNovaGoal, updateNovaMemory, type NovaApiProposal, type NovaApiStatus, type NovaGoal, type NovaMemory } from "./data/novaApi";
 import "./components/AnatomyMap.css";
 
 const fullExerciseLibrary = productionExerciseLibrary.map(toLegacyExerciseDefinition);
 
 type Screen = "today" | "journey" | "training" | "week-plan" | "nova" | "nova-workout-builder" | "nova-routine-builder" | "you" | "account" | "settings" | "prepare" | "exercise-detail" | "workout" | "workout-review" | "review" | "workout-library" | "workout-template" | "programs" | "program-detail" | "progression" | "workout-history" | "session-detail" | "activity-log" | "coach-import" | "check-in" | "weekly-review" | "test-log";
-type ThemeName = "off-white" | "rosewater" | "cloud" | "sage" | "teal" | "carbon" | "midnight" | "plum" | "pine";
+type ThemeName = "off-white" | "rosewater" | "cloud" | "sage" | "teal" | "carbon" | "midnight" | "plum" | "pine" | "fuchsia" | "gold" | "solstice" | "lavender" | "spectrum";
 
 const themeOptions: Array<{ id: ThemeName; name: string; mode: "light" | "dark" }> = [
-  { id: "off-white", name: "Porcelain", mode: "light" }, { id: "rosewater", name: "Rosewater", mode: "light" }, { id: "cloud", name: "Mist", mode: "light" }, { id: "sage", name: "Moss", mode: "light" },
-  { id: "teal", name: "Tide", mode: "dark" }, { id: "carbon", name: "Graphite", mode: "dark" }, { id: "midnight", name: "Cobalt", mode: "dark" }, { id: "plum", name: "Ember", mode: "dark" }, { id: "pine", name: "Plum", mode: "dark" },
+  { id: "off-white", name: "Riviera", mode: "light" }, { id: "rosewater", name: "Rosewater", mode: "light" }, { id: "cloud", name: "Mist", mode: "light" }, { id: "sage", name: "Moss", mode: "light" },
+  { id: "teal", name: "Tide", mode: "dark" }, { id: "carbon", name: "Voltage", mode: "dark" }, { id: "midnight", name: "Cobalt", mode: "dark" }, { id: "plum", name: "Ember", mode: "dark" }, { id: "pine", name: "Noir", mode: "dark" },
+  { id: "fuchsia", name: "Afterglow", mode: "dark" }, { id: "gold", name: "Aurum", mode: "dark" }, { id: "solstice", name: "Solstice", mode: "light" },
+  { id: "lavender", name: "Lavender Milk", mode: "light" }, { id: "spectrum", name: "Spectrum", mode: "light" },
 ];
 
-const RELEASE_NOTES_ID = "north-0.4-nova-intelligence-hub";
+const RELEASE_NOTES_ID = "north-0.5-built-to-train";
 const RELEASE_NOTES_DISMISSAL_KEY = "north-release-notes-dismissed";
-type ReleaseNotesVersion = "0.4" | "0.3" | "0.2" | "0.1";
+type ReleaseNotesVersion = "0.5" | "0.4" | "0.3" | "0.2" | "0.1";
 type ReleaseNote = { version: ReleaseNotesVersion; eyebrow: string; title: string; introLead: string; intro: string; items: Array<{ title: string; detail: string }>; thanksLead: string; thanks: string; action: string };
 
 const releaseNotes: ReleaseNote[] = [
+  { version: "0.5", eyebrow: "NORTH 0.5 · BUILT TO TRAIN", title: "A new version of North has arrived.", introLead: "Planning, building and completing a workout now feels faster, clearer and more personal.", intro: "North 0.5 brings a rebuilt training experience, new ways to share workouts and a stronger identity across the entire app.", items: [{ title: "Build workouts your way.", detail: "Desktop now has a dedicated Build a Workout section, with a more visual and interactive way to search for movements, shape a routine and adjust every prescription." }, { title: "A workout tracker rebuilt around training.", detail: "The complete tracker UX overhaul makes sets, targets, rest periods and progress easier to follow while you stay focused on the session." }, { title: "Community workouts have arrived.", detail: "Publish your routines, discover workouts from other North members and copy a workout into your own library to train it or make it yours." }, { title: "Introducing NORTH: ORIGINALS.", detail: "A growing collection of purpose-built North routines will be released over time, giving you trusted starting points for different goals, schedules and training styles." }, { title: "A better beginning.", detail: "Onboarding is simpler, clearer and more welcoming, helping North understand your direction and real week without making setup feel like paperwork." }, { title: "Themes, reimagined.", detail: "Overhauled themes bring stronger visual identities, improved contrast and a more consistent experience across desktop and mobile." }], thanksLead: "North 0.5 is more than a new coat of paint.", thanks: "It is a more capable place to build a workout, follow a plan, share ideas and train with purpose.", action: "Explore North 0.5" },
   { version: "0.4", eyebrow: "NORTH 0.4 · NOVA WAKES UP", title: "Your coach now knows your direction.", introLead: "North already knew how to record the work.", intro: "Now Nova can understand the story behind it, talk it through with you and prepare real changes without ever silently taking control.", items: [{ title: "Talk like a person. Get a real answer.", detail: "Ask about today’s plan, recovery, progress, exercises or what to do next. Nova answers from your saved North records, not a generic fitness script." }, { title: "Your goals have a home.", detail: "Create, pause, complete and refine your direction in a private goal ledger that belongs only to your account." }, { title: "You control what Nova remembers.", detail: "Review what Nova knows, confirm useful context, pause its influence or erase it completely." }, { title: "Changes come with a preview.", detail: "Goals, check-ins, reflections and workout decisions require your approval. Nothing meaningful moves behind your back." }, { title: "One conversation on every device.", detail: "Your Nova thread now follows your signed-in account from desktop to phone, just like your workouts and plans." }, { title: "Evidence, confidence and receipts.", detail: "See what informed a response, where the limits are and exactly what was saved after you approve an action." }], thanksLead: "This is Nova’s foundation, not the finish line.", thanks: "Bring the messy day, the big goal or the what now. North 0.4 is ready to think it through with you.", action: "Meet the new Nova" },
   { version: "0.3", eyebrow: "NORTH 0.3 · BUILT TO MOVE", title: "Your training system just got seriously stronger.", introLead: "0.2 gave you better builders, themes and cross-device control.", intro: "Now 0.3 powers up the engine underneath it all. More movements, better records and smarter muscle detail.", items: [{ title: "784 real exercises. One serious library.", detail: "Strength, cardio, mobility, calisthenics, machines, free weights, timed holds and more are searchable by muscle, equipment, movement, difficulty and training style." }, { title: "Muscles you can actually explore.", detail: "Every reviewed movement connects to North’s interactive front-and-back muscle system, with primary, secondary and supporting roles kept distinct." }, { title: "A recorder built for the gym floor.", detail: "Log weight and reps, left and right sides, timed holds, carries, distance, intervals and cardio using the right controls for the movement." }, { title: "Progress that understands the exercise.", detail: "Personal records and trends now respect the tracking style, so North does not judge a plank like a bench press." }, { title: "Swap without losing direction.", detail: "Progressions, regressions and equipment alternatives connect through stable exercise records." }], thanksLead: "The training engine got a serious upgrade.", thanks: "Pick something hard. Record it properly. Watch the story build.", action: "Keep exploring" },
   { version: "0.2", eyebrow: "NORTH 0.2 · BUILD YOUR WAY", title: "Make North fit the way you train.", introLead: "The foundation was in place.", intro: "0.2 made planning, building and personalising a workout feel closer to your actual week.", items: [{ title: "Build with Nova.", detail: "Set your goal, available time, equipment and location, then build a guided workout one movement at a time." }, { title: "A cleaner workout library.", detail: "Clearer names, honest time estimates including rest, useful sorting and focused filters." }, { title: "Plan the right day.", detail: "Choose an exact day before adding a workout without accidentally reshuffling the week." }, { title: "Preview before adding.", detail: "Open an exercise profile before committing it to your workout." }, { title: "Cross-device account control.", detail: "Your account copy became the source of truth when devices disagreed, with safer syncing and conflict handling." }, { title: "More personal North.", detail: "New themes, refined cards, clearer measurements, improved labels and better navigation." }], thanksLead: "Your plan became more yours.", thanks: "Build the week you can actually carry, then adjust it with intention.", action: "See what changed" },
@@ -137,13 +145,25 @@ const workoutFocusAccents: Record<string, string> = {
 function workoutFocusAccent(focus: string) {
   return workoutFocusAccents[focus] ?? "var(--blue)";
 }
+
+function planWorkoutCardImage(plan: PlanDay) {
+  const definitions = (plan.workout ?? []).map((exercise) => exerciseLibrary.find((definition) => definition.name === exercise.name));
+  return resolveWorkoutCardImage({
+    kind: plan.kind,
+    title: plan.title,
+    exerciseNames: plan.workout?.map((exercise) => exercise.name),
+    categories: definitions.flatMap((definition) => definition ? [definition.category] : []),
+    equipment: definitions.flatMap((definition) => definition ? [definition.equipment] : []),
+  });
+}
 type ActivityEntry = { id: string; date: string; kind: Exclude<ActivityKind, "strength" | "rest">; duration: string; distance: string; effort: number; note: string };
 type CheckInEntry = { id: string; date: string; weight: string; sleep: string; energy: number; soreness: number; note: string };
 type WeeklyReview = { id: string; weekStart: string; proud: string; learned: string; next: string; createdAt: string };
-type TestNote = { id: string; createdAt: string; source: string; category: "confusing" | "slow" | "missing" | "bug"; text: string; resolved: boolean };
+type TestNote = { id: string; createdAt: string; source: string; category: "bug" | "issue" | "problem"; text: string; resolved: boolean; serverId?: string; deliveredAt?: string };
 type ActiveProgram = { programId: string; startedAt: string; currentWeek: number; daysPerWeek: number; duration: number; level: string; equipment: string; priority: string; trainingDayIndexes: number[]; generatedWeekStart: string; weekHistory: Array<{ week: number; completed: number; planned: number; weekStart: string }>; changes: Array<{ createdAt: string; week: number; kind: string; from: string; to: string }> };
 type ProgressionSuggestion = { id: string; exerciseName: string; kind: "load" | "reps" | "rest" | "recovery" | "substitution"; title: string; recommendation: string; evidence: string; nextWeight?: string; nextTarget?: string; nextRest?: number; substitution?: string };
 type ProgressionTransaction = { id: string; suggestion: ProgressionSuggestion; planDayId: string; beforeDay: PlanDay; afterDay: PlanDay; beforeProgram: ActiveProgram | null; afterProgram: ActiveProgram | null; createdAt: string; appliedAt?: string; undoneAt?: string; dismissedAt?: string };
+type TrophyRoomRecord = { id: string; category: "Strength" | "Endurance" | "Movement" | "Consistency"; title: string; value: string; unit: string; detail: string; date?: string; earned: boolean; icon: "strength" | "bike" | "run" | "walk" | "time" | "consistency"; relevance?: number };
 type JourneyPhoto = { id: string; createdAt: string; date: string; dataUrl: string; caption: string };
 type WeatherContext = { temperature: number; apparent: number; precipitation: number; weatherCode: number };
 type CachedWeather = WeatherContext & { savedAt: number };
@@ -153,12 +173,15 @@ type NovaProgramProposal = { id: string; summary: string; beforeProgram: ActiveP
 type NovaMessage = { id: string; role: "user" | "nova"; text: string; createdAt: string; evidence?: string[]; confidence?: "High" | "Moderate" | "Limited"; action?: NovaAction; actionLabel?: string; proposal?: NovaPlanProposal; programProposal?: NovaProgramProposal; apiProposal?: NovaApiProposal; appliedAt?: string; undoneAt?: string };
 type ProfileSettings = { name: string; direction: string; targetDate: string; trainingDays: number; height: string; units: "imperial" | "metric"; bodyWeightUnit: "lb" | "kg"; distanceUnit: "mi" | "km"; language: string; tone: string; notifications: boolean; memoryEnabled: boolean; reducedMotion: boolean; largeText: boolean; highContrast: boolean; connectedServices: string[]; dismissedInsights: string[]; memoryCorrections: Record<string, string> };
 type AccountDevice = { id: string; name: string; user_agent?: string; last_ip?: string; last_seen_at: string; created_at: string; revoked_at?: string; active_sessions: number };
-type HealthConnection = { provider: "health_connect" | "apple_health"; status: string; scopes: string[]; source_apps: string[]; last_sync_at?: string; last_error?: string };
+type HealthPreferences = { workouts: boolean; dailyMovement: boolean; sleepRecovery: boolean; bodyMeasurements: boolean };
+type HealthConnection = { provider: "health_connect" | "apple_health"; status: string; scopes: string[]; source_apps: string[]; preferences?: HealthPreferences; connected_at?: string; import_from?: string; last_sync_at?: string; last_error?: string };
 type HealthSummary = { days: number; types: Array<{ record_type: string; records: number; first_record: string; latest_record: string }> };
-type HealthActivity = { id: string; started_at: string; ended_at: string; title?: string; kind: "bike" | "run" | "walk" | "workout"; exercise_type: number; distance_metres: number; duration_minutes: number; source_app: string };
+type HealthDailyContext = { date: string; steps: number; distance_metres: number; active_calories: number; total_calories: number; calories_kind: "active" | "total"; active_minutes: number; sleep_minutes: number };
+type HealthContext = { days: number; daily: HealthDailyContext[]; latest_weight: { kilograms: number; recorded_at: string } | null };
+type HealthActivity = { id: string; started_at: string; ended_at: string; title?: string; notes?: string; recording_method: "actively_recorded" | "manual_entry" | "unknown"; kind: "bike" | "run" | "walk" | "workout"; exercise_type: number; distance_metres: number; duration_minutes: number; average_speed_kmh: number; calories: number; average_heart_rate: number; maximum_heart_rate: number; source_app: string };
 type InstallPromptEvent = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: "accepted" | "dismissed" }> };
 type SetResult = LoggedTrackingSet & { weight: string; reps: string; complete: boolean };
-type Exercise = {
+export type Exercise = {
   id: string;
   name: string;
   target: string;
@@ -173,7 +196,7 @@ type Exercise = {
   resolutionStatus?: "resolved" | "unresolved";
   originalSavedName?: string;
 };
-type Session = {
+export type Session = {
   planDayId?: string;
   performedAt?: string;
   recordedAt?: string;
@@ -199,6 +222,14 @@ function DeferredUnitInput({ storedValue, formatValue, storeValue, onCommit, lab
 function DeferredIntegerInput({ value, onCommit, min, max, step, label }: { value: number; onCommit: (value: number) => void; min: number; max: number; step?: number; label: string }) {
   const formatted = String(value);
   return <input key={formatted} type="number" inputMode="numeric" min={min} max={max} step={step} defaultValue={formatted} aria-label={label} onBlur={(event) => { const parsed = Number.parseInt(event.currentTarget.value, 10); const next = Number.isFinite(parsed) ? Math.min(max, Math.max(min, parsed)) : min; event.currentTarget.value = String(next); onCommit(next); }} />;
+}
+
+function TrophyRecordIcon({ kind }: { kind: TrophyRoomRecord["icon"] }) {
+  if (kind === "bike") return <Bike />;
+  if (kind === "run" || kind === "walk") return <Footprints />;
+  if (kind === "time") return <Clock3 />;
+  if (kind === "consistency") return <Award />;
+  return <Dumbbell />;
 }
 
 const STORAGE_KEY = "north-active-session-v1";
@@ -319,6 +350,7 @@ function getMuscleActivation(exercise?:Pick<ExerciseDefinition,"name"|"category"
 function buildExercise(template: ExerciseDefinition, id = `${template.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${Date.now()}`): Exercise {
   const setCount = Number(template.target.match(/^\d+/)?.[0] ?? 1);
   const canonical=canonicalExerciseFor(template.name),trackingTemplate=trackingTemplates.find((item)=>item.id===canonical?.trackingTemplateId);
+  const usesClassicTracking=!trackingTemplate||trackingTemplate.requiredFieldIds.every((fieldId)=>fieldId==="weight"||fieldId==="reps");
   return {
     id,
     name: template.name,
@@ -326,7 +358,7 @@ function buildExercise(template: ExerciseDefinition, id = `${template.name.toLow
     rest: template.rest,
     previous: template.previous,
     cue: template.cue,
-    sets: Array.from({ length: setCount }, () => canonical&&trackingTemplate?{...createTrackingSet(canonical,trackingTemplate),weight:template.weight,reps:"",values:{...createTrackingSet(canonical,trackingTemplate).values,weight:template.weight}}:{ weight: template.weight, reps: "", complete: false }),
+    sets: Array.from({ length: setCount }, () => canonical&&trackingTemplate?{...createTrackingSet(canonical,trackingTemplate),weight:usesClassicTracking?template.weight:"",reps:""}:{ weight: template.weight, reps: "", complete: false }),
     note: "",
     passed: false,
     canonicalExerciseId:canonical?.id,
@@ -360,14 +392,17 @@ function exercisesFromTemplate(template: WorkoutTemplate): Exercise[] {
     const resolution = resolveWorkoutTemplateExercise(planned);
     const definition = definitionForTemplateExercise(planned);
     const exercise = buildExercise(definition, `${template.id}-${index}-${planned.exerciseName.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`);
+    const timedHold = resolution.status === "resolved" && resolution.canonical.timedHold && resolution.canonical.trackingTemplateId === "timed_hold";
     return {
       ...exercise,
       canonicalExerciseId: resolution.status === "resolved" ? resolution.canonicalExerciseId : undefined,
       resolutionStatus: resolution.status,
       originalSavedName: planned.exerciseName,
-      target: `${planned.sets} sets · ${planned.reps}${planned.reps.includes("sec") ? "" : " reps"}`,
+      target: `${planned.sets} sets · ${planned.reps}${/sec|min|rep/i.test(planned.reps) ? "" : timedHold ? " sec" : " reps"}`,
       rest: planned.rest,
-      sets: Array.from({ length: planned.sets }, () => ({ weight: definition.weight, reps: "", complete: false })),
+      sets: Array.from({ length: planned.sets }, () => timedHold
+        ? { ...createTrackingSet(resolution.canonical, trackingTemplates.find((item) => item.id === "timed_hold")!), weight: "", reps: "", values: {}, units: { duration: "seconds" } }
+        : { weight: definition.weight, reps: "", complete: false }),
     };
   });
 }
@@ -375,6 +410,12 @@ function exercisesFromTemplate(template: WorkoutTemplate): Exercise[] {
 function prescribedResult(target: string) {
   const result = target.match(/(?:·|sets?)\s*(\d+)(?:\s*[–-]\s*(\d+))?\s*(?:reps?|sec(?:onds?)?|min(?:utes?)?)/i);
   return result ? (result[2] ?? result[1]) : "";
+}
+
+function prescribedHoldSeconds(target: string) {
+  const result = target.match(/(\d+)(?:\s*[–-]\s*(\d+))?\s*(sec(?:onds?)?|min(?:utes?)?)/i);
+  if (!result) return 0;
+  return Number(result[2] ?? result[1]) * (result[3].toLowerCase().startsWith("min") ? 60 : 1);
 }
 
 const resetExercises = (exercises: Exercise[]) => structuredClone(exercises).map((exercise) => ({
@@ -592,9 +633,11 @@ function App() {
   });
   const [loginReveal, setLoginReveal] = useState(false);
   const releaseNotesOpen = false;
-  const [releaseNotesV4Open, setReleaseNotesOpen] = useState(() => localStorage.getItem(RELEASE_NOTES_DISMISSAL_KEY) !== RELEASE_NOTES_ID);
+  const releaseNotesV4Open = false;
+  const [releaseHistoryOpen, setReleaseNotesOpen] = useState(false);
+  const [updateNoticeOpen, setUpdateNoticeOpen] = useState(() => localStorage.getItem(RELEASE_NOTES_DISMISSAL_KEY) !== RELEASE_NOTES_ID);
   const [dismissReleaseNotes, setDismissReleaseNotes] = useState(false);
-  const [releaseNotesVersion, setReleaseNotesVersion] = useState<ReleaseNotesVersion>("0.4");
+  const [releaseNotesVersion, setReleaseNotesVersion] = useState<ReleaseNotesVersion>("0.5");
   const [tourStep, setTourStep] = useState(() => readNorthSession() && !localStorage.getItem(productTourStorageKey()) ? 0 : -1);
   const [screen, setScreen] = useState<Screen>(() => new URLSearchParams(location.search).get("open") === "training" ? "training" : "today");
   const [trainingDetailsOpen, setTrainingDetailsOpen] = useState(false);
@@ -605,6 +648,7 @@ function App() {
   const [timer, setTimer] = useState(0);
   const [timerRunning, setTimerRunning] = useState(false);
   const [timerControlsOpen, setTimerControlsOpen] = useState(false);
+  const [holdTimer, setHoldTimer] = useState<HoldTimerState | null>(null);
   const [workoutTopbarHidden, setWorkoutTopbarHidden] = useState(false);
   const [routineSheetOpen, setRoutineSheetOpen] = useState(false);
   const [workoutSubmitOpen, setWorkoutSubmitOpen] = useState(false);
@@ -624,6 +668,7 @@ function App() {
   const [novaSuggestionIndex, setNovaSuggestionIndex] = useState(0);
   const [novaRoutineStatus, setNovaRoutineStatus] = useState("");
   const [exerciseSearch, setExerciseSearch] = useState("");
+  const [trophySearch, setTrophySearch] = useState("");
   const [customName, setCustomName] = useState("");
   const [exerciseCategory, setExerciseCategory] = useState("All");
   const [exerciseEquipmentFilter, setExerciseEquipmentFilter] = useState("All");
@@ -644,10 +689,11 @@ function App() {
   const [history, setHistory] = useState<Session[]>(readHistory);
   const [editingExerciseId, setEditingExerciseId] = useState<string | null>(null);
   const [selectedHistoryId, setSelectedHistoryId] = useState<string | null>(null);
-  const [historyReturnScreen, setHistoryReturnScreen] = useState<"training" | "journey">("training");
+  const [historyReturnScreen, setHistoryReturnScreen] = useState<"training" | "journey" | "you">("training");
   const [historyEditing, setHistoryEditing] = useState(false);
   const [historyCalendarMonth, setHistoryCalendarMonth] = useState(() => new Date(new Date().getFullYear(), new Date().getMonth(), 1, 12));
   const [historyCalendarDate, setHistoryCalendarDate] = useState(() => isoDate(new Date()));
+  const [activityReturnScreen, setActivityReturnScreen] = useState<"training" | "workout-history">("training");
   const [templateSearch, setTemplateSearch] = useState("");
   const [templateFocus, setTemplateFocus] = useState("All");
   const [templateGoal, setTemplateGoal] = useState("All");
@@ -685,8 +731,8 @@ function App() {
   const [timelineSort, setTimelineSort] = useState<"newest" | "oldest">("newest");
   const [backfillOpen, setBackfillOpen] = useState(false);
   const [backfillSearch, setBackfillSearch] = useState("");
+  const [calendarBackfillOpen, setCalendarBackfillOpen] = useState(false);
   const [journeyPhotos, setJourneyPhotos] = useState<JourneyPhoto[]>(readJourneyPhotos);
-  const [photoCaption, setPhotoCaption] = useState("");
   const [milestoneFilter, setMilestoneFilter] = useState("All");
   const [selectedMilestoneChapter, setSelectedMilestoneChapter] = useState(1);
   const [weather, setWeather] = useState<WeatherContext | null>(readWeatherCache);
@@ -713,6 +759,8 @@ function App() {
   const [healthConnections, setHealthConnections] = useState<HealthConnection[]>([]);
   const [healthSummary, setHealthSummary] = useState<HealthSummary | null>(null);
   const [healthActivities, setHealthActivities] = useState<HealthActivity[]>([]);
+  const [healthContext, setHealthContext] = useState<HealthContext | null>(null);
+  const [healthStatus, setHealthStatus] = useState("");
   const [currentDeviceId, setCurrentDeviceId] = useState("");
   const [accountStatus, setAccountStatus] = useState("");
   const [shareStatus, setShareStatus] = useState("");
@@ -733,9 +781,20 @@ function App() {
   const [expandedInsightId, setExpandedInsightId] = useState<string | null>(null);
   const [testNotes, setTestNotes] = useState<TestNote[]>(readTestNotes);
   const [testReturnScreen, setTestReturnScreen] = useState<Screen>("workout");
-  const [draftTestNote, setDraftTestNote] = useState<{ category: TestNote["category"]; text: string }>({ category: "confusing", text: "" });
+  const [draftTestNote, setDraftTestNote] = useState<{ category: TestNote["category"]; text: string }>({ category: "bug", text: "" });
+  const [reportStatus, setReportStatus] = useState("");
+  const [reportSending, setReportSending] = useState(false);
 
   useEffect(() => { sessionRef.current = session; }, [session]);
+
+  useEffect(() => {
+    if (!novaHubOpen) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setNovaHubOpen(false);
+    };
+    document.addEventListener("keydown", closeOnEscape);
+    return () => document.removeEventListener("keydown", closeOnEscape);
+  }, [novaHubOpen]);
 
   useEffect(() => {
     const preserve = () => localStorage.setItem(STORAGE_KEY, JSON.stringify(sessionRef.current));
@@ -745,24 +804,44 @@ function App() {
   }, []);
 
   useEffect(() => {
-    // Lock screen orientation to portrait when on workout screen for better mobile UX
-    const lockOrientation = async () => {
-      const isWorkoutScreen = screen === "workout";
+    const orientation = window.screen?.orientation as (ScreenOrientation & { lock?: (orientation: "portrait-primary") => Promise<void> }) | undefined;
+    const isMobile = window.matchMedia("(pointer: coarse)").matches;
+    const isStandalone = window.matchMedia("(display-mode: standalone)").matches || Boolean((navigator as Navigator & { standalone?: boolean }).standalone);
+
+    const lockPortrait = async () => {
       try {
-        if (isWorkoutScreen && window.screen?.orientation?.lock) {
-          await window.screen.orientation.lock("portrait-primary");
-        } else if (!isWorkoutScreen && window.screen?.orientation?.unlock) {
-          await window.screen.orientation.unlock();
-        }
-      } catch (err) {
-        // Orientation lock not supported on this device
-        console.debug("Screen orientation lock not available", err);
+        await orientation?.lock?.("portrait-primary");
+      } catch (error) {
+        console.debug("Portrait orientation lock not available", error);
       }
-      // Also set CSS class for media query handling
-      document.documentElement.classList.toggle("portrait-lock", isWorkoutScreen);
     };
-    void lockOrientation();
-  }, [screen]);
+
+    const lockFromInteraction = () => {
+      if (!isMobile || !orientation?.lock) return;
+      if (isStandalone || document.fullscreenElement || !document.fullscreenEnabled) {
+        void lockPortrait();
+        return;
+      }
+      void document.documentElement.requestFullscreen({ navigationUI: "hide" }).then(lockPortrait).catch((error) => {
+        console.debug("Fullscreen portrait lock not available", error);
+      });
+    };
+
+    const relockPortrait = () => {
+      if (document.visibilityState === "visible" && (isStandalone || document.fullscreenElement)) void lockPortrait();
+    };
+
+    document.documentElement.classList.add("portrait-lock");
+    void lockPortrait();
+    document.addEventListener("pointerdown", lockFromInteraction, { capture: true });
+    document.addEventListener("fullscreenchange", relockPortrait);
+    document.addEventListener("visibilitychange", relockPortrait);
+    return () => {
+      document.removeEventListener("pointerdown", lockFromInteraction, { capture: true });
+      document.removeEventListener("fullscreenchange", relockPortrait);
+      document.removeEventListener("visibilitychange", relockPortrait);
+    };
+  }, []);
 
   useEffect(() => {
     // Timer vibration feedback at final 10 seconds and on completion
@@ -890,14 +969,11 @@ function App() {
   }, [screen, journeyTab]);
 
   useEffect(() => {
-    if (screen !== "workout") {
-      setWorkoutTopbarHidden(false);
-      return;
-    }
+    const frame = window.requestAnimationFrame(() => setWorkoutTopbarHidden(screen === "workout" && window.scrollY > 8));
+    if (screen !== "workout") return () => window.cancelAnimationFrame(frame);
     const updateWorkoutTopbar = () => setWorkoutTopbarHidden(window.scrollY > 8);
-    updateWorkoutTopbar();
     window.addEventListener("scroll", updateWorkoutTopbar, { passive: true });
-    return () => window.removeEventListener("scroll", updateWorkoutTopbar);
+    return () => { window.cancelAnimationFrame(frame); window.removeEventListener("scroll", updateWorkoutTopbar); };
   }, [screen]);
 
   useEffect(() => { if (accountDataReady) void persistAccountJson(STORAGE_KEY, "active-session", session); }, [session, accountDataReady]);
@@ -966,16 +1042,20 @@ function App() {
   }, [screen]);
 
   useEffect(() => {
-    if (screen !== "nova" || !novaAtBottom) return;
+    if (screen !== "nova") return;
     const transcript = novaTranscriptRef.current;
-    transcript?.scrollTo({ top: transcript.scrollHeight, behavior: "auto" });
-  }, [screen, novaMessages, novaThinking, novaAtBottom]);
+    if (!transcript) return;
+    const frame = window.requestAnimationFrame(() => {
+      transcript.scrollTo({ top: transcript.scrollHeight, behavior: "auto" });
+      setNovaAtBottom(true);
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [screen, novaMessages, novaThinking]);
 
   useEffect(() => {
     if (screen !== "workout-library" || !accountDataReady || !readNorthSession()) return;
     let cancelled = false;
-    setCommunityLoading(true);
-    setCommunityStatus("");
+    queueMicrotask(() => { if (!cancelled) { setCommunityLoading(true); setCommunityStatus(""); } });
     void listCommunityWorkouts().then((result) => {
       if (cancelled) return;
       setCommunityTemplates(result.workouts.map((record) => migrateWorkoutTemplate(communityRecordToTemplate(record))));
@@ -994,7 +1074,7 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (!["you", "account"].includes(screen) || !readNorthSession()) return;
+    if (!["account", "settings"].includes(screen) || !readNorthSession()) return;
     void withFreshAccess(async (token) => {
       const response = await fetch(`${NORTH_API_BASE}/v1/me/devices`, { headers: { Authorization: `Bearer ${token}`, ...northDeviceHeaders() } });
       if (!response.ok) throw new Error("Devices could not load");
@@ -1006,15 +1086,20 @@ function App() {
   useEffect(() => {
     if (!entryComplete || !readNorthSession()) return;
     void withFreshAccess(async (token) => {
-      const response = await fetch(`${NORTH_API_BASE}/v1/health/activities?days=30`, { headers: { Authorization: `Bearer ${token}`, ...northDeviceHeaders() } });
-      if (!response.ok) throw new Error("Health activities could not load");
-      const result = await response.json() as { activities?: HealthActivity[] };
-      setHealthActivities(Array.isArray(result.activities) ? result.activities : []);
-    }).catch(() => setHealthActivities([]));
+      const headers = { Authorization: `Bearer ${token}`, ...northDeviceHeaders() };
+      const [activityResponse, contextResponse, connectionResponse] = await Promise.all([fetch(`${NORTH_API_BASE}/v1/health/activities?days=365`, { headers }), fetch(`${NORTH_API_BASE}/v1/health/context?days=365`, { headers }), fetch(`${NORTH_API_BASE}/v1/health/connections`, { headers })]);
+      if (!activityResponse.ok || !contextResponse.ok || !connectionResponse.ok) throw new Error("Health context could not load");
+      const activityResult = await activityResponse.json() as { activities?: HealthActivity[] };
+      const contextResult = await contextResponse.json() as Partial<HealthContext>;
+      const connectionResult = await connectionResponse.json() as { connections?: HealthConnection[] };
+      setHealthActivities(Array.isArray(activityResult.activities) ? activityResult.activities : []);
+      setHealthContext(Array.isArray(contextResult.daily) ? { days: Number(contextResult.days) || 14, daily: contextResult.daily, latest_weight: contextResult.latest_weight ?? null } : null);
+      setHealthConnections(Array.isArray(connectionResult.connections) ? connectionResult.connections : []);
+    }).catch(() => { setHealthActivities([]); setHealthContext(null); setHealthConnections([]); });
   }, [entryComplete]);
 
   useEffect(() => {
-    if (!["you", "account"].includes(screen) || !readNorthSession()) return;
+    if (!["account", "settings"].includes(screen) || !readNorthSession()) return;
     void withFreshAccess(async (token) => {
       const headers = { Authorization: `Bearer ${token}`, ...northDeviceHeaders() };
       const [connectionResponse, summaryResponse] = await Promise.all([fetch(`${NORTH_API_BASE}/v1/health/connections`, { headers }), fetch(`${NORTH_API_BASE}/v1/health/summary?days=30`, { headers })]);
@@ -1049,6 +1134,29 @@ function App() {
 
   const currentIndex = Math.max(0, session.exercises.findIndex((item) => item.id === session.currentId));
   const current = session.exercises[currentIndex];
+  const historyChronological = useMemo(() => [...history].sort((left, right) => new Date(workoutRecordDate(left)).getTime() - new Date(workoutRecordDate(right)).getTime()), [history]);
+  const currentCanonical = current ? canonicalExerciseFor(current) : undefined;
+  const currentTimedHold = currentCanonical?.timedHold && currentCanonical.trackingTemplateId === "timed_hold";
+  const nextHoldSetIndex = current?.sets.findIndex((set) => !set.complete) ?? -1;
+  const nextHoldGoal = current && nextHoldSetIndex >= 0 ? prescribedHoldSeconds(current.target) : 0;
+  const previousHoldSets = current && currentTimedHold ? previousCompletedSets(current) : [];
+  const previousCurrentHoldSet = current && nextHoldSetIndex > 0 ? current.sets.slice(0, nextHoldSetIndex).reverse().find((set) => set.complete && Number(set.values?.duration) > 0) : undefined;
+  const previousHoldSet = nextHoldSetIndex >= 0 ? previousCurrentHoldSet ?? previousHoldSets[nextHoldSetIndex] ?? previousHoldSets.at(-1) : undefined;
+  const activeHoldBenchmark = current && nextHoldSetIndex >= 0 ? Number(current.sets[nextHoldSetIndex]?.values?.duration) || 0 : 0;
+  const previousHoldDuration = activeHoldBenchmark || Number(previousHoldSet?.values?.duration) || 0;
+
+  useEffect(() => {
+    if (holdTimer?.phase !== "preparing" && holdTimer?.phase !== "holding") return;
+    const id = window.setInterval(() => setHoldTimer((value) => value ? advanceHoldTimer(value, Date.now()) : value), holdTimer.phase === "preparing" ? 1000 : 250);
+    return () => window.clearInterval(id);
+  }, [holdTimer?.phase]);
+
+  useEffect(() => {
+    if (!holdTimer) return;
+    if (holdTimer.phase === "preparing" && holdTimer.remaining <= 3) navigator.vibrate?.(35);
+    if (holdTimer.phase === "holding" && holdTimer.previous > 0 && holdTimer.elapsed === holdTimer.previous + 1) navigator.vibrate?.([70, 40, 70]);
+    else if (holdTimer.phase === "holding" && holdTimer.goal > 0 && holdTimer.elapsed === holdTimer.goal) navigator.vibrate?.(55);
+  }, [holdTimer?.phase, holdTimer?.remaining, holdTimer?.elapsed, holdTimer?.goal, holdTimer?.previous]);
   const completedCount = session.exercises.filter((item) => item.sets.every((set) => set.complete)).length;
   const progress = Math.round((completedCount / session.exercises.length) * 100);
   const hasProgress = Boolean(session.startedAt && !session.finishedAt);
@@ -1098,9 +1206,20 @@ function App() {
   const bodyWeightCheckIns = [...checkIns].filter((entry) => Number.parseFloat(entry.weight) > 0).sort((left, right) => right.date.localeCompare(left.date));
   const latestBodyWeight = bodyWeightCheckIns[0] ? displayBodyWeight(bodyWeightCheckIns[0].weight) : null;
   const bodyWeightChange = bodyWeightCheckIns.length > 1 && latestBodyWeight !== null ? latestBodyWeight - displayBodyWeight(bodyWeightCheckIns.at(-1)!.weight) : null;
+  const checkInTrend = [...checkIns].sort((left, right) => left.date.localeCompare(right.date)).slice(-14);
+  const recentCheckIns = [...checkInTrend].reverse();
+  const averageCheckInValue = (values: number[]) => values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : null;
+  const averageEnergy = averageCheckInValue(recentCheckIns.map((entry) => entry.energy));
+  const averageSoreness = averageCheckInValue(recentCheckIns.map((entry) => entry.soreness));
+  const averageSleep = averageCheckInValue(recentCheckIns.map((entry) => Number.parseFloat(entry.sleep)).filter(Number.isFinite));
+  const weightTrend = checkInTrend.filter((entry) => Number.parseFloat(entry.weight) > 0).map((entry) => ({ date: entry.date, value: displayBodyWeight(entry.weight) }));
+  const weightTrendMin = Math.min(...weightTrend.map((entry) => entry.value));
+  const weightTrendMax = Math.max(...weightTrend.map((entry) => entry.value));
+  const weightTrendHeight = (value: number) => weightTrendMax === weightTrendMin ? 60 : 18 + (value - weightTrendMin) / (weightTrendMax - weightTrendMin) * 82;
   const recordedSets = history.reduce((total, workout) => total + sessionSetCount(workout), 0);
   const recordedVolume = history.reduce((total, workout) => total + sessionTonnage(workout), 0);
   const todayPlan = weeklyPlan.find((item) => item.date === isoDate(new Date())) ?? weeklyPlan[0];
+  const todayWorkoutCardImage = planWorkoutCardImage(todayPlan);
   const todayActivities = activities.filter((item) => item.date === todayPlan.date);
   const todayCompletedWorkout = history.find((item) => isoDate(new Date(workoutRecordDate(item) || 0)) === todayPlan.date);
   const todayPlanCompleted = todayPlan.status === "completed";
@@ -1124,8 +1243,14 @@ function App() {
             ? `${todayPlan.title} and ${todayPlan.sessions.length} supporting ${todayPlan.sessions.length === 1 ? "session" : "sessions"} are ready when you are.`
             : `${todayPlan.title} is ready when you are.`;
   const selectedWorkout = useMemo(() => selectedPlanDay.kind === "strength" ? (selectedPlanDay.workout?.length ? selectedPlanDay.workout : starterExercises) : [], [selectedPlanDay.kind, selectedPlanDay.workout]);
-  const selectedMuscleActivation = useMemo(() => combineMuscleActivations(selectedWorkout.map((exercise) => getMuscleActivation(exerciseLibrary.find((definition) => definition.name === exercise.name) ?? { name: exercise.name, category: "Full body" }))), [selectedWorkout]);
-  const historyChronological = useMemo(() => [...history].sort((left, right) => new Date(workoutRecordDate(left)).getTime() - new Date(workoutRecordDate(right)).getTime()), [history]);
+  const selectedWorkoutCardImage = planWorkoutCardImage(selectedPlanDay);
+  const todayMuscleActivation = useMemo(() => {
+    if (todayPlan.kind === "strength") {
+      const workout = todayPlan.workout?.length ? todayPlan.workout : starterExercises;
+      return combineMuscleActivations(workout.map((exercise) => getMuscleActivation(exerciseLibrary.find((definition) => definition.name === exercise.name) ?? { name: exercise.name, category: "Full body" })));
+    }
+    return getMuscleActivation({ name: todayPlan.title, category: todayPlan.kind === "rest" || todayPlan.kind === "recovery" ? "Mobility" : "Conditioning" });
+  }, [todayPlan.kind, todayPlan.title, todayPlan.workout]);
   const sessionNewRecords = session.exercises.flatMap((exercise) => {
     const currentBest = Math.max(0, ...exercise.sets.filter((set) => set.complete).map((set) => Number.parseFloat(set.weight) || 0));
     const performedTime = new Date(session.performedAt ?? session.startedAt ?? new Date()).getTime();
@@ -1138,6 +1263,9 @@ function App() {
   historyGridStart.setDate(1 - ((historyMonthStart.getDay() + 6) % 7));
   const historyCalendarDays = Array.from({ length: 42 }, (_, index) => { const date = new Date(historyGridStart); date.setDate(historyGridStart.getDate() + index); return date; });
   const historyCalendarSessions = historyByDate[historyCalendarDate] ?? [];
+  const historyCalendarActivities = activities.filter((activity) => activity.date === historyCalendarDate);
+  const historyCalendarItemCount = historyCalendarSessions.length + historyCalendarActivities.length;
+  const historyCalendarPlanDay = weeklyPlan.find((day) => day.date === historyCalendarDate);
   const allTemplates = [...personalTemplates, ...communityTemplates, ...workoutTemplates];
   const myWorkoutCount = allTemplates.filter((template) => template.source === "personal" || favoriteTemplateIds.includes(template.id)).length;
   const filteredTemplates = allTemplates.filter((template) => {
@@ -1174,8 +1302,9 @@ function App() {
     return date >= weeklyPlan[0].date && date <= weeklyPlan[6].date;
   });
   const weekActivities = activities.filter((activity) => activity.date >= weeklyPlan[0].date && activity.date <= weeklyPlan[6].date);
-  const weekTrainingMinutes = weekSessions.reduce((total, workout) => total + (sessionMinutes(workout) ?? 0), 0) + weekActivities.reduce((total, activity) => total + (Number.parseFloat(activity.duration) || 0), 0);
-  const lifetimeTrainingMinutes = history.reduce((total, workout) => total + (sessionMinutes(workout) ?? 0), 0) + activities.reduce((total, activity) => total + (Number.parseFloat(activity.duration) || 0), 0);
+  const weekHealthActivities = healthActivities.filter((activity) => { const date = isoDate(new Date(activity.started_at)); return date >= weeklyPlan[0].date && date <= weeklyPlan[6].date; });
+  const weekTrainingMinutes = weekSessions.reduce((total, workout) => total + (sessionMinutes(workout) ?? 0), 0) + weekActivities.reduce((total, activity) => total + (Number.parseFloat(activity.duration) || 0), 0) + weekHealthActivities.reduce((total, activity) => total + activity.duration_minutes, 0);
+  const lifetimeTrainingMinutes = history.reduce((total, workout) => total + (sessionMinutes(workout) ?? 0), 0) + activities.reduce((total, activity) => total + (Number.parseFloat(activity.duration) || 0), 0) + healthActivities.reduce((total, activity) => total + activity.duration_minutes, 0);
   const activityTotals = (kind: ActivityEntry["kind"]) => activities.filter((activity) => activity.kind === kind).reduce((total, activity) => ({ sessions: total.sessions + 1, distance: total.distance + (Number.parseFloat(activity.distance) || 0) }), { sessions: 0, distance: 0 });
   const bikeTotals = activityTotals("bike");
   const walkTotals = activityTotals("walk");
@@ -1183,7 +1312,7 @@ function App() {
   const recoveryTotals = activityTotals("recovery");
   const weekTonnage = weekSessions.reduce((total, workout) => total + sessionTonnage(workout), 0);
   const weekReps = weekSessions.reduce((total, workout) => total + workout.exercises.flatMap((exercise) => exercise.sets).filter((set) => set.complete).reduce((sum, set) => sum + (Number.parseFloat(set.reps) || 0), 0), 0);
-  const weekDistance = weekActivities.reduce((total, activity) => total + (Number.parseFloat(activity.distance) || 0), 0);
+  const weekDistance = weekActivities.reduce((total, activity) => total + (Number.parseFloat(activity.distance) || 0), 0) + weekHealthActivities.reduce((total, activity) => total + activity.distance_metres / 1000, 0);
   const muscleDistribution = (() => {
     const totals = new Map<string, number>();
     weekSessions.forEach((workout) => workout.exercises.forEach((exercise) => {
@@ -1192,21 +1321,85 @@ function App() {
     }));
     return [...totals.entries()].sort((a, b) => b[1] - a[1]);
   })();
-  const weekDayMinutes = currentWeekPlan.map((day) => weekSessions.filter((workout) => isoDate(new Date(workoutRecordDate(workout) || 0)) === day.date).reduce((total, workout) => total + (sessionMinutes(workout) ?? 0), 0) + weekActivities.filter((activity) => activity.date === day.date).reduce((total, activity) => total + (Number.parseFloat(activity.duration) || 0), 0));
+  const loadWeekDays = weeklyPlan.slice(0, 7);
+  const weekDayLoads = loadWeekDays.map((day) => {
+    const daySessions = weekSessions.filter((workout) => isoDate(new Date(workoutRecordDate(workout) || 0)) === day.date);
+    const dayActivities = weekActivities.filter((activity) => activity.date === day.date);
+    return {
+      sessions: daySessions.length + dayActivities.length,
+      minutes: daySessions.reduce((total, workout) => total + (sessionMinutes(workout) ?? 0), 0) + dayActivities.reduce((total, activity) => total + (Number.parseFloat(activity.duration) || 0), 0),
+      reps: daySessions.reduce((total, workout) => total + workout.exercises.flatMap((exercise) => exercise.sets).filter((set) => set.complete).reduce((sum, set) => sum + (Number.parseFloat(set.reps) || 0), 0), 0),
+      volume: daySessions.reduce((total, workout) => total + sessionTonnage(workout), 0),
+      distance: dayActivities.reduce((total, activity) => total + (Number.parseFloat(activity.distance) || 0), 0),
+    };
+  });
+  const finiteLoadValue = (value: number) => Number.isFinite(value) && value > 0 ? value : 0;
+  const weekLoadMaximums = weekDayLoads.reduce((maximums, day) => ({
+    sessions: Math.max(maximums.sessions, finiteLoadValue(day.sessions)),
+    minutes: Math.max(maximums.minutes, finiteLoadValue(day.minutes)),
+    reps: Math.max(maximums.reps, finiteLoadValue(day.reps)),
+    volume: Math.max(maximums.volume, finiteLoadValue(day.volume)),
+    distance: Math.max(maximums.distance, finiteLoadValue(day.distance)),
+  }), { sessions: 0, minutes: 0, reps: 0, volume: 0, distance: 0 });
+  const weekLoadScores = weekDayLoads.map((day) => (Object.keys(weekLoadMaximums) as Array<keyof typeof weekLoadMaximums>).reduce((score, metric) => score + (weekLoadMaximums[metric] ? finiteLoadValue(day[metric]) / weekLoadMaximums[metric] : 0), 0));
+  const maximumWeekLoadScore = Math.max(...weekLoadScores, 1);
   const latestBodyweightKg = (Number.parseFloat(checkIns.find((entry) => Number.parseFloat(entry.weight) > 0)?.weight ?? "") || 0) * 0.453592;
   const estimatedWeekCalories = latestBodyweightKg ? Math.round(weekSessions.reduce((total, workout) => total + 6 * latestBodyweightKg * ((sessionMinutes(workout) ?? 0) / 60), 0) + weekActivities.reduce((total, activity) => {
     const met = activity.kind === "run" ? 8 : activity.kind === "bike" ? 6.8 : activity.kind === "walk" ? 3.5 : 2.5;
     return total + met * latestBodyweightKg * ((Number.parseFloat(activity.duration) || 0) / 60);
   }, 0)) : null;
-  const meaningfulHealthActivities = healthActivities.filter((activity) => activity.kind === "workout" || activity.kind === "bike" || activity.kind === "run" ? activity.duration_minutes >= 10 : activity.kind === "walk" ? activity.duration_minutes >= 20 || activity.distance_metres >= 1500 : false);
+  const meaningfulHealthActivities = healthActivities;
+  const samsungConnection = healthConnections.find((item) => item.provider === "health_connect" && item.status === "connected");
+  const todayHealth = healthContext?.daily.find((day) => day.date === isoDate(new Date()));
+  const recentHealthDays = healthContext?.daily.slice(0, 7) ?? [];
+  const syncedSleepDays = (healthContext?.daily ?? []).filter((day) => day.sleep_minutes > 0);
+  const latestSleepDay = syncedSleepDays[0];
+  const recentSleepDays = syncedSleepDays.slice(0, 7);
+  const averageHealthSleep = recentSleepDays.length ? recentSleepDays.reduce((total, day) => total + day.sleep_minutes, 0) / recentSleepDays.length : 0;
+  const averageHealthSleepMinutes = Math.round(averageHealthSleep);
+  const latestSleepIsLastNight = latestSleepDay?.date === isoDate(new Date());
+  const completedHealthDays = (healthContext?.daily ?? []).filter((day) => day.date < isoDate(new Date()));
+  const latestCompletedHealthDay = completedHealthDays[0];
+  const healthBaselineDays = completedHealthDays.slice(1, 8);
+  const healthBaselineAverage = (select: (day: HealthDailyContext) => number, requirePositive = false) => {
+    const values = healthBaselineDays.map(select).filter((value) => !requirePositive || value > 0);
+    return values.length ? values.reduce((total, value) => total + value, 0) / values.length : 0;
+  };
+  const healthChange = (value: number, baseline: number) => baseline > 0 ? Math.round((value - baseline) / baseline * 100) : null;
+  const latestHealthChanges = latestCompletedHealthDay ? {
+    steps: healthChange(latestCompletedHealthDay.steps, healthBaselineAverage((day) => day.steps)),
+    distance: healthChange(latestCompletedHealthDay.distance_metres, healthBaselineAverage((day) => day.distance_metres)),
+    minutes: healthChange(latestCompletedHealthDay.active_minutes, healthBaselineAverage((day) => day.active_minutes)),
+    calories: healthChange(latestCompletedHealthDay.active_calories, healthBaselineAverage((day) => day.active_calories)),
+    sleep: healthChange(latestCompletedHealthDay.sleep_minutes, healthBaselineAverage((day) => day.sleep_minutes, true)),
+  } : null;
+  const healthChangeLabel = (change: number | null) => healthBaselineDays.length < 2 || change === null ? "Building your baseline" : Math.abs(change) < 5 ? "Close to your recent baseline" : `${Math.abs(change)}% ${change > 0 ? "above" : "below"} your recent baseline`;
+  const latestHealthHeadline = !latestHealthChanges || healthBaselineDays.length < 2 ? "Your first reports are building a useful baseline." : latestHealthChanges.sleep !== null && latestHealthChanges.sleep <= -15 && latestHealthChanges.steps !== null && latestHealthChanges.steps >= 15 ? "More movement on less sleep than usual." : latestHealthChanges.steps !== null && latestHealthChanges.steps >= 15 ? "A more active day than your recent rhythm." : latestHealthChanges.steps !== null && latestHealthChanges.steps <= -15 ? "A lighter movement day than usual." : "A day close to your recent rhythm.";
+  const completedHealthWeek = completedHealthDays.slice(0, 7);
+  const completedHealthWeekTotals = completedHealthWeek.reduce((total, day) => ({
+    steps: total.steps + day.steps,
+    distance_metres: total.distance_metres + day.distance_metres,
+    active_minutes: total.active_minutes + day.active_minutes,
+    calories: total.calories + day.active_calories,
+    sleep_days: total.sleep_days + (day.sleep_minutes > 0 ? 1 : 0),
+  }), { steps: 0, distance_metres: 0, active_minutes: 0, calories: 0, sleep_days: 0 });
+  const healthTotals = (healthContext?.daily ?? []).reduce((total, day) => ({
+    steps: total.steps + day.steps,
+    distance_metres: total.distance_metres + day.distance_metres,
+    active_minutes: total.active_minutes + day.active_minutes,
+    calories: total.calories + day.active_calories,
+  }), { steps: 0, distance_metres: 0, active_minutes: 0, calories: 0 });
+  const averageHealthSteps = recentHealthDays.length ? Math.round(recentHealthDays.reduce((total, day) => total + day.steps, 0) / recentHealthDays.length) : 0;
   const timelineItems = [
     ...history.map((workout) => ({ id: `workout-${workout.finishedAt}`, type: "Workouts", date: workoutRecordDate(workout), title: workout.sourceTitle || workout.exercises.filter((exercise) => exercise.sets.some((set) => set.complete)).map((exercise) => exercise.name).slice(0, 3).join(" · ") || "Training session", summary: `${sessionSetCount(workout)} sets${sessionMinutes(workout) ? ` · ${sessionMinutes(workout)} minutes` : ""}${sessionTonnage(workout) ? ` · ${Math.round(displayWeight(sessionTonnage(workout))).toLocaleString()} ${weightUnit} volume` : ""}.${workout.addedLater && workout.recordedAt ? ` Added later on ${formatSessionDate(workout.recordedAt)}.` : ""} ${workout.reflection || "A completed workout preserved in North."}`, workout })),
     ...activities.map((activity) => ({ id: `activity-${activity.id}`, type: "Activities", date: `${activity.date}T12:00:00`, title: activity.kind === "bike" ? "Bike ride" : activity.kind === "walk" ? "Walk" : activity.kind === "run" ? "Run" : "Recovery", summary: `${activity.duration ? `${activity.duration} minutes` : "Duration not recorded"}${activity.distance ? ` · ${displayDistance(activity.distance).toFixed(1)} ${distanceUnit}` : ""} · Effort ${activity.effort}/5. ${activity.note}`, activity })),
     ...checkIns.map((entry) => ({ id: `checkin-${entry.id}`, type: "Check-ins", date: `${entry.date}T08:00:00`, title: "Daily check-in", summary: `Energy ${entry.energy}/5 · soreness ${entry.soreness}/5${entry.sleep ? ` · ${entry.sleep} hours sleep` : ""}${entry.weight ? ` · ${displayBodyWeight(entry.weight).toFixed(1)} ${bodyWeightUnit}` : ""}. ${entry.note}`, checkIn: entry })),
     ...weeklyReviews.map((review) => ({ id: `review-${review.id}`, type: "Reflections", date: review.createdAt, title: "Weekly reflection", summary: `${review.proud || "A week reviewed."}${review.learned ? ` Learned: ${review.learned}` : ""}${review.next ? ` Next: ${review.next}` : ""}`, review })),
     ...journeyPhotos.map((photo) => ({ id: `photo-${photo.id}`, type: "Photos", date: photo.createdAt, title: photo.caption || "Journey photo", summary: "Stored privately in this browser.", photo })),
-    ...meaningfulHealthActivities.map((activity) => ({ id: `health-${activity.id}`, type: "Activities", date: activity.started_at, title: activity.title || (activity.kind === "bike" ? "Bike ride" : activity.kind === "run" ? "Run" : activity.kind === "walk" ? "Purposeful walk" : "Samsung Health workout"), summary: `${activity.duration_minutes} minutes${activity.distance_metres > 0 ? ` · ${displayDistance(activity.distance_metres / 1000).toFixed(1)} ${distanceUnit}` : ""} · Imported from Samsung Health.`, healthActivity: activity })),
+    ...completedHealthDays.map((day) => ({ id: `health-day-${day.date}`, type: "Daily reports", date: `${day.date}T23:59:59`, title: "Health Connect daily report", summary: `${day.steps.toLocaleString()} steps · ${day.active_minutes} Health Connect exercise minutes · ${day.distance_metres > 0 ? `${displayDistance(day.distance_metres / 1000).toFixed(1)} ${distanceUnit} recorded distance` : "distance not shared"} · ${Math.round(day.active_calories).toLocaleString()} Health Connect kcal${day.sleep_minutes ? ` · ${Math.floor(day.sleep_minutes / 60)}h ${day.sleep_minutes % 60}m sleep` : ""}. Samsung dashboard estimates can differ; purposeful workouts remain separate and are not added again.`, healthDay: day })),
+    ...meaningfulHealthActivities.map((activity) => ({ id: `health-${activity.id}`, type: "Activities", date: activity.started_at, title: activity.title || (activity.kind === "bike" ? "Bike ride" : activity.kind === "run" ? "Run" : activity.kind === "walk" ? "Purposeful walk" : "Samsung Health workout"), summary: `${activity.duration_minutes} minutes${activity.distance_metres > 0 ? ` · ${displayDistance(activity.distance_metres / 1000).toFixed(1)} ${distanceUnit}` : ""}${activity.average_speed_kmh > 0 ? ` · ${displayDistance(activity.average_speed_kmh).toFixed(1)} ${distanceUnit}/h` : ""}${activity.average_heart_rate > 0 ? ` · ${activity.average_heart_rate} avg / ${activity.maximum_heart_rate} max bpm` : ""}${activity.calories > 0 ? ` · ${Math.round(activity.calories)} kcal` : ""} · Imported from Samsung Health.`, healthActivity: activity })),
   ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  const recentMovementRecords = timelineItems.filter((item) => item.type === "Workouts" || item.type === "Activities").slice(0, 4);
   const journeyMomentIcon = (item: (typeof timelineItems)[number]) => {
     const activityKind = "activity" in item && item.activity ? item.activity.kind : "healthActivity" in item && item.healthActivity ? item.healthActivity.kind : null;
     if (activityKind === "bike") return <Bike size={16} />;
@@ -1215,6 +1408,7 @@ function App() {
     if (activityKind === "workout" || item.type === "Workouts") return <Dumbbell size={16} />;
     if (item.type === "Check-ins") return <HeartPulse size={16} />;
     if (item.type === "Reflections") return <NotebookPen size={16} />;
+    if (item.type === "Daily reports") return <HeartPulse size={16} />;
     if (item.type === "Photos") return <Image size={16} />;
     return <Compass size={16} />;
   };
@@ -1225,6 +1419,7 @@ function App() {
     if (activityKind === "run") return "moment-run";
     if (activityKind === "recovery") return "moment-recovery";
     if (activityKind === "workout" || item.type === "Workouts") return "moment-workout";
+    if (item.type === "Daily reports") return "moment-daily-report";
     return "moment-default";
   };
   const filteredTimeline = timelineItems
@@ -1320,39 +1515,124 @@ function App() {
     }));
     return records.reverse().slice(0, 30);
   }, [historyChronological]);
-  const progressionSuggestions = useMemo<ProgressionSuggestion[]>(() => {
-    const suggestions: ProgressionSuggestion[] = [];
-    const latest = historyChronological.at(-1);
-    if (latest) latest.exercises.forEach((exercise) => {
-      const complete = exercise.sets.filter((set) => set.complete);
-      const numericReps = complete.map((set) => Number.parseInt(set.reps, 10)).filter(Number.isFinite);
-      const definition = exerciseLibrary.find((item) => item.name.toLowerCase() === exercise.name.toLowerCase());
-      const maxWeight = Math.max(0, ...complete.map((set) => Number.parseFloat(set.weight) || 0));
-      const priorWorkout = [...historyChronological].reverse().slice(1).find((workout) => workout.exercises.some((item) => item.name.toLowerCase() === exercise.name.toLowerCase()));
-      const prior = priorWorkout?.exercises.find((item) => item.name.toLowerCase() === exercise.name.toLowerCase());
-      const priorMax = Math.max(0, ...(prior?.sets.filter((set) => set.complete).map((set) => Number.parseFloat(set.weight) || 0) ?? [0]));
-      if (complete.length === exercise.sets.length && numericReps.length === complete.length && priorMax > 0 && maxWeight >= priorMax && numericReps.every((reps) => reps >= 10)) {
-        const lowerBody = ["Quads", "Hamstrings", "Glutes", "Calves", "Full body"].includes(definition?.category ?? "");
-        const increment = lowerBody ? 5 : 2.5;
-        const shownNext = profile.units === "metric" ? ((maxWeight + increment) * .453592).toFixed(1) : String(maxWeight + increment);
-        const shownCurrent = profile.units === "metric" ? (maxWeight * .453592).toFixed(1) : String(maxWeight);
-        const shownPrior = profile.units === "metric" ? (priorMax * .453592).toFixed(1) : String(priorMax);
-        suggestions.push({ id: `load-${exercise.name}`, exerciseName: exercise.name, kind: "load", title: `A small ${exercise.name} progression may be ready`, recommendation: `Try ${shownNext} ${profile.units === "metric" ? "kg" : "lb"} on the first working set, then keep it only if technique and effort remain controlled.`, evidence: `The latest session completed every planned set at ${shownCurrent} ${profile.units === "metric" ? "kg" : "lb"} with at least 10 recorded reps per set. The prior recorded maximum was ${shownPrior} ${profile.units === "metric" ? "kg" : "lb"}.`, nextWeight: String(maxWeight + increment) });
-      } else if (complete.length === exercise.sets.length && numericReps.length === complete.length && priorMax > 0) {
-        const currentLow = Number.parseInt(exercise.target.match(/(\d+)\s*[–-]/)?.[1] ?? "8", 10);
-        const nextLow = Math.min(currentLow + 1, 20);
-        const nextTarget = exercise.target.replace(/\d+\s*([–-])/, `${nextLow}$1`);
-        suggestions.push({ id: `reps-${exercise.name}`, exerciseName: exercise.name, kind: "reps", title: `Build repetitions before load on ${exercise.name}`, recommendation: `Keep ${profile.units === "metric" ? ((maxWeight || priorMax) * .453592).toFixed(1) : maxWeight || priorMax} ${profile.units === "metric" ? "kg" : "lb"} and aim for one additional controlled repetition on the first set.`, evidence: `Every planned set was completed, but the saved repetitions do not yet support a load increase under North's conservative rule.`, nextTarget });
-      } else if (complete.length < exercise.sets.length && definition?.substitutions[0]) {
-        suggestions.push({ id: `sub-${exercise.name}`, exerciseName: exercise.name, kind: "substitution", title: `Keep a substitute ready for ${exercise.name}`, recommendation: `${definition.substitutions[0]} uses a similar ${definition.movementPattern.toLowerCase()} pattern. Use it only if equipment or comfort blocked the original movement.`, evidence: `${complete.length} of ${exercise.sets.length} sets were completed in the latest record. North cannot tell whether equipment, time, discomfort, or another reason caused that.`, substitution: definition.substitutions[0] });
+  const trophyRoomRecords = (() => {
+    const number = (value: unknown) => { const parsed = Number.parseFloat(String(value ?? "")); return Number.isFinite(parsed) && parsed > 0 ? parsed : 0; };
+    const distanceKilometres = (value: number, unit?: string) => unit === "miles" ? value * 1.609344 : unit === "metres" ? value / 1000 : unit === "feet" ? value * 0.0003048 : unit === "yards" ? value * 0.0009144 : value;
+    const movementRecords = new Map<string, { name: string; templateId: string; load: number; repsAtLoad: number; loadDate: string; reps: number; repsDate: string; duration: number; durationDate: string; distance: number; distanceDate: string; completedSets: number; sessions: Set<string>; improvements: number; lastDate: string }>();
+    historyChronological.forEach((workout) => workout.exercises.forEach((exercise) => {
+      const key = normalizeExerciseKey(exercise.name);
+      const canonical = canonicalExerciseFor(exercise);
+      const record = movementRecords.get(key) ?? { name: exercise.name, templateId: canonical?.trackingTemplateId ?? exercise.trackingTemplateId ?? "custom_tracking", load: 0, repsAtLoad: 0, loadDate: "", reps: 0, repsDate: "", duration: 0, durationDate: "", distance: 0, distanceDate: "", completedSets: 0, sessions: new Set<string>(), improvements: 0, lastDate: "" };
+      const workoutDate = workoutRecordDate(workout);
+      const completed = exercise.sets.filter((set) => set.complete && (!set.setKind || set.setKind === "working" || set.setKind === "amrap"));
+      completed.forEach((set) => {
+        const values = set.values ?? {};
+        const structuredLoad = number(values.weight);
+        const structuredUnit = set.units?.weight;
+        const legacyLoad = number(set.weight);
+        const load = legacyLoad > 0
+          ? legacyLoad
+          : structuredLoad > 0 && (structuredUnit === "kg" || structuredUnit === "lb")
+            ? (structuredUnit === "kg" ? structuredLoad / 0.45359237 : structuredLoad)
+            : 0;
+        const reps = number(values.reps) || number(set.reps);
+        const durationSeconds = (fieldId: string) => number(values[fieldId]) * (set.units?.[fieldId] === "minutes" ? 60 : 1);
+        const duration = durationSeconds("duration") + durationSeconds("top_duration") + durationSeconds("midpoint_duration") + durationSeconds("bottom_duration");
+        const distance = distanceKilometres(number(values.distance), set.units?.distance);
+        if (load > record.load || (load === record.load && reps > record.repsAtLoad)) {
+          if (record.load > 0 && load > record.load) record.improvements += 1;
+          record.load = load; record.repsAtLoad = reps; record.loadDate = workoutDate;
+        }
+        if (reps > record.reps) { if (record.reps > 0) record.improvements += 1; record.reps = reps; record.repsDate = workoutDate; }
+        if (duration > record.duration) { if (record.duration > 0) record.improvements += 1; record.duration = duration; record.durationDate = workoutDate; }
+        if (distance > record.distance) { if (record.distance > 0) record.improvements += 1; record.distance = distance; record.distanceDate = workoutDate; }
+      });
+      if (completed.length) {
+        record.completedSets += completed.length;
+        record.sessions.add(workout.finishedAt ?? workout.startedAt ?? `${key}-${workoutDate}`);
+        record.lastDate = workoutDate;
       }
-      if (latest.difficulty >= 4 && exercise.rest < 180 && complete.length > 0) suggestions.push({ id: `rest-${exercise.name}`, exerciseName: exercise.name, kind: "rest", title: `More rest may protect ${exercise.name} quality`, recommendation: `Try ${exercise.rest + 15} seconds between working sets and judge whether technique becomes more repeatable.`, evidence: `The latest workout was rated ${latest.difficulty}/5 difficulty. North is suggesting a small rest change, not assuming the exercise itself caused the rating.`, nextRest: exercise.rest + 15 });
+      movementRecords.set(key, record);
+    }));
+
+    const relevanceFor = (record: (typeof movementRecords extends Map<string, infer Value> ? Value : never)) => {
+      const daysSince = record.lastDate ? Math.max(0, (Date.now() - new Date(record.lastDate).getTime()) / 86400000) : 365;
+      return record.sessions.size * 120 + record.completedSets * 8 + record.improvements * 55 + Math.max(0, 45 - daysSince);
+    };
+    const records: TrophyRoomRecord[] = [...movementRecords.entries()].flatMap<TrophyRoomRecord>(([key, record]) => {
+      if (!record.completedSets) return [];
+      const relevance = relevanceFor(record);
+      const relevanceEvidence = `${record.sessions.size} ${record.sessions.size === 1 ? "session" : "sessions"} · ${record.completedSets} completed ${record.completedSets === 1 ? "set" : "sets"}${record.improvements ? ` · beaten ${record.improvements} ${record.improvements === 1 ? "time" : "times"}` : ""}`;
+      if (record.load > 0) return [{ id: `load-${key}`, category: "Strength", title: `${record.name} load record`, value: displayWeight(record.load).toFixed(1).replace(/\.0$/, ""), unit: weightUnit, detail: record.repsAtLoad ? `${record.repsAtLoad} reps at your heaviest recorded load · ${relevanceEvidence}` : `Heaviest completed working set · ${relevanceEvidence}`, date: record.loadDate, earned: true, icon: "strength", relevance } satisfies TrophyRoomRecord];
+      if (/weight|loaded_carry/.test(record.templateId)) return [{ id: `awaiting-load-${key}`, category: "Strength", title: `${record.name} load record`, value: "LOAD NEEDED", unit: "", detail: `This movement has ${relevanceEvidence}, but no valid load has been recorded yet`, date: record.lastDate, earned: false, icon: "strength", relevance } satisfies TrophyRoomRecord];
+      if (record.distance > 0 && /distance|cardio|carry/.test(record.templateId)) return [{ id: `distance-${key}`, category: "Endurance", title: `${record.name} distance record`, value: displayDistance(record.distance).toFixed(1), unit: distanceUnit, detail: `Farthest completed effort · ${record.sessions.size} sessions`, date: record.distanceDate, earned: true, icon: "walk", relevance } satisfies TrophyRoomRecord];
+      if (record.duration > 0 && /hold|duration|cardio|interval|amrap|emom|jump_rope/.test(record.templateId)) return [{ id: `duration-${key}`, category: /mobility|hold/.test(record.templateId) ? "Movement" : "Endurance", title: `${record.name} ${/hold/.test(record.templateId) ? "hold" : "duration record"}`, value: record.duration >= 60 ? `${Math.floor(record.duration / 60)}:${String(Math.round(record.duration % 60)).padStart(2, "0")}` : String(Math.round(record.duration)), unit: record.duration >= 60 ? "min" : "sec", detail: `Longest completed effort · ${relevanceEvidence}`, date: record.durationDate, earned: true, icon: "time", relevance } satisfies TrophyRoomRecord];
+      if (record.reps > 0) return [{ id: `reps-${key}`, category: "Movement", title: `${record.name} rep record`, value: String(record.reps), unit: "reps", detail: `Best completed rep set · ${relevanceEvidence}`, date: record.repsDate, earned: true, icon: "strength", relevance } satisfies TrophyRoomRecord];
+      return [];
     });
-    const recent = [...historyChronological].reverse().slice(0, 3);
-    const lowEnergy = checkIns.slice(0, 3).filter((entry) => entry.energy <= 2).length;
-    if (recent.length === 3 && recent.reduce((sum, workout) => sum + workout.difficulty, 0) / 3 >= 4 && lowEnergy >= 2) suggestions.unshift({ id: "recovery", exerciseName: "Whole program", kind: "recovery", title: "Consider a lower-stress week", recommendation: "Reduce working sets by roughly one third or keep loads steady without pushing repetitions. Reassess after several easier days.", evidence: `The last three workouts average ${(recent.reduce((sum, workout) => sum + workout.difficulty, 0) / 3).toFixed(1)}/5 difficulty, and ${lowEnergy} of the latest three check-ins report energy at 2/5 or lower.` });
-    return suggestions.slice(0, 12);
-  }, [checkIns, historyChronological, profile.units]);
+
+    const movement = [
+      ...activities.filter((activity) => activity.kind !== "recovery").map((activity) => ({ kind: activity.kind as "bike" | "run" | "walk", distance: number(activity.distance), duration: number(activity.duration), date: `${activity.date}T12:00:00` })),
+      ...meaningfulHealthActivities.filter((activity) => activity.kind === "bike" || activity.kind === "run" || activity.kind === "walk").map((activity) => ({ kind: activity.kind as "bike" | "run" | "walk", distance: Math.max(0, activity.distance_metres / 1000), duration: Math.max(0, activity.duration_minutes), date: activity.started_at })),
+    ];
+    (["bike", "run", "walk"] as const).forEach((kind) => {
+      const entries = movement.filter((entry) => entry.kind === kind);
+      const longest = entries.reduce<(typeof entries)[number] | null>((best, entry) => !best || entry.distance > best.distance ? entry : best, null);
+      const longestTime = entries.reduce<(typeof entries)[number] | null>((best, entry) => !best || entry.duration > best.duration ? entry : best, null);
+      const fastest = entries.filter((entry) => entry.distance > 0 && entry.duration > 0).reduce<(typeof entries)[number] | null>((best, entry) => !best || entry.distance / entry.duration > best.distance / best.duration ? entry : best, null);
+      const label = kind === "bike" ? "Bike ride" : kind === "run" ? "Run" : "Walk";
+      const activityRelevance = entries.length * 120 + Math.max(0, 45 - (longest?.date ? (Date.now() - new Date(longest.date).getTime()) / 86400000 : 365));
+      if (longest?.distance) records.push({ id: `${kind}-distance`, category: "Endurance", title: `Longest ${label.toLowerCase()}`, value: displayDistance(longest.distance).toFixed(1), unit: distanceUnit, detail: `${longest.duration || "—"} minutes · farthest of ${entries.length} recorded ${entries.length === 1 ? "effort" : "efforts"}`, date: longest.date, earned: true, icon: kind, relevance: activityRelevance + 30 });
+      if (longestTime?.duration) records.push({ id: `${kind}-duration`, category: "Endurance", title: `Longest ${label.toLowerCase()} by time`, value: String(Math.round(longestTime.duration)), unit: "min", detail: `${longestTime.distance ? `${displayDistance(longestTime.distance).toFixed(1)} ${distanceUnit} · ` : ""}longest recorded duration`, date: longestTime.date, earned: true, icon: kind, relevance: activityRelevance });
+      if (fastest) records.push({ id: `${kind}-speed`, category: "Endurance", title: kind === "bike" ? "Fastest ride" : `Fastest ${label.toLowerCase()}`, value: displayDistance(fastest.distance / (fastest.duration / 60)).toFixed(1), unit: `${distanceUnit}/h`, detail: `${displayDistance(fastest.distance).toFixed(1)} ${distanceUnit} in ${Math.round(fastest.duration)} minutes`, date: fastest.date, earned: true, icon: kind, relevance: activityRelevance - 10 });
+    });
+
+    const longestWorkout = history.reduce<Session | null>((best, workout) => (sessionMinutes(workout) ?? 0) > (best ? sessionMinutes(best) ?? 0 : 0) ? workout : best, null);
+    if (longestWorkout && sessionMinutes(longestWorkout)) records.push({ id: "longest-workout", category: "Consistency", title: "Longest workout", value: String(sessionMinutes(longestWorkout)), unit: "min", detail: `${sessionSetCount(longestWorkout)} working sets completed`, date: workoutRecordDate(longestWorkout), earned: true, icon: "time" });
+    if (history.length) records.push({ id: "workouts", category: "Consistency", title: "Workouts preserved", value: history.length.toLocaleString(), unit: "sessions", detail: "Every completed workout in your North record", earned: true, icon: "consistency" });
+    const totalSets = history.reduce((total, workout) => total + sessionSetCount(workout), 0);
+    if (totalSets) records.push({ id: "sets", category: "Consistency", title: "Working sets completed", value: totalSets.toLocaleString(), unit: "sets", detail: "Lifetime completed working sets", earned: true, icon: "consistency" });
+    const activeDays = new Set([...history.map((workout) => isoDate(new Date(workoutRecordDate(workout) || 0))), ...movement.map((entry) => isoDate(new Date(entry.date))), ...completedHealthDays.filter((day) => day.steps > 0 || day.distance_metres > 0 || day.active_minutes > 0).map((day) => day.date)]).size;
+    if (activeDays) records.push({ id: "active-days", category: "Consistency", title: "Days in motion", value: activeDays.toLocaleString(), unit: "days", detail: "Distinct days with recorded training or movement", earned: true, icon: "consistency" });
+    if (healthTotals.steps) records.push({ id: "health-steps", category: "Movement", title: "Health Connect steps", value: healthTotals.steps.toLocaleString(), unit: "steps", detail: `Across ${healthContext?.daily.length ?? 0} synced daily summaries`, earned: true, icon: "walk" });
+    if (healthTotals.distance_metres) records.push({ id: "health-distance", category: "Endurance", title: "Health Connect movement distance", value: displayDistance(healthTotals.distance_metres / 1000).toFixed(1), unit: distanceUnit, detail: "Daily aggregate distance, including recorded activities; not added to workout distance again", earned: true, icon: "walk" });
+    if (healthTotals.active_minutes) records.push({ id: "health-minutes", category: "Consistency", title: "Health Connect recorded time", value: healthTotals.active_minutes.toLocaleString(), unit: "min", detail: "Exercise duration shared by Health Connect; tracked separately from North workout minutes", earned: true, icon: "time" });
+    if (healthTotals.calories) records.push({ id: "health-calories", category: "Movement", title: "Health Connect energy", value: Math.round(healthTotals.calories).toLocaleString(), unit: "kcal", detail: "Synced daily energy; Samsung currently shares total calories, including resting energy", earned: true, icon: "consistency" });
+
+    const locked: TrophyRoomRecord[] = [
+      { id: "locked-bench", category: "Strength", title: "Bench press record", value: "LOCKED", unit: "", detail: "Complete a loaded bench press set to claim this plinth", earned: false, icon: "strength" },
+      { id: "locked-pullup", category: "Strength", title: "Pull-up record", value: "LOCKED", unit: "", detail: "Record a completed pull-up set to reveal your best", earned: false, icon: "strength" },
+      { id: "locked-bike", category: "Endurance", title: "Longest bike ride", value: "LOCKED", unit: "", detail: "Log ride distance and duration to unlock", earned: false, icon: "bike" },
+      { id: "locked-run", category: "Endurance", title: "Longest run", value: "LOCKED", unit: "", detail: "Log run distance and duration to unlock", earned: false, icon: "run" },
+      { id: "locked-walk", category: "Endurance", title: "Longest walk", value: "LOCKED", unit: "", detail: "Log walk distance and duration to unlock", earned: false, icon: "walk" },
+      { id: "locked-hold", category: "Movement", title: "Longest hold", value: "LOCKED", unit: "", detail: "Complete a timed plank, hang, or hold to unlock", earned: false, icon: "time" },
+    ];
+    const lockIsClaimed = (record: TrophyRoomRecord) => {
+      if (record.id === "locked-bench") return records.some((item) => /bench|chest press/i.test(item.title));
+      if (record.id === "locked-pullup") return records.some((item) => /pull.?up|chin.?up/i.test(item.title));
+      if (record.id === "locked-hold") return records.some((item) => /hold/i.test(item.title));
+      return records.some((item) => item.earned && item.id === `${record.id.replace("locked-", "")}-distance`);
+    };
+    return [...records.sort((left, right) => (right.relevance ?? 0) - (left.relevance ?? 0) || new Date(right.date ?? 0).getTime() - new Date(left.date ?? 0).getTime()), ...locked.filter((record) => !lockIsClaimed(record))];
+  })();
+  const earnedTrophyRecords = trophyRoomRecords.filter((record) => record.earned);
+  const trophyCategories = (["Strength", "Endurance", "Movement", "Consistency"] as const).map((category) => ({ category, count: earnedTrophyRecords.filter((record) => record.category === category).length }));
+  const normalizedTrophySearch = trophySearch.trim().toLowerCase();
+  const visibleTrophyRecords = normalizedTrophySearch ? trophyRoomRecords.filter((record) => `${record.title} ${record.category} ${record.detail} ${record.value} ${record.unit}`.toLowerCase().includes(normalizedTrophySearch)) : trophyRoomRecords;
+
+  async function shareTrophyRoom() {
+    const highlights = earnedTrophyRecords.slice(0, 5).map((record) => `${record.title}: ${record.value}${record.unit ? ` ${record.unit}` : ""}`).join("\n");
+    const text = `${profile.name || "My"} North Trophy Room\n${earnedTrophyRecords.length} records on the wall${highlights ? `\n\n${highlights}` : ""}`;
+    try {
+      const canShare = typeof navigator.share === "function";
+      if (canShare) await navigator.share({ title: "My North Trophy Room", text });
+      else await navigator.clipboard.writeText(text);
+      setCopyStatus(canShare ? "Trophy highlights shared" : "Trophy highlights copied");
+    } catch (error) {
+      if ((error as DOMException).name !== "AbortError") setCopyStatus("Sharing was not available");
+    }
+    window.setTimeout(() => setCopyStatus(""), 1800);
+  }
   const fourWeekTrends = (() => {
     const anchor = new Date(`${weeklyPlan[0].date}T00:00:00`);
     return [3, 2, 1, 0].map((weeksAgo) => {
@@ -1448,11 +1728,14 @@ function App() {
       sets: exercise.sets.map((set, index) => {
         const previous = previousSets[index] ?? previousSets.at(-1);
         if (!previous) return set;
+        const previousValues = canonicalExerciseFor(exercise)?.trackingTemplateId === "timed_hold"
+          ? Object.fromEntries(Object.entries(previous.values ?? {}).filter(([fieldId]) => fieldId !== "duration"))
+          : previous.values ?? {};
         return {
           ...set,
           weight: previous.weight || set.weight,
           reps: previous.reps || set.reps,
-          values: { ...(set.values ?? {}), ...(previous.values ?? {}), weight: previous.values?.weight ?? previous.weight ?? set.values?.weight ?? set.weight, reps: previous.values?.reps ?? previous.reps ?? set.values?.reps ?? set.reps },
+          values: { ...(set.values ?? {}), ...previousValues, weight: previous.values?.weight ?? previous.weight ?? set.values?.weight ?? set.weight, reps: previous.values?.reps ?? previous.reps ?? set.values?.reps ?? set.reps },
           units: { ...(set.units ?? {}), ...(previous.units ?? {}) },
           complete: false,
         };
@@ -1647,16 +1930,13 @@ function App() {
       (item) => item.id !== afterId && item.passed && !item.sets.every((set) => set.complete),
     );
     const next = remaining[0] ?? queued[0];
+    setHoldTimer(null);
     if (next) setSession((value) => ({ ...value, currentId: next.id }));
     else setScreen("review");
   }
 
-  function passCurrent() {
-    patchExercise(current.id, { passed: true });
-    chooseNext(current.id);
-  }
-
   function returnTo(id: string) {
+    setHoldTimer(null);
     patchExercise(id, { passed: false });
     setSession((value) => ({ ...value, currentId: id }));
   }
@@ -1673,6 +1953,7 @@ function App() {
     if (patch.complete) {
       setTimer(current.rest);
       setTimerRunning(true);
+      setTimerControlsOpen(true);
       setRecorderStatus(`Set ${setIndex + 1} saved. Rest timer started.`);
       navigator.vibrate?.(45);
     }
@@ -1701,7 +1982,31 @@ function App() {
 
   function completeNextSet() {
     const index = current.sets.findIndex((set) => !set.complete);
-    if (index >= 0) updateSet(index, { complete: true });
+    if (index < 0) return;
+    if (currentTimedHold) {
+      setHoldTimer({ exerciseId: current.id, setIndex: index, phase: "ready", remaining: 0, goal: nextHoldGoal, previous: previousHoldDuration, elapsed: 0, startedAt: null });
+      setTimer(0);
+      setTimerRunning(false);
+      setRecorderStatus(`Set ${index + 1} is ready to time.`);
+      return;
+    }
+    updateSet(index, { complete: true });
+  }
+
+  function startHold(prepSeconds: number) {
+    const now = Date.now();
+    setTimer(0);
+    setTimerRunning(false);
+    setTimerControlsOpen(false);
+    setHoldTimer((value) => value ? { ...value, phase: prepSeconds ? "preparing" : "holding", remaining: prepSeconds, elapsed: 0, startedAt: prepSeconds ? null : now } : value);
+  }
+
+  function completeTimedHold() {
+    if (!holdTimer || holdTimer.exerciseId !== current.id || holdTimer.phase !== "holding") return;
+    const duration = completedHoldSeconds(holdTimer, Date.now());
+    if (duration <= 0) return;
+    updateSet(holdTimer.setIndex, { values: { ...(current.sets[holdTimer.setIndex]?.values ?? {}), duration }, units: { ...(current.sets[holdTimer.setIndex]?.units ?? {}), duration: "seconds" }, complete: true });
+    setHoldTimer(null);
   }
 
   function finishExercise() {
@@ -1906,7 +2211,7 @@ function App() {
 
   function followNovaAction(action?: NovaAction) {
     if (action === "open-week") setScreen("week-plan");
-    else if (action === "check-in") { setDraftCheckIn({ id: "", date: isoDate(new Date()), weight: checkIns[0]?.weight ? displayBodyWeight(checkIns[0].weight).toFixed(1).replace(/\.0$/, "") : "", sleep: "", energy: 3, soreness: 2, note: "" }); setScreen("check-in"); }
+    else if (action === "check-in") { setDraftCheckIn({ id: "", date: isoDate(new Date()), weight: checkIns[0]?.weight ? displayBodyWeight(checkIns[0].weight).toFixed(1).replace(/\.0$/, "") : "", sleep: latestSleepDay?.sleep_minutes ? (latestSleepDay.sleep_minutes / 60).toFixed(1) : "", energy: 3, soreness: 2, note: "" }); setScreen("check-in"); }
     else if (action === "progression") setScreen("progression");
     else if (action === "weekly-review") { const existing = weeklyReviews.find((item) => item.weekStart === weeklyPlan[0].date); setDraftReview(existing ? { proud: existing.proud, learned: existing.learned, next: existing.next } : { proud: "", learned: "", next: "" }); setScreen("weekly-review"); }
     else if (action === "open-today") { setSelectedPlanDayId(todayPlan.id); setScreen("training"); }
@@ -1964,7 +2269,7 @@ function App() {
     setNovaMessages((messages) => messages.map((item) => item.id === message.id ? { ...item, undoneAt: new Date().toISOString() } : item)); setNovaError("");
   }
 
-  function openHistory(session: Session, from: "training" | "journey") {
+  function openHistory(session: Session, from: "training" | "journey" | "you") {
     setSelectedHistoryId(session.finishedAt);
     setHistoryReturnScreen(from);
     setHistoryEditing(false);
@@ -2092,11 +2397,15 @@ function App() {
   function beginPlannedDay() {
     if (selectedPlanDay.kind === "strength") {
       if (hasPreparedDraft && session.planDayId === selectedPlanDay.id) {
+        if (selectedPlanDay.date < isoDate(new Date()) && !session.performedAt) setSession((current) => ({ ...current, performedAt: `${selectedPlanDay.date}T12:00:00`, recordedAt: current.recordedAt ?? new Date().toISOString(), addedLater: true }));
         setScreen(session.startedAt ? "workout" : "prepare");
       } else {
-        setSession(initialSession(selectedWorkout, selectedPlanDay.id));
-        setPickerOpen(false);
-        setScreen("prepare");
+        if (selectedPlanDay.date < isoDate(new Date())) prepareBackfill(selectedWorkout, selectedPlanDay.title, selectedPlanDay.id, selectedPlanDay.date);
+        else {
+          setSession(initialSession(selectedWorkout, selectedPlanDay.id));
+          setPickerOpen(false);
+          setScreen("prepare");
+        }
       }
       return;
     }
@@ -2112,13 +2421,20 @@ function App() {
     setScreen("workout-template");
   }
 
-  function prepareBackfill(exercises: Exercise[], title: string, planDayId?: string) {
-    if (!timelineDate || timelineDate > isoDate(new Date())) return;
-    const performedAt = `${timelineDate}T12:00:00`;
-    setSession({ ...initialSession(exercises, planDayId), performedAt, recordedAt: new Date().toISOString(), addedLater: timelineDate < isoDate(new Date()), sourceTitle: title, durationMinutes: exercises.length ? plannedMinutes(exercises) : undefined });
+  function prepareBackfill(exercises: Exercise[], title: string, planDayId?: string, performedDate = timelineDate) {
+    if (!performedDate || performedDate > isoDate(new Date())) return;
+    const timing = backfillSessionTiming(performedDate, new Date().toISOString(), isoDate(new Date()));
+    setSession({ ...initialSession(exercises, planDayId), ...timing, sourceTitle: title, durationMinutes: exercises.length ? plannedMinutes(exercises) : undefined });
+    if (planDayId) setSelectedPlanDayId(planDayId);
     setBackfillOpen(false);
+    setCalendarBackfillOpen(false);
     setRecorderStatus("");
     setScreen("prepare");
+  }
+
+  function prepareTemplateBackfill(template: WorkoutTemplate, performedDate: string) {
+    setRecentTemplateIds((ids) => [template.id, ...ids.filter((id) => id !== template.id)].slice(0, 8));
+    prepareBackfill(exercisesFromTemplate(template), workoutDisplayName(template.name), historyCalendarPlanDay?.id, performedDate);
   }
 
   function copyToPersonal(template: WorkoutTemplate, suffix = "My workout") {
@@ -2376,36 +2692,6 @@ function App() {
     generateProgramWeek(currentProgram, activeProgram.currentWeek + 1, archived);
   }
 
-  function applyProgressionSuggestion(suggestion: ProgressionSuggestion) {
-    if (selectedPlanDay.kind !== "strength" || !selectedPlanDay.workout?.length) {
-      window.alert("Select a strength day with a planned workout first.");
-      return;
-    }
-    const beforeDay = structuredClone(selectedPlanDay);
-    let afterDay = structuredClone(selectedPlanDay);
-    if (suggestion.kind === "recovery") afterDay = { ...afterDay, workout: afterDay.workout!.map((exercise) => ({ ...exercise, sets: exercise.sets.slice(0, Math.max(1, Math.ceil(exercise.sets.length * .67))) })), note: `${afterDay.note ? `${afterDay.note} · ` : ""}Reduced-volume week suggested from recent difficulty and energy records.` };
-    if (suggestion.kind === "load" && suggestion.nextWeight) afterDay = { ...afterDay, workout: afterDay.workout!.map((exercise) => exercise.name === suggestion.exerciseName ? { ...exercise, sets: exercise.sets.map((set) => ({ ...set, weight: suggestion.nextWeight ?? set.weight })) } : exercise) };
-    if (suggestion.kind === "reps" && suggestion.nextTarget) afterDay = { ...afterDay, workout: afterDay.workout!.map((exercise) => exercise.name === suggestion.exerciseName ? { ...exercise, target: suggestion.nextTarget ?? exercise.target } : exercise) };
-    if (suggestion.kind === "rest" && suggestion.nextRest) afterDay = { ...afterDay, workout: afterDay.workout!.map((exercise) => exercise.name === suggestion.exerciseName ? { ...exercise, rest: suggestion.nextRest ?? exercise.rest } : exercise) };
-    if (suggestion.kind === "substitution" && suggestion.substitution) {
-      const definition = exerciseLibrary.find((exercise) => exercise.name === suggestion.substitution);
-      if (!definition) return;
-      afterDay = { ...afterDay, workout: afterDay.workout!.map((exercise) => exercise.name === suggestion.exerciseName ? buildExercise(definition, exercise.id) : exercise), note: `${afterDay.note ? `${afterDay.note} · ` : ""}${suggestion.exerciseName} substituted with ${suggestion.substitution}.` };
-    }
-    const afterProgram = activeProgram ? { ...structuredClone(activeProgram), changes: [...activeProgram.changes, { createdAt: new Date().toISOString(), week: activeProgram.currentWeek, kind: suggestion.kind, from: suggestion.exerciseName, to: suggestion.kind === "load" ? `${suggestion.nextWeight} lb` : suggestion.kind === "reps" ? suggestion.nextTarget ?? "more repetitions" : suggestion.kind === "rest" ? `${suggestion.nextRest} seconds rest` : suggestion.kind === "substitution" ? suggestion.substitution ?? "substitution" : "reduced volume" }] } : null;
-    setProgressionTransaction({ id: crypto.randomUUID(), suggestion: structuredClone(suggestion), planDayId: selectedPlanDay.id, beforeDay, afterDay, beforeProgram: activeProgram ? structuredClone(activeProgram) : null, afterProgram, createdAt: new Date().toISOString() });
-  }
-
-  function confirmProgressionTransaction() {
-    const transaction = progressionTransaction;
-    if (!transaction || transaction.appliedAt && !transaction.undoneAt) return;
-    const current = weeklyPlan.find((day) => day.id === transaction.planDayId);
-    if (!current || JSON.stringify(current) !== JSON.stringify(transaction.beforeDay) || JSON.stringify(activeProgram) !== JSON.stringify(transaction.beforeProgram)) { setNovaError("The selected workout or program changed after this preview. Reopen Progression for a current recommendation."); return; }
-    setWeeklyPlan((days) => days.map((day) => day.id === transaction.planDayId ? structuredClone(transaction.afterDay) : day));
-    setActiveProgram(transaction.afterProgram ? structuredClone(transaction.afterProgram) : null);
-    setProgressionTransaction({ ...transaction, appliedAt: new Date().toISOString(), undoneAt: undefined }); setNovaError("");
-  }
-
   function undoProgressionTransaction() {
     const transaction = progressionTransaction;
     if (!transaction?.appliedAt || transaction.undoneAt) return;
@@ -2489,8 +2775,10 @@ function App() {
     performWorkoutTemplateChange(change.template, change.prepareNow, change.planDayId);
   }
 
-  function openActivity(kind: ActivityEntry["kind"]) {
-    setDraftActivity({ id: "", date: isoDate(new Date()), kind, duration: "", distance: "", effort: 3, note: "" });
+  function openActivity(kind: ActivityEntry["kind"], date = isoDate(new Date()), returnScreen: "training" | "workout-history" = "training") {
+    setDraftActivity({ id: "", date, kind, duration: "", distance: "", effort: 3, note: "" });
+    setActivityReturnScreen(returnScreen);
+    setCalendarBackfillOpen(false);
     setRecorderStatus("");
     setScreen("activity-log");
   }
@@ -2507,7 +2795,8 @@ function App() {
     }));
     localStorage.removeItem(ACTIVITY_DRAFT_KEY);
     setRecorderStatus("");
-    setScreen("journey");
+    setScreen(activityReturnScreen === "workout-history" ? "workout-history" : "journey");
+    setActivityReturnScreen("training");
   }
 
   function importCoachWorkout() {
@@ -2544,14 +2833,10 @@ function App() {
     setScreen("today");
   }
 
-  function saveTodayBodyWeight() {
-    const enteredWeight = Number.parseFloat(draftCheckIn.weight);
-    if (!Number.isFinite(enteredWeight)) return;
-    const today = isoDate(new Date());
-    const existing = checkIns.find((item) => item.date === today);
-    const entry: CheckInEntry = { ...(existing ?? draftCheckIn), date: today, weight: storeBodyWeight(draftCheckIn.weight), id: existing?.id ?? `${today}-${Date.now()}` };
-    setCheckIns((value) => [entry, ...value.filter((item) => item.date !== today)].slice(0, 365));
-    setDraftCheckIn((value) => ({ ...value, date: today, weight: displayBodyWeight(entry.weight).toFixed(1).replace(/\.0$/, "") }));
+  function openWeeklyReview() {
+    const existing = weeklyReviews.find((item) => item.weekStart === weeklyPlan[0].date);
+    setDraftReview(existing ? { proud: existing.proud, learned: existing.learned, next: existing.next } : { proud: "", learned: "", next: "" });
+    setScreen("weekly-review");
   }
 
   function saveWeeklyReview() {
@@ -2621,18 +2906,31 @@ function App() {
 
   function openTestLog(from: Screen) {
     setTestReturnScreen(from);
-    setDraftTestNote({ category: "confusing", text: "" });
+    setDraftTestNote({ category: "bug", text: "" });
+    setReportStatus("");
     setScreen("test-log");
   }
 
-  function saveTestNote() {
-    if (!draftTestNote.text.trim()) return;
-    setTestNotes((value) => [{ id: `test-${Date.now()}`, createdAt: new Date().toISOString(), source: testReturnScreen, category: draftTestNote.category, text: draftTestNote.text.trim(), resolved: false }, ...value]);
-    setScreen(testReturnScreen);
-  }
-
-  function toggleTestNote(id: string) {
-    setTestNotes((value) => value.map((item) => item.id === id ? { ...item, resolved: !item.resolved } : item));
+  async function saveTestNote() {
+    const text = draftTestNote.text.trim();
+    if (!text || reportSending) return;
+    if (!navigator.onLine) { setReportStatus("Connect to the internet to send this report to North."); return; }
+    const localId = `report-${Date.now()}`;
+    const createdAt = new Date().toISOString();
+    setReportSending(true); setReportStatus("Sending to North…");
+    try {
+      const result = await withFreshAccess(async (token) => {
+        const response = await fetch(`${NORTH_API_BASE}/v1/issues`, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}`, ...northDeviceHeaders() }, body: JSON.stringify({ category: draftTestNote.category, message: text, sourceScreen: testReturnScreen, pageUrl: location.href, viewport: { width: window.innerWidth, height: window.innerHeight, pixelRatio: window.devicePixelRatio } }) });
+        const body = await response.json().catch(() => ({})) as { id?: string; error?: string };
+        if (!response.ok || !body.id) throw new Error(body.error || `Report returned ${response.status}`);
+        return body;
+      });
+      setTestNotes((value) => [{ id: localId, createdAt, source: testReturnScreen, category: draftTestNote.category, text, resolved: false, serverId: result.id, deliveredAt: new Date().toISOString() }, ...value]);
+      setDraftTestNote({ category: "bug", text: "" });
+      setReportStatus("Sent. This report is now in the North owner inbox.");
+    } catch (error) {
+      setReportStatus(error instanceof Error ? error.message : "This report could not be sent. Please try again.");
+    } finally { setReportSending(false); }
   }
 
   function addJourneyPhoto(event: ChangeEvent<HTMLInputElement>) {
@@ -2647,8 +2945,7 @@ function App() {
     reader.onload = () => {
       if (typeof reader.result !== "string") return;
       const createdAt = new Date().toISOString();
-      setJourneyPhotos((photos) => [{ id: `photo-${createdAt}`, createdAt, date: isoDate(new Date()), dataUrl: reader.result as string, caption: photoCaption.trim() }, ...photos].slice(0, 20));
-      setPhotoCaption("");
+      setJourneyPhotos((photos) => [{ id: `photo-${createdAt}`, createdAt, date: isoDate(new Date()), dataUrl: reader.result as string, caption: "" }, ...photos].slice(0, 20));
       event.target.value = "";
     };
     reader.readAsDataURL(file);
@@ -2697,14 +2994,30 @@ function App() {
   }
 
   function completeOnboarding(result: OnboardingResult) {
-    setProfile((value) => ({ ...value, name: result.name, direction: result.direction, trainingDays: result.trainingDays, units: result.weightUnit === "kg" ? "metric" : "imperial", bodyWeightUnit: result.weightUnit, distanceUnit: result.distanceUnit, memoryEnabled: result.memoryEnabled }));
+    setAccountDataReady(false);
+    const nextProfile = { ...readProfile(), name: result.name, direction: result.direction, trainingDays: result.trainingDays, units: result.weightUnit === "kg" ? "metric" as const : "imperial" as const, bodyWeightUnit: result.weightUnit, distanceUnit: result.distanceUnit, memoryEnabled: result.memoryEnabled };
     const indexes = result.trainingDayIndexes;
-    setWeeklyPlan((days) => days.map((day, index) => indexes.includes(index) ? { ...day, kind: "strength", title: result.direction, note: `${result.duration} minute ${result.experience.toLowerCase()} session`, status: "planned" } : { ...day, kind: index === 6 ? "rest" : "recovery", title: index === 6 ? "Rest & recover" : "Active recovery", note: "Easy movement and recovery", status: "planned" }));
+    const nextPlan = initialWeekPlan().map((day, index) => indexes.includes(index % 7) ? { ...day, kind: "strength" as const, title: result.direction, note: `${result.duration} minute ${result.experience.toLowerCase()} session`, status: "planned" as const } : { ...day, kind: index % 7 === 6 ? "rest" as const : "recovery" as const, title: index % 7 === 6 ? "Rest & recover" : "Active recovery", note: "Easy movement and recovery", status: "planned" as const, workout: undefined });
+    localStorage.setItem(PROFILE_KEY, JSON.stringify(nextProfile));
+    localStorage.setItem(PLAN_KEY, JSON.stringify(nextPlan));
+    localStorage.setItem(RELEASE_NOTES_DISMISSAL_KEY, RELEASE_NOTES_ID);
+    localStorage.setItem(productTourStorageKey(), new Date().toISOString());
+    setProfile(nextProfile);
+    setWeeklyPlan(nextPlan);
+    setSession(initialSession());
+    setHistory([]);
+    setActivities([]);
+    setCheckIns([]);
+    setWeeklyReviews([]);
+    setPersonalTemplates([]);
+    setJourneyPhotos([]);
+    setNovaMessages([]);
     void northRepository.put("onboarding", "primary", { completedAt: new Date().toISOString(), ...result });
     setEntryComplete(true);
     setLoginReveal(true);
+    setUpdateNoticeOpen(false);
     setScreen("today");
-    setTourStep(0);
+    setTourStep(-1);
   }
 
   function closeProductTour() {
@@ -2715,6 +3028,18 @@ function App() {
   function closeReleaseNotes() {
     if (dismissReleaseNotes) localStorage.setItem(RELEASE_NOTES_DISMISSAL_KEY, RELEASE_NOTES_ID);
     setReleaseNotesOpen(false);
+  }
+
+  function openReleaseNotes(version: ReleaseNotesVersion = "0.5") {
+    localStorage.setItem(RELEASE_NOTES_DISMISSAL_KEY, RELEASE_NOTES_ID);
+    setUpdateNoticeOpen(false);
+    setReleaseNotesVersion(version);
+    setReleaseNotesOpen(true);
+  }
+
+  function dismissUpdateNotice() {
+    localStorage.setItem(RELEASE_NOTES_DISMISSAL_KEY, RELEASE_NOTES_ID);
+    setUpdateNoticeOpen(false);
   }
 
   function advanceProductTour() {
@@ -2851,7 +3176,34 @@ function App() {
     } catch (reason) { setAccountStatus(reason instanceof Error ? reason.message : "Device could not be revoked."); }
   }
 
-  function signOutAccount() { logoutNorthAccount(); location.assign("/"); }
+  function openHealthSync() {
+    if (/Android/i.test(navigator.userAgent)) {
+      window.location.href = "intent://connect#Intent;scheme=northhealth;package=io.bodhix.north.health;S.browser_fallback_url=https%3A%2F%2Fnorth.bodhix.io%2Fnorth-health.apk;end";
+      return;
+    }
+    setHealthStatus("Open North Health on your Samsung phone, then tap Sync again.");
+  }
+
+  async function updateHealthPreferences(patch: Partial<HealthPreferences>) {
+    if (!samsungConnection) return;
+    const preferences = { workouts: true, dailyMovement: true, sleepRecovery: true, bodyMeasurements: false, ...samsungConnection.preferences, ...patch };
+    setHealthStatus("Saving Samsung Health preferences…");
+    try {
+      const updated = await withFreshAccess(async (token) => {
+        const response = await fetch(`${NORTH_API_BASE}/v1/health/connections/health_connect`, { method: "PUT", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}`, ...northDeviceHeaders() }, body: JSON.stringify({ status: "connected", scopes: samsungConnection.scopes, sourceApps: samsungConnection.source_apps, preferences }) });
+        if (!response.ok) throw new Error("Samsung Health preferences could not be saved");
+        return response.json() as Promise<HealthConnection>;
+      });
+      setHealthConnections((connections) => connections.map((connection) => connection.provider === "health_connect" ? updated : connection));
+      setHealthStatus("Samsung Health preferences saved.");
+    } catch (reason) { setHealthStatus(reason instanceof Error ? reason.message : "Samsung Health preferences could not be saved."); }
+  }
+
+  function signOutAccount() {
+    if (!window.confirm("Sign out of North on this device? Your synced workouts, health records, and account data will remain safe.")) return;
+    logoutNorthAccount();
+    location.assign("/");
+  }
 
   async function shareNorth() {
     const account = readNorthSession();
@@ -2882,9 +3234,60 @@ function App() {
     }
   }
 
-  const focusedTrainingScreen = ["prepare", "workout", "workout-review", "review"].includes(screen);
-  const coreScreen = focusedTrainingScreen || ["today", "journey", "training", "nova-workout-builder", "nova-routine-builder", "workout-library", "workout-template", "nova", "you", "settings"].includes(screen);
   const activeTourStep = tourStep >= 0 ? productTourSteps[tourStep] : null;
+
+  function navigateToDestinationSection(destination: Screen, section: string) {
+    if (destination === "today" && section === "check-in") {
+      setDraftCheckIn({ id: "", date: isoDate(new Date()), weight: checkIns[0]?.weight ? displayBodyWeight(checkIns[0].weight).toFixed(1).replace(/\.0$/, "") : "", sleep: "", energy: 3, soreness: 2, note: "" });
+      setScreen("check-in");
+      return;
+    }
+    if (destination === "journey") {
+      setJourneyTab(section as "timeline" | "milestones" | "insights" | "this-day");
+      setScreen("journey");
+      return;
+    }
+    if (destination === "training" && section === "trophy-room") {
+      setScreen("progression");
+      return;
+    }
+    if (destination === "training" && section === "weekly-review") {
+      openWeeklyReview();
+      return;
+    }
+    if (destination === "nova-workout-builder" && section === "expert-studio") {
+      createPersonalWorkout();
+      return;
+    }
+    if (destination === "nova-workout-builder" && section !== "setup") {
+      setTemplateSource(section as "personal" | "north" | "community");
+      setScreen("workout-library");
+      return;
+    }
+    if (destination === "nova") setNovaHubOpen(section === "context");
+    setScreen(destination);
+    const sectionSelectors: Record<string, string> = {
+      "today-direction": ".direction-panel",
+      "today-week": ".today-week-pulse",
+      "today-record": ".today-record",
+      "training-plan": ".training-rhythm-strip",
+      "training-workout": ".training-hero",
+      "training-build": ".workout-builder-section",
+      "training-quick-log": ".quick-log-section",
+      "training-recent": ".training-performance-panel:first-child",
+      "training-load": ".training-performance-panel:last-child",
+      "nova-workout-builder-setup": ".nova-builder-form",
+      "nova-context": ".nova-intelligence-hub",
+      "nova-conversation": ".conversation-surface",
+      "you-health": ".you-health-hub",
+      "you-recovery": ".you-wellbeing",
+      "you-record": ".you-training-record",
+      "you-memory": ".memory-controls",
+      "you-account": ".you-account-menu",
+    };
+    const selector = sectionSelectors[`${destination}-${section}`];
+    requestAnimationFrame(() => requestAnimationFrame(() => selector && document.querySelector<HTMLElement>(selector)?.scrollIntoView({ behavior: profile.reducedMotion ? "auto" : "smooth", block: "start" })));
+  }
 
   if (!entryComplete) return <Onboarding onComplete={completeOnboarding} onLocalPreview={import.meta.env.DEV ? () => setEntryComplete(true) : undefined} />;
   if (!accountDataReady) return <main className="account-hydration-screen"><BrandLoader label="Restoring your North" /><p>Bringing your plan and saved workouts onto this device…</p></main>;
@@ -2906,7 +3309,7 @@ function App() {
 
       {!online && <div className="offline-banner" role="status" aria-live="polite"><Database size={15}/><span><strong>Offline mode</strong> Your workout and edits are saved on this device and will sync when connection returns.</span></div>}
 
-      {readNorthSession() && ["you", "account"].includes(screen) && (Boolean(syncError) || syncConflicts.length > 0) && <SyncCentre expanded online={online} syncing={syncing} error={syncError} result={syncResult} conflicts={syncConflicts} lastSyncedAt={lastSyncedAt} onSync={() => void runAccountSync(true)} onResolve={(conflict, choice) => void chooseSyncConflict(conflict, choice)} onResolveAllAccount={() => void keepAllAccountConflictVersions()} />}
+      {readNorthSession() && screen === "settings" && (Boolean(syncError) || syncConflicts.length > 0) && <SyncCentre expanded online={online} syncing={syncing} error={syncError} result={syncResult} conflicts={syncConflicts} lastSyncedAt={lastSyncedAt} onSync={() => void runAccountSync(true)} onResolve={(conflict, choice) => void chooseSyncConflict(conflict, choice)} onResolveAllAccount={() => void keepAllAccountConflictVersions()} />}
 
       {screen === "today" && (
         <section className="screen today-screen" id="north-primary-screen">
@@ -2914,44 +3317,46 @@ function App() {
             <div><p className="today-greeting">{todayGreeting}</p><h1>{profile.name || "North"}</h1><p className="lead">{todayIntro}</p></div>
           </section>
 
+          {samsungConnection ? <section className="today-health-context" aria-label="Health Connect daily summary"><span><Footprints size={18}/><strong>{(todayHealth?.steps ?? 0).toLocaleString()}</strong><small>STEPS</small></span><span><Clock3 size={18}/><strong>{todayHealth?.active_minutes ?? 0}</strong><small>MINS</small></span><span><Flame size={18}/><strong>{Math.round(todayHealth?.total_calories ?? 0).toLocaleString()}</strong><small>KCAL</small></span><span><Bike size={18}/><strong>{displayDistance((todayHealth?.distance_metres ?? 0) / 1000).toFixed(1)} {distanceUnit}</strong><small>DISTANCE</small></span><button onClick={() => setScreen("you")}>Health & recovery <ArrowRight size={14}/></button></section> : null}
+
           <section className={`direction-panel${todayPlan.kind === "run" ? " direction-panel-run" : todayPlan.kind === "strength" ? " direction-panel-strength" : todayPlan.kind === "rest" ? " direction-panel-rest" : ""}`}>
-            {(todayPlan.kind === "run" || todayPlan.kind === "strength" || todayPlan.kind === "rest") && <><img className="direction-run-art" src={todayPlan.kind === "strength" ? todayPlan.title === "Upper Body Builder" ? "/png/upper-body-builder.png" : todayPlan.title === "Push Day" ? "/png/push-day.png" : "/png/full-body-foundation.png" : todayPlan.kind === "rest" ? "/png/rest.png" : "/png/run-direction-legs.png"} alt="" /><span className="direction-run-overlay" aria-hidden="true" /></>}
+            <img className="direction-run-art" src={todayWorkoutCardImage} alt="" /><span className="direction-run-overlay" aria-hidden="true" />
             <div className="direction-panel-copy">
               <p className="eyebrow">TODAY’S DIRECTION</p>
               <h2>{todayPlan.title}</h2>
               <p>{todayPlan.kind === "strength" && todayPlan.workout ? `${todayPlan.workout.length} exercises · ${todayPlan.workout.reduce((sum, exercise) => sum + exercise.sets.length, 0)} working sets · ≈${plannedMinutes(todayPlan.workout)} minutes` : todayPlan.note || `${todayPlan.kind} day`}</p>
               {todayPlanCompleted ? <><span className="direction-complete-stamp"><Check size={14} /> Completed</span><button className="direction-panel-add-session" onClick={() => { setSelectedPlanDayId(todayPlan.id); setScreen("training"); }}>Add a session <ArrowRight size={16} /></button></> : <>{hasProgress && todayPlan.kind !== "rest" && <div className="resume-progress"><div className="progress-track"><span style={{ width: `${progress}%` }} /></div><span>{progress}% complete</span></div>}<button className="primary-button direction-panel-action" onClick={openTodayWorkout}>{hasPreparedDraft && session.planDayId === todayPlan.id ? session.startedAt ? "Resume workout" : "Continue workout setup" : todayPlan.kind === "rest" ? "Plan a workout" : todayPlan.kind === "strength" ? "View today’s workout" : `Open ${todayPlan.kind}`}<ArrowRight size={18} /></button></>}
             </div>
-            {todayPlan.kind !== "run" && todayPlan.kind !== "strength" && todayPlan.kind !== "rest" && <span className="direction-mark">{todayPlan.kind === "bike" ? <Bike size={24} /> : todayPlan.kind === "walk" ? <Footprints size={24} /> : todayPlan.kind === "recovery" ? <HeartPulse size={24} /> : <Compass size={24} />}</span>}
           </section>
           {todayActivities.length > 0 && <section className="day-session-stack compact" aria-label="Today's completed sessions"><header><div><p className="eyebrow">TODAY'S RECORD</p><h2>{todayPlanCompleted || todayCompletedWorkout ? "Main session and additional movement" : "Movement recorded today"}</h2></div><span>{todayActivities.length + (todayPlan.kind === "rest" ? 0 : 1)} sessions</span></header>{todayPlan.kind !== "rest" && <article className="primary-session completed"><i><Check size={14}/></i><div><small>MAIN SESSION</small><strong>{todayPlan.title}</strong><span>{todayPlanCompleted || todayCompletedWorkout ? "Completed" : "Planned"}</span></div></article>}{todayActivities.map((activity) => <article key={activity.id} className="completed"><i>{activity.kind === "bike" ? <Bike size={14}/> : activity.kind === "run" ? <Footprints size={14}/> : activity.kind === "walk" ? <PersonStanding size={14}/> : <HeartPulse size={14}/>}</i><div><small>ADDITIONAL ACTIVITY</small><strong>{activity.kind === "bike" ? "Bike ride" : activity.kind === "run" ? "Run" : activity.kind === "walk" ? "Walk" : "Recovery"}</strong><span>{[activity.duration ? `${activity.duration} min` : "", activity.distance ? `${displayDistance(activity.distance).toFixed(1)} ${distanceUnit}` : ""].filter(Boolean).join(" · ") || "Logged"}</span></div></article>)}</section>}
           {weatherStatus && <p className="weather-status" role="status">{weatherStatus}</p>}
 
           {(todayPlan.sessions?.length ?? 0) > 0 && <section className="day-session-stack compact"><header><div><p className="eyebrow">TODAY'S SESSION STACK</p><h2>Main focus plus supporting work</h2></div><span>{1 + (todayPlan.sessions?.length ?? 0)} sessions</span></header><article className="primary-session"><i>1</i><div><small>MAIN FOCUS</small><strong>{todayPlan.title}</strong><span>{todayPlan.kind}</span></div></article>{todayPlan.sessions?.map((item, index) => <article key={item.id} className={item.status}><i>{index + 2}</i><div><small>{item.role.toUpperCase()}</small><strong>{item.title}</strong><span>{[item.distance ? `${displayDistance(item.distance).toFixed(1)} ${distanceUnit}` : "", item.duration ? `${item.duration} min` : "", item.kind].filter(Boolean).join(" · ")}</span></div></article>)}</section>}
 
-          <button className="daily-check-in" onClick={() => { setDraftCheckIn({ id: "", date: isoDate(new Date()), weight: checkIns[0]?.weight ? displayBodyWeight(checkIns[0].weight).toFixed(1).replace(/\.0$/, "") : "", sleep: "", energy: 3, soreness: 2, note: "" }); setScreen("check-in"); }}><HeartPulse size={19} /><div><strong>{checkIns[0]?.date === isoDate(new Date()) ? "Today is checked in" : "How are you arriving today?"}</strong><small>{checkIns[0]?.date === isoDate(new Date()) ? `Energy ${checkIns[0].energy}/5 · Soreness ${checkIns[0].soreness}/5` : "Energy, recovery, sleep, and anything worth knowing"}</small></div><ArrowRight size={16} /></button>
+          <div className="today-context-column">
+            <button className="daily-check-in" onClick={() => { setDraftCheckIn({ id: "", date: isoDate(new Date()), weight: checkIns[0]?.weight ? displayBodyWeight(checkIns[0].weight).toFixed(1).replace(/\.0$/, "") : "", sleep: "", energy: 3, soreness: 2, note: "" }); setScreen("check-in"); }}><HeartPulse size={19} /><div><strong>{checkIns[0]?.date === isoDate(new Date()) ? "Today is checked in" : "How are you arriving today?"}</strong><small>{checkIns[0]?.date === isoDate(new Date()) ? `Energy ${checkIns[0].energy}/5 · Soreness ${checkIns[0].soreness}/5` : "Energy, recovery, sleep, and anything worth knowing"}</small></div><ArrowRight size={16} /></button>
+            <section className="today-muscle-focus" aria-label="Today’s muscle focus"><AnatomyMap compact showBack={false} label="Today’s muscle focus" {...todayMuscleActivation} /></section>
+          </div>
 
           <section className="today-week-pulse"><div className="today-week-pulse-copy"><p className="eyebrow">YOUR WEEK</p><h2>{completedWeekDays ? `${completedWeekDays} of ${plannedWeekDays.length} sessions complete.` : "Your week is ready."}</h2><p>{weekTrainingMinutes ? `${weekTrainingMinutes} minutes already in the record.` : "Your plan can change with real life."}</p></div><div className="week-pulse-orbit" style={{ "--week-progress": `${weeklyPulseProgress * 3.6}deg` } as CSSProperties}><b>{weeklyPulseProgress}%</b><small>COMPLETE</small></div><div className="week-pulse-days" aria-label="This week's plan">{currentWeekPlan.map((day) => <button key={day.id} className={`${day.status} ${day.date === todayPlan.date ? "today" : ""}`} onClick={() => { selectPlanDay(day); setScreen("training"); }} aria-label={`${day.label}: ${day.title}, ${day.status}`}><span>{day.label.slice(0, 1)}</span><i>{day.status === "completed" ? <Check size={12}/> : day.kind === "rest" ? <Moon size={11}/> : day.kind === "recovery" ? <HeartPulse size={11}/> : ""}</i></button>)}</div>{upcomingMilestones[0] && <button className="week-pulse-milestone" onClick={() => { setJourneyTab("milestones"); setScreen("journey"); }}><span>Next milestone</span><strong>{upcomingMilestones[0].title.replace(/^Chapter \d+: /, "")}</strong><em>{upcomingMilestones[0].progress}% complete</em><i><b style={{ width: `${upcomingMilestones[0].progress}%` }} /></i><ArrowRight size={14}/></button>}</section>
 
           <section className="today-record"><header><div><p className="eyebrow">THE RECORD</p><h2>Where you are now.</h2></div><button onClick={() => { setJourneyTab("timeline"); setScreen("journey"); }}>Open Journey <ArrowRight size={14}/></button></header>{latestWorkout ? <button className="today-record-item" onClick={() => openHistory(latestWorkout, "training")}><span><History size={17}/></span><div><small>LAST SESSION</small><strong>{latestWorkoutTitle ?? "Workout completed"}</strong><p>{formatSessionDate(workoutRecordDate(latestWorkout))}{sessionSetCount(latestWorkout) ? ` · ${sessionSetCount(latestWorkout)} working sets` : " · Recorded in North"}</p></div><ArrowRight size={16}/></button> : <div className="today-record-item"><span><History size={17}/></span><div><small>LAST SESSION</small><strong>Your record starts here.</strong><p>Complete a session to begin your Journey.</p></div></div>}{upNextPlan ? <button className="today-record-item" onClick={() => { setSelectedPlanDayId(upNextPlan.id); setScreen("training"); }}><span>{upNextPlan.kind === "bike" ? <Bike size={17}/> : upNextPlan.kind === "run" ? <Footprints size={17}/> : upNextPlan.kind === "recovery" ? <HeartPulse size={17}/> : <CalendarDays size={17}/>}</span><div><small>UP NEXT</small><strong>{upNextPlan.title}</strong><p>{formatSessionDate(`${upNextPlan.date}T12:00:00`)} · {upNextPlan.kind}</p></div><ArrowRight size={16}/></button> : <button className="today-record-item" onClick={() => setScreen("training")}><span><Plus size={17}/></span><div><small>UP NEXT</small><strong>Shape your next session.</strong><p>Build a workout, add a ride, or leave room to recover.</p></div><ArrowRight size={16}/></button>}</section>
 
-          <p className="quiet-copy">Head North. Every day.</p>
         </section>
       )}
 
       {screen === "journey" && (
         <section className="screen destination-screen journey-destination">
-          <header className="journey-page-header"><div><p className="eyebrow">YOUR JOURNEY</p><h1>See how far you’ve come.</h1><p>Progress is more than a number. It is the story of choosing to continue.</p></div><span><MapIcon size={22} /></span></header>
+          <header className="journey-page-header"><div><p className="destination-subheading">Your progress, held with care.</p><h1>See how far you’ve come.</h1><p>Progress is more than a number. It is the story of choosing to continue.</p></div><span><MapIcon size={22} /></span></header>
           <nav className="journey-tabs" aria-label="Journey views">{(["timeline", "milestones", "insights", "this-day"] as const).map((tab) => <button key={tab} className={journeyTab === tab ? "active" : ""} onClick={() => setJourneyTab(tab)}><span aria-hidden="true">{tab === "timeline" ? <MapIcon size={17} /> : tab === "milestones" ? <Award size={17} /> : tab === "insights" ? <TrendingUp size={17} /> : <CalendarDays size={17} />}</span><b>{tab === "this-day" ? "This Day" : tab[0].toUpperCase() + tab.slice(1)}</b></button>)}</nav>
           {journeyTab === "timeline" && <>
-            <section className="journey-stats"><div><i><Dumbbell size={16} /></i><strong>{history.length}</strong><span>workouts</span></div><div><i><Award size={16} /></i><strong>{history.reduce((total, item) => total + sessionSetCount(item), 0)}</strong><span>completed sets</span></div><div><i><Clock3 size={16} /></i><strong>{lifetimeTrainingMinutes}</strong><span>total minutes</span></div><div><i><Bike size={16} /></i><strong>{displayDistance(activities.reduce((total, item) => total + (Number.parseFloat(item.distance) || 0), 0)).toFixed(1)}</strong><span>distance {distanceUnit}</span></div><div><i><HeartPulse size={16} /></i><strong>{checkIns[0]?.weight ? displayWeight(checkIns[0].weight).toFixed(1) : "—"}</strong><span>latest {weightUnit}</span></div></section>
+            <section className="journey-stats"><div><i><Dumbbell size={16} /></i><strong>{history.length}</strong><span>workouts</span></div><div><i><Award size={16} /></i><strong>{history.reduce((total, item) => total + sessionSetCount(item), 0)}</strong><span>completed sets</span></div><div><i><Clock3 size={16} /></i><strong>{lifetimeTrainingMinutes}</strong><span>training minutes</span></div><div><i><Footprints size={16} /></i><strong>{displayDistance(healthTotals.distance_metres / 1000).toFixed(1)}</strong><span>HC distance {distanceUnit}</span></div><div><i><Flame size={16} /></i><strong>{Math.round(healthTotals.calories).toLocaleString()}</strong><span>HC kcal</span></div></section>
             {timelineDate && timelineDate <= isoDate(new Date()) && <section className="journey-backfill"><button className="journey-backfill-launch" onClick={() => setBackfillOpen((open) => !open)}><span><Plus size={19}/></span><div><small>{timelineDate < isoDate(new Date()) ? "MISSING SOMETHING?" : "ADD TO TODAY"}</small><strong>{timelineDate < isoDate(new Date()) ? "Add a workout performed this day" : "Add another workout"}</strong><p>North will preserve when it happened and when it was entered.</p></div><ChevronDown className={backfillOpen ? "open" : ""}/></button>{backfillOpen && <div className="journey-backfill-picker"><header><div><p className="eyebrow">BACKFILL WORKOUT</p><h2>{formatSessionDate(`${timelineDate}T12:00:00`)}</h2></div><button onClick={() => setBackfillOpen(false)} aria-label="Close backfill options"><X/></button></header>{weeklyPlan.find((day) => day.date === timelineDate && day.kind === "strength") && (() => { const day = weeklyPlan.find((item) => item.date === timelineDate)!; return <button className="backfill-planned" onClick={() => prepareBackfill(day.workout?.length ? day.workout : starterExercises, day.title, day.id)}><CalendarDays/><div><small>PLANNED FOR THIS DAY</small><strong>Complete {day.title}</strong><span>{day.workout?.length ?? starterExercises.length} exercises</span></div><ArrowRight/></button>; })()}<button className="backfill-blank" onClick={() => prepareBackfill([], "Custom workout")}><Plus/><div><strong>Build from scratch</strong><span>Start empty and add only what you performed</span></div><ArrowRight/></button><label className="backfill-search"><Search/><input value={backfillSearch} onChange={(event) => setBackfillSearch(event.target.value)} placeholder="Search premade and My Workouts" /></label><div className="backfill-template-groups"><section><h3>MY WORKOUTS</h3>{personalTemplates.filter((template) => !backfillSearch || `${template.name} ${template.focus}`.toLowerCase().includes(backfillSearch.toLowerCase())).slice(0,6).map((template) => <button key={template.id} onClick={() => prepareBackfill(exercisesFromTemplate(template), template.name)}><Heart/><span><strong>{template.name}</strong><small>{template.duration} min · {template.exercises.length} exercises</small></span><ArrowRight/></button>)}{personalTemplates.length === 0 && <p>Saved personal workouts will appear here.</p>}</section><section><h3>NORTH WORKOUTS</h3>{workoutTemplates.filter((template) => !backfillSearch || `${template.name} ${template.focus} ${template.goal}`.toLowerCase().includes(backfillSearch.toLowerCase())).slice(0,8).map((template) => <button key={template.id} onClick={() => prepareBackfill(exercisesFromTemplate(template), template.name)}><Dumbbell/><span><strong>{template.name}</strong><small>{template.focus} · {template.duration} min</small></span><ArrowRight/></button>)}</section></div></div>}</section>}
-            <section className="timeline-moments"><div className="section-heading"><div><p className="eyebrow">TIMELINE</p><h2>{timelineDate ? formatSessionDate(`${timelineDate}T12:00:00`) : "Your moments"}</h2></div><span>{filteredTimeline.length}</span></div><div className="timeline-toolbar"><details><summary><ListFilter size={15} /><span>{timelineFilter === "All" ? "All moments" : timelineFilter}</span><ChevronDown size={14} /></summary><div className="timeline-toolbar-menu">{["All", "Workouts", "Activities", "Check-ins", "Reflections", "Photos"].map((filter) => <button key={filter} className={timelineFilter === filter ? "active" : ""} onClick={() => { setTimelineFilter(filter); }}>{filter === "All" ? "All moments" : filter}</button>)}</div></details><details><summary><ArrowDownUp size={15} /><span>{timelineSort === "newest" ? "Newest first" : "Oldest first"}</span><ChevronDown size={14} /></summary><div className="timeline-toolbar-menu timeline-sort-menu"><button className={timelineSort === "newest" ? "active" : ""} onClick={() => setTimelineSort("newest")}>Newest first</button><button className={timelineSort === "oldest" ? "active" : ""} onClick={() => setTimelineSort("oldest")}>Oldest first</button></div></details><label className="timeline-date-control"><CalendarDays size={15} /><input type="date" value={timelineDate} onChange={(event) => setTimelineDate(event.target.value)} aria-label="Filter timeline by date" /></label>{(timelineFilter !== "All" || timelineDate) && <div className="timeline-active-filters">{timelineFilter !== "All" && <button onClick={() => setTimelineFilter("All")}>{timelineFilter}<X size={12} /></button>}{timelineDate && <button onClick={() => setTimelineDate("")}>{formatSessionDate(`${timelineDate}T12:00:00`)}<X size={12} /></button>}</div>}</div></section>
+            <section className="timeline-moments"><div className="section-heading"><div><p className="eyebrow">TIMELINE</p><h2>{timelineDate ? formatSessionDate(`${timelineDate}T12:00:00`) : "Your moments"}</h2></div><span>{filteredTimeline.length}</span></div><div className="timeline-toolbar"><details><summary><ListFilter size={15} /><span>{timelineFilter === "All" ? "All moments" : timelineFilter}</span><ChevronDown size={14} /></summary><div className="timeline-toolbar-menu">{["All", "Workouts", "Activities", "Check-ins", "Reflections", "Photos"].map((filter) => <button key={filter} className={timelineFilter === filter ? "active" : ""} onClick={() => { setTimelineFilter(filter); }}>{filter === "All" ? "All moments" : filter}</button>)}</div></details><details><summary className="timeline-sort-control" aria-label={`Sort timeline: ${timelineSort === "newest" ? "newest first" : "oldest first"}`} title={timelineSort === "newest" ? "Newest first" : "Oldest first"}><ArrowDownUp size={16} /></summary><div className="timeline-toolbar-menu timeline-sort-menu"><button className={timelineSort === "newest" ? "active" : ""} onClick={() => setTimelineSort("newest")}>Newest first</button><button className={timelineSort === "oldest" ? "active" : ""} onClick={() => setTimelineSort("oldest")}>Oldest first</button></div></details><label className="timeline-date-control"><CalendarDays size={15} /><input type="date" value={timelineDate} onChange={(event) => setTimelineDate(event.target.value)} aria-label="Filter timeline by date" /></label><label className="timeline-photo-control" aria-label="Add a private Journey photo" title="Add a private Journey photo"><ImagePlus size={16} /><input type="file" accept="image/*" onChange={addJourneyPhoto} /></label>{(timelineFilter !== "All" || timelineDate) && <div className="timeline-active-filters">{timelineFilter !== "All" && <button onClick={() => setTimelineFilter("All")}>{timelineFilter}<X size={12} /></button>}{timelineDate && <button onClick={() => setTimelineDate("")}>{formatSessionDate(`${timelineDate}T12:00:00`)}<X size={12} /></button>}</div>}</div></section>
             <section className="timeline unified-timeline">{filteredTimeline.map((item) => {
               const content = <><span>{journeyMomentIcon(item)}</span><div><small>{item.type.toUpperCase()} · {formatSessionDate(item.date).toUpperCase()}</small><h3>{item.title}</h3>{"photo" in item && item.photo && <img src={item.photo.dataUrl} alt={item.photo.caption || "Journey memory"} />}<p>{item.summary}</p>{"photo" in item && item.photo && <button className="photo-delete" onClick={() => removeJourneyPhoto(item.photo.id)}>Remove photo</button>}</div></>;
               return "workout" in item && item.workout ? <button className={`timeline-entry ${journeyMomentTone(item)}`} key={item.id} onClick={() => openHistory(item.workout, "journey")}>{content}</button> : <article className={journeyMomentTone(item)} key={item.id}>{content}</article>;
             })}{filteredTimeline.length === 0 && <article><span><Compass size={16} /></span><div><small>NO MATCHING MOMENTS</small><h3>Your record is still here.</h3><p>Clear the date or choose another filter.</p></div></article>}<article><span><Compass size={16} /></span><div><small>YOUR BEGINNING</small><h3>You chose a direction.</h3><p>Every journey needs somewhere honest to begin.</p></div></article></section>
-            <section className="photo-add"><div><strong>Add a private Journey photo</strong><small>Stored only in this browser and your exported backup · maximum 2 MB.</small></div><input value={photoCaption} onChange={(event) => setPhotoCaption(event.target.value)} placeholder="Optional caption" /><label><Plus size={14} /> Choose photo<input type="file" accept="image/*" onChange={addJourneyPhoto} /></label></section>
           </>}
           {journeyTab === "insights" && <>
             <section className="momentum-panel"><div><span>LAST FOUR WEEKS</span><strong>You’re building a record, not a score.</strong><p>{fourWeekTrends.reduce((sum, week) => sum + week.workouts, 0)} workouts · {fourWeekTrends.reduce((sum, week) => sum + week.minutes, 0)} minutes · {Math.round(displayWeight(fourWeekTrends.reduce((sum, week) => sum + week.volume, 0))).toLocaleString()} {weightUnit} volume.</p></div><TrendingUp size={27} /></section>
@@ -2974,14 +3379,15 @@ function App() {
 
       {screen === "training" && (
         <section className="screen destination-screen training-destination">
-          <header className="training-page-header"><div><p className="eyebrow">TRAINING</p><h1>Own the work.</h1><p>Your plan. Your progress. Your strength.</p></div><div className="training-page-actions"><button aria-label="Review this week" title={weeklyReviews.some((item) => item.weekStart === weeklyPlan[0].date) ? "Revisit this week" : "Reflect on this week"} onClick={() => { const existing = weeklyReviews.find((item) => item.weekStart === weeklyPlan[0].date); setDraftReview(existing ? { proud: existing.proud, learned: existing.learned, next: existing.next } : { proud: "", learned: "", next: "" }); setScreen("weekly-review"); }}><NotebookPen size={20} /></button><button aria-label="Open progression and personal records" title="Progression and personal records" onClick={() => setScreen("progression")}><Trophy size={21} /></button></div></header>
+          <header className="training-page-header"><div><p className="destination-subheading">Your work, at your pace.</p><h1>Own the work.</h1><p>Your plan. Your progress. Your strength.</p></div><div className="training-page-actions"><button aria-label="Review this week" title={weeklyReviews.some((item) => item.weekStart === weeklyPlan[0].date) ? "Revisit this week" : "Reflect on this week"} onClick={openWeeklyReview}><NotebookPen size={20} /></button><button aria-label="Open Trophy Room" title="Trophy Room" onClick={() => setScreen("progression")}><Trophy size={21} /></button></div></header>
           <div className="section-heading training-rhythm-heading"><div className="choice-row" aria-label="Planning week"><button className={planningWeekOffset === 0 ? "active" : ""} onClick={() => showPlanningWeek(0)}>This week</button><button className={planningWeekOffset === 1 ? "active" : ""} onClick={() => showPlanningWeek(1)}>Next week</button></div><button className="text-button" onClick={() => setScreen("week-plan")}>See full week <ArrowRight size={14} /></button></div>
           <section className="week-strip training-rhythm-strip">
             {viewedWeekPlan.map((day) => <button key={day.id} onClick={() => selectPlanDay(day)} className={`${day.id === selectedPlanDay.id ? "selected" : ""} ${day.date === isoDate(new Date()) ? "today" : ""} ${day.status}`}><span>{day.label.slice(0, 1)}</span><small>{Number(day.date.slice(-2))}</small><i>{day.status === "completed" ? "✓" : day.status === "skipped" ? "×" : day.kind === "strength" ? "●" : day.kind === "rest" ? "—" : "·"}</i></button>)}
           </section>
           <section className={`training-hero ${selectedPlanDay.kind}`}>
+            <img className="direction-run-art" src={selectedWorkoutCardImage} alt="" />
+            <span className="direction-run-overlay" aria-hidden="true" />
             <div className="training-hero-copy"><p className="eyebrow">TODAY’S TRAINING</p><h2>{selectedPlanDay.title}</h2><div className="training-muscle-tags">{selectedPlanDay.kind === "strength" ? Array.from(new Set(selectedWorkout.map((item) => exerciseLibrary.find((entry) => entry.name === item.name)?.category).filter(Boolean))).slice(0, 3).map((group) => <span key={group}>{group}</span>) : <span>{selectedPlanDay.kind}</span>}</div><div className="training-hero-metrics"><span><Clock3 size={16} /><strong>{selectedPlanDay.kind === "strength" ? `${plannedMinutes(selectedWorkout)} min` : "Open"}</strong><small>EST. TIME</small></span><span><TrendingUp size={16} /><strong>{selectedPlanDay.kind === "strength" ? plannedIntensity(selectedWorkout) : "Steady"}</strong><small>INTENSITY</small></span><span><Dumbbell size={16} /><strong>{selectedPlanDay.kind === "strength" ? selectedWorkout.flatMap((item) => item.sets).length : "—"}</strong><small>SETS</small></span></div></div>
-            <div className="training-body-state" aria-hidden="true"><AnatomyMap compact showBack={false} {...selectedMuscleActivation} /></div>
             <div className="training-hero-actions">{selectedPlanDay.kind === "rest" ? <button className="primary-button" onClick={() => setTrainingDetailsOpen(true)}><Dumbbell size={17} />Plan a workout<ArrowRight size={16} /></button> : <><button className="primary-button" onClick={beginPlannedDay}><Play size={17} />{hasPreparedDraft && session.planDayId === selectedPlanDay.id ? session.startedAt ? "Resume workout" : "Continue setup" : "Start workout"}</button><button className="secondary-button" onClick={() => setTrainingDetailsOpen((open) => !open)}>{trainingDetailsOpen ? "Close editor" : "Edit workout"}<ArrowRight size={16} /></button></>}</div>
           </section>
           {selectedPlanDay.kind !== "rest" && <button className="training-add-session" onClick={() => { setTrainingDetailsOpen(true); setStackComposerOpen(true); }}><Plus size={16} /> Add session</button>}
@@ -3046,13 +3452,17 @@ function App() {
                   <button key={item.finishedAt} onClick={() => openHistory(item, "training")}><span><Dumbbell size={17} /></span><div><strong>{formatSessionDate(item.finishedAt)}</strong><small>{sessionSetCount(item)} sets{sessionMinutes(item) ? ` · ${sessionMinutes(item)} min` : ""} · Energy {item.energy}/5</small></div><ArrowRight size={16} /></button>
                 ))}
               </section>
-              {history.length > 0 && <button className="text-wide-button" onClick={() => setScreen("workout-history")}>View all workouts <ArrowRight size={16} /></button>}
+              {(history.length > 0 || activities.length > 0) && <button className="text-wide-button" onClick={() => setScreen("workout-history")}>View training calendar <ArrowRight size={16} /></button>}
             </div>
             <div className="training-performance-panel">
               <header className="panel-heading"><p className="eyebrow">WEEKLY LOAD</p><h2>What actually happened</h2></header>
               <section className="weekly-load-card">
-                <div className="weekly-load-metrics"><div><strong>{weekSessions.length + weekActivities.length}</strong><span>sessions</span></div><div><strong>{weekTrainingMinutes}</strong><span>minutes</span></div><div><strong>{weekReps}</strong><span>reps</span></div><div><strong>{Math.round(displayWeight(weekTonnage)).toLocaleString()}</strong><span>{weightUnit} volume</span></div><div><strong>{displayDistance(weekDistance).toFixed(1)}</strong><span>{distanceUnit}</span></div></div>
-                <div className="week-bars">{weekDayMinutes.map((minutes, index) => <div key={currentWeekPlan[index].id}><i style={{ height: `${Math.max(4, Math.min(56, minutes))}px` }} /><span>{currentWeekPlan[index].label.slice(0, 1)}</span></div>)}</div>
+                <div className="weekly-load-metrics"><div><strong>{weekSessions.length + weekActivities.length + weekHealthActivities.length}</strong><span>sessions</span></div><div><strong>{weekTrainingMinutes}</strong><span>minutes</span></div><div><strong>{weekReps}</strong><span>reps</span></div><div><strong>{Math.round(displayWeight(weekTonnage)).toLocaleString()}</strong><span>{weightUnit} volume</span></div><div><strong>{displayDistance(weekDistance).toFixed(1)}</strong><span>{distanceUnit}</span></div></div>
+                <div className="week-bars">{weekDayLoads.map((day, index) => {
+                  const details = `${loadWeekDays[index].label}: ${day.sessions} session${day.sessions === 1 ? "" : "s"}, ${day.minutes} minutes, ${day.reps} reps, ${Math.round(displayWeight(day.volume)).toLocaleString()} ${weightUnit} volume, ${displayDistance(day.distance).toFixed(1)} ${distanceUnit}`;
+                  const height = day.sessions ? 12 + Math.round(44 * weekLoadScores[index] / maximumWeekLoadScore) : 4;
+                  return <div key={loadWeekDays[index].id} role="img" tabIndex={0} title={details} aria-label={details} data-load-details={details}><i aria-hidden="true" style={{ height: `${height}px` }} /><span aria-hidden="true">{loadWeekDays[index].label.slice(0, 2)}</span></div>;
+                })}</div>
                 {muscleDistribution.length > 0 && <div className="muscle-summary">{muscleDistribution.slice(0, 5).map(([category, sets]) => <span key={category}>{category} <b>{sets} sets</b></span>)}</div>}
                 {calorieEstimates && <p className="calorie-assumption">{estimatedWeekCalories ? `≈${estimatedWeekCalories.toLocaleString()} active kcal estimated using your latest recorded bodyweight and standard activity MET values.` : "Add bodyweight in a check-in to calculate an estimate."} Estimates are optional and are not measurements.</p>}
                 <button className="estimate-toggle" onClick={() => setCalorieEstimates((enabled) => !enabled)}>{calorieEstimates ? "Hide calorie estimate" : "Show optional calorie estimate"}</button>
@@ -3077,20 +3487,15 @@ function App() {
       )}
 
       {screen === "progression" && (
-        <section className="screen progression-screen">
+        <section className="screen progression-screen trophy-room-screen">
           <button className="back-button" onClick={() => setScreen("training")}><ArrowLeft size={17} /> Training</button>
-          <p className="eyebrow">PROGRESSION</p>
-          <h1>Build from evidence.</h1>
-          <p className="lead">Nova only suggests a change when North's saved records support it. You confirm every plan edit.</p>
-          <section className="progression-target"><small>CHANGES APPLY TO</small><strong>{selectedPlanDay.label} · {selectedPlanDay.title}</strong><span>Select another day from Training before returning here if needed.</span></section>
-          <div className="section-heading"><div><p className="eyebrow">NOVA RECOMMENDATIONS</p><h2>What to consider</h2></div></div>
-          <section className="suggestion-list">
-            {progressionSuggestions.map((suggestion) => <article key={suggestion.id}><span>{suggestion.kind === "load" ? "↑" : suggestion.kind === "recovery" ? "↘" : "↔"}</span><div><strong>{suggestion.title}</strong><p>{suggestion.recommendation}</p><details><summary>Why North is suggesting this</summary><small>{suggestion.evidence}</small></details><button onClick={() => applyProgressionSuggestion(suggestion)}>Review and apply <ArrowRight size={13} /></button></div></article>)}
-            {progressionSuggestions.length === 0 && <div className="quiet-row"><TrendingUp size={19} /><div><strong>No change suggested yet</strong><small>Repeat movements and record complete sets before North proposes progression.</small></div></div>}
-          </section>
-          {progressionTransaction && !progressionTransaction.appliedAt && <section className="progression-preview" role="dialog" aria-labelledby="progression-preview-title"><header><span><SlidersHorizontal size={17} /></span><div><small>REVIEW BEFORE APPLYING</small><h2 id="progression-preview-title">{progressionTransaction.suggestion.title}</h2></div></header><p>{progressionTransaction.suggestion.evidence}</p><div className="progression-compare"><div><span>BEFORE</span><strong>{progressionTransaction.beforeDay.title}</strong><small>{progressionTransaction.beforeDay.workout?.find((exercise) => exercise.name === progressionTransaction.suggestion.exerciseName)?.target ?? `${progressionTransaction.beforeDay.workout?.reduce((sum, exercise) => sum + exercise.sets.length, 0)} total sets`}</small></div><ArrowRight size={17} /><div><span>AFTER</span><strong>{progressionTransaction.afterDay.title}</strong><small>{progressionTransaction.afterDay.workout?.find((exercise) => exercise.name === (progressionTransaction.suggestion.substitution ?? progressionTransaction.suggestion.exerciseName))?.target ?? `${progressionTransaction.afterDay.workout?.reduce((sum, exercise) => sum + exercise.sets.length, 0)} total sets`}</small></div></div><p className="progression-recommendation">{progressionTransaction.suggestion.recommendation}</p><footer><button onClick={() => setProgressionTransaction(null)}>Cancel</button><button onClick={confirmProgressionTransaction}>Confirm recommendation</button></footer></section>}
-          <div className="section-heading"><div><p className="eyebrow">PERSONAL RECORDS</p><h2>New recorded loads</h2></div></div>
-          <section className="pr-list">{personalRecords.map((record) => <article key={record.id}><span><Trophy size={15} /></span><div><small>PERSONAL BEST · {formatSessionDate(record.date)}</small><strong>{record.exerciseName}</strong><em>Previous {displayWeight(record.previous).toFixed(1)} {weightUnit}</em></div><b>{displayWeight(record.weight).toFixed(1)} <small>{weightUnit}</small></b></article>)}{personalRecords.length === 0 && <p>Personal records appear after an exercise has at least two recorded loads.</p>}</section>
+          <header className="trophy-room-hero"><div className="trophy-room-copy"><p className="eyebrow">NORTH RECORDS</p><h1>THE TROPHY ROOM</h1><p>Your strongest sets, longest rides, fastest efforts, biggest days and every record still waiting to be claimed.</p><div className="trophy-room-actions"><button onClick={() => void shareTrophyRoom()}><Share2 size={17} />{copyStatus || "Share highlights"}</button><button onClick={() => { const evidence = earnedTrophyRecords.slice(0, 8).map((record) => `${record.title}: ${record.value}${record.unit ? ` ${record.unit}` : ""}${record.date ? ` on ${formatSessionDate(record.date)}` : ""}`).join("; "); setScreen("nova"); void sendToNova(`Review these evidence-backed Trophy Room records and tell me which progression deserves attention next: ${evidence || "No earned records yet"}. Do not suggest a change unless my saved records support it.`); }}><Compass size={17} />Ask Nova about progression</button></div><span className="trophy-share-status" role="status" aria-live="polite">{copyStatus}</span></div><div className="trophy-room-emblem" aria-hidden="true"><span><Trophy /></span><b>{earnedTrophyRecords.length}</b><small>RECORDS</small></div></header>
+          <section className="trophy-room-stats" aria-label="Trophy Room summary">{trophyCategories.map(({ category, count }) => <div key={category}><strong>{count}</strong><span>{category}</span></div>)}<div><strong>{personalRecords.length}</strong><span>Improved</span></div></section>
+          <div className="trophy-room-heading"><div><p className="eyebrow">YOUR COLLECTION</p><h2>Every best has a place.</h2></div><span>{earnedTrophyRecords.length} earned · {trophyRoomRecords.length - earnedTrophyRecords.length} locked</span></div>
+          <label className="trophy-room-search"><Search size={18} /><input value={trophySearch} onChange={(event) => setTrophySearch(event.target.value)} placeholder="Search exercises, records, or results" /><span>{visibleTrophyRecords.length} shown</span></label>
+          <section className="trophy-masonry" aria-label="Personal record trophies">{visibleTrophyRecords.map((record, index) => <article className={`${record.earned ? "earned" : "locked"} trophy-${record.category.toLowerCase()}`} style={{ "--trophy-index": index % 5 } as CSSProperties} key={record.id}><div className="trophy-card-art" aria-hidden="true"><i /><span><TrophyRecordIcon kind={record.icon} /></span></div><div className="trophy-card-copy"><small>{record.earned ? `${record.category.toUpperCase()} RECORD` : "UNCLAIMED TROPHY"}</small><h3>{record.title}</h3><p>{record.detail}</p>{record.date && <time dateTime={record.date}>{formatSessionDate(record.date)}</time>}</div><div className="trophy-card-value"><strong>{record.value}</strong>{record.unit && <span>{record.unit}</span>}</div></article>)}</section>
+          {normalizedTrophySearch && visibleTrophyRecords.length === 0 && <section className="trophy-room-empty"><Search /><div><strong>No trophies match that search.</strong><p>Try an exercise name, record type, unit, or result.</p></div></section>}
+          {earnedTrophyRecords.length === 0 && <section className="trophy-room-empty"><Trophy /><div><strong>The room is ready.</strong><p>Complete a workout or log a ride, run, or walk. North will place the first evidence-backed record on the wall.</p></div></section>}
         </section>
       )}
 
@@ -3216,17 +3621,18 @@ function App() {
           <button className="back-button" onClick={() => setScreen("training")}><ArrowLeft size={17} /> Training</button>
           <p className="eyebrow">TRAINING CALENDAR</p>
           <h1>Your work, month by month.</h1>
-          <p className="lead">Tap a training day. See exactly what happened.</p>
-          {history.length > 0 ? <section className="north-history-calendar-layout"><div className="north-history-calendar"><header><button onClick={() => setHistoryCalendarMonth((month) => new Date(month.getFullYear(), month.getMonth() - 1, 1, 12))} aria-label="Previous month"><ChevronLeft /></button><div><small>TRAINING CALENDAR</small><h2>{new Intl.DateTimeFormat("en-CA", { month: "long", year: "numeric" }).format(historyCalendarMonth)}</h2></div><button onClick={() => setHistoryCalendarMonth((month) => new Date(month.getFullYear(), month.getMonth() + 1, 1, 12))} aria-label="Next month"><ChevronRight /></button></header><div className="north-calendar-weekdays">{["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day) => <span key={day}>{day}</span>)}</div><div className="north-calendar-grid">{historyCalendarDays.map((date) => { const key = isoDate(date); const items = historyByDate[key] ?? []; const outside = date.getMonth() !== historyCalendarMonth.getMonth(); return <button key={key} className={`${outside ? "outside " : ""}${key === historyCalendarDate ? "selected " : ""}${items.length ? "has-work" : ""}`} onClick={() => setHistoryCalendarDate(key)}><time>{date.getDate()}</time>{items.length > 0 && <span>{items.slice(0, 3).map((item, index) => <i className={item.exercises.length >= 5 ? "strength" : "quick"} key={`${item.finishedAt}-${index}`} />)}</span>}{items.length > 1 && <small>{items.length}</small>}</button>; })}</div></div><aside className="north-history-day"><p>{new Intl.DateTimeFormat("en-CA", { weekday: "long", month: "long", day: "numeric" }).format(new Date(`${historyCalendarDate}T12:00:00`))}</p><h2>{historyCalendarSessions.length ? `${historyCalendarSessions.length} session${historyCalendarSessions.length === 1 ? "" : "s"}` : "Recovery day."}</h2>{historyCalendarSessions.length ? historyCalendarSessions.map((item) => <button key={item.finishedAt} onClick={() => openHistory(item, "training")}><span><strong>{item.exercises.filter((exercise) => exercise.sets.some((set) => set.complete)).map((exercise) => exercise.name).slice(0, 2).join(" + ") || "Workout"}</strong><small>{sessionMinutes(item) ?? "—"} min · {sessionSetCount(item)} sets · Energy {item.energy}/5</small></span><ArrowRight /></button>) : <div className="north-rest-day"><Moon /><strong>Rest builds the next session.</strong></div>}</aside></section> : <section className="north-empty-history"><Dumbbell /><h2>Your first workout starts the calendar.</h2><button className="primary-button" onClick={() => setScreen("training")}>Choose today’s training</button></section>}
+          <p className="lead">Tap a day to review it or add a workout you performed then.</p>
+          {history.length > 0 || activities.length > 0 ? <section className="north-history-calendar-layout"><div className="north-history-calendar"><header><button onClick={() => setHistoryCalendarMonth((month) => new Date(month.getFullYear(), month.getMonth() - 1, 1, 12))} aria-label="Previous month"><ChevronLeft /></button><div><small>TRAINING CALENDAR</small><h2>{new Intl.DateTimeFormat("en-CA", { month: "long", year: "numeric" }).format(historyCalendarMonth)}</h2></div><button onClick={() => setHistoryCalendarMonth((month) => new Date(month.getFullYear(), month.getMonth() + 1, 1, 12))} aria-label="Next month"><ChevronRight /></button></header><div className="north-calendar-weekdays">{["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day) => <span key={day}>{day}</span>)}</div><div className="north-calendar-grid">{historyCalendarDays.map((date) => { const key = isoDate(date); const sessions = historyByDate[key] ?? []; const dayActivities = activities.filter((activity) => activity.date === key); const items = [...sessions.map((item) => ({ id: item.finishedAt, className: item.exercises.length >= 5 ? "strength" : "quick" })), ...dayActivities.map((item) => ({ id: item.id, className: item.kind }))]; const outside = date.getMonth() !== historyCalendarMonth.getMonth(); return <button key={key} className={`${outside ? "outside " : ""}${key === historyCalendarDate ? "selected " : ""}${items.length ? "has-work" : ""}`} onClick={() => setHistoryCalendarDate(key)}><time>{date.getDate()}</time>{items.length > 0 && <span>{items.slice(0, 3).map((item) => <i className={item.className} key={item.id} />)}</span>}{items.length > 1 && <small>{items.length}</small>}</button>; })}</div></div><aside className="north-history-day"><p>{new Intl.DateTimeFormat("en-CA", { weekday: "long", month: "long", day: "numeric" }).format(new Date(`${historyCalendarDate}T12:00:00`))}</p><h2>{historyCalendarItemCount ? `${historyCalendarItemCount} session${historyCalendarItemCount === 1 ? "" : "s"}` : "Recovery day."}</h2>{historyCalendarSessions.map((item) => <button key={item.finishedAt} onClick={() => openHistory(item, "training")}><span><strong>{item.exercises.filter((exercise) => exercise.sets.some((set) => set.complete)).map((exercise) => exercise.name).slice(0, 2).join(" + ") || "Workout"}</strong><small>{sessionMinutes(item) ?? "—"} min · {sessionSetCount(item)} sets · Energy {item.energy}/5</small></span><ArrowRight /></button>)}{historyCalendarActivities.map((activity) => <button key={activity.id} onClick={() => { setTimelineDate(activity.date); setJourneyTab("timeline"); setScreen("journey"); }}><span className={`calendar-activity-icon ${activity.kind}`}>{activity.kind === "bike" ? <Bike /> : activity.kind === "recovery" ? <HeartPulse /> : <Footprints />}</span><span><strong>{activity.kind === "bike" ? "Bike ride" : activity.kind === "walk" ? "Walk" : activity.kind === "run" ? "Run" : "Recovery"}</strong><small>{activity.duration} min{activity.distance ? ` · ${displayDistance(activity.distance).toFixed(1)} ${distanceUnit}` : ""} · Effort {activity.effort}/5</small></span><ArrowRight /></button>)}{historyCalendarItemCount === 0 && <div className="north-rest-day"><Moon /><strong>Rest builds the next session.</strong></div>}</aside></section> : <section className="north-empty-history"><Dumbbell /><h2>Your first workout starts the calendar.</h2><button className="primary-button" onClick={() => setScreen("training")}>Choose today’s training</button></section>}
+          {historyCalendarDate <= isoDate(new Date()) && <section className="calendar-backfill"><button className="calendar-backfill-launch" onClick={() => setCalendarBackfillOpen((open) => !open)}><span><Plus size={18}/></span><div><small>{historyCalendarDate < isoDate(new Date()) ? "BACKLOG A SESSION" : "ADD A SESSION"}</small><strong>Add workout or activity to this day</strong><p>{formatSessionDate(`${historyCalendarDate}T12:00:00`)} · performed then, entered now</p></div><ChevronDown className={calendarBackfillOpen ? "open" : ""}/></button>{calendarBackfillOpen && <div className="calendar-backfill-picker"><header><div><p className="eyebrow">MOVEMENT PERFORMED</p><h2>{formatSessionDate(`${historyCalendarDate}T12:00:00`)}</h2></div><label><CalendarDays size={15}/><input type="date" max={isoDate(new Date())} value={historyCalendarDate} onChange={(event) => { const date = event.target.value; setHistoryCalendarDate(date); const parsed = new Date(`${date}T12:00:00`); setHistoryCalendarMonth(new Date(parsed.getFullYear(), parsed.getMonth(), 1, 12)); }}/></label></header><section className="calendar-backfill-activities" aria-label="Quick log an activity"><button onClick={() => openActivity("bike", historyCalendarDate, "workout-history")}><Bike/><strong>Bike ride</strong></button><button onClick={() => openActivity("walk", historyCalendarDate, "workout-history")}><Footprints/><strong>Walk</strong></button><button onClick={() => openActivity("run", historyCalendarDate, "workout-history")}><PersonStanding/><strong>Run</strong></button><button onClick={() => openActivity("recovery", historyCalendarDate, "workout-history")}><HeartPulse/><strong>Recovery</strong></button></section>{historyCalendarPlanDay?.kind === "strength" && <button className="calendar-backfill-choice planned" onClick={() => prepareBackfill(historyCalendarPlanDay.workout?.length ? historyCalendarPlanDay.workout : starterExercises, historyCalendarPlanDay.title, historyCalendarPlanDay.id, historyCalendarDate)}><CalendarDays/><div><small>PLANNED FOR THIS DAY</small><strong>{historyCalendarPlanDay.title}</strong><span>{historyCalendarPlanDay.workout?.length ?? starterExercises.length} exercises</span></div><ArrowRight/></button>}<button className="calendar-backfill-choice" onClick={() => prepareBackfill([], "Custom workout", historyCalendarPlanDay?.id, historyCalendarDate)}><Plus/><div><small>START BLANK</small><strong>Build what you performed</strong><span>Add only the exercises and sets you completed</span></div><ArrowRight/></button><label className="calendar-backfill-search"><Search size={15}/><input value={backfillSearch} onChange={(event) => setBackfillSearch(event.target.value)} placeholder="Search My Workouts and North workouts"/></label><div className="calendar-backfill-groups"><section><h3>MY WORKOUTS</h3>{personalTemplates.filter((template) => !backfillSearch || `${template.name} ${template.focus}`.toLowerCase().includes(backfillSearch.toLowerCase())).slice(0,4).map((template) => <button key={template.id} onClick={() => prepareTemplateBackfill(template, historyCalendarDate)}><strong>{workoutDisplayName(template.name)}</strong><small>{template.exercises.length} exercises · {template.duration} min</small><ArrowRight/></button>)}{personalTemplates.length === 0 && <p>Saved workouts will appear here.</p>}</section><section><h3>NORTH WORKOUTS</h3>{workoutTemplates.filter((template) => !backfillSearch || `${template.name} ${template.focus}`.toLowerCase().includes(backfillSearch.toLowerCase())).slice(0,4).map((template) => <button key={template.id} onClick={() => prepareTemplateBackfill(template, historyCalendarDate)}><strong>{workoutDisplayName(template.name)}</strong><small>{template.exercises.length} exercises · {template.duration} min</small><ArrowRight/></button>)}</section></div></div>}</section>}
         </section>
       )}
 
       {screen === "nova" && (
         <section className="screen destination-screen nova-screen">
-          <div className="nova-page-heading"><div><p className="eyebrow">NOVA INTELLIGENCE</p><h1>Let’s figure it out together.</h1><p>Your private coach uses only this account’s records, goals and approved memory.</p></div><div className="nova-heading-actions"><button onClick={() => setNovaHubOpen((open) => !open)}><Compass size={15}/>{novaHubOpen ? "Close context" : "Nova context"}</button>{novaMessages.length > 0 && <button onClick={clearNovaConversation}>Clear chat</button>}</div></div>
+          <div className="nova-page-heading"><div><p className="destination-subheading">A calm place to think together.</p><h1>Let’s figure it out together.</h1><p>Your private coach uses only this account’s records, goals and approved memory.</p></div><div className="nova-heading-actions"><button onClick={() => setNovaHubOpen((open) => !open)}><Compass size={15}/>{novaHubOpen ? "Close context" : "Nova context"}</button>{novaMessages.length > 0 && <button onClick={clearNovaConversation}>Clear chat</button>}</div></div>
           <div className="nova-line living" />
-          {novaHubOpen && <section className="nova-intelligence-hub">
-            <header><div><p className="eyebrow">NOVA CONTEXT</p><h2>{novaSetupOpen ? "A little context goes a long way." : "What Nova can use."}</h2></div><div className="nova-context-actions"><span className={novaStatus?.available ? "connected" : "setup"}>{novaStatus?.available ? "Nova connected" : "Local setup needed"}</span><button onClick={() => setNovaHubOpen(false)} aria-label="Close Nova context"><X size={17}/></button></div></header>
+          {novaHubOpen && createPortal(<div className="nova-context-backdrop" onClick={(event) => { if (event.target === event.currentTarget) setNovaHubOpen(false); }}><section className="nova-intelligence-hub" role="dialog" aria-modal="true" aria-labelledby="nova-context-title">
+            <header><div><p className="eyebrow">NOVA CONTEXT</p><h2 id="nova-context-title">{novaSetupOpen ? "A little context goes a long way." : "What Nova can use."}</h2></div><div className="nova-context-actions"><span className={novaStatus?.available ? "connected" : "setup"}>{novaStatus?.available ? "Nova connected" : "Local setup needed"}</span><button onClick={() => setNovaHubOpen(false)} aria-label="Close Nova context"><X size={17}/></button></div></header>
             {novaSetupOpen ? <section className="nova-setup-form"><p>Optional and quick. Share only what helps Nova make your plan easier to follow.</p><fieldset><legend>Where do you usually train?</legend><div className="nova-setup-choices">{["Home", "Gym", "Outdoors"].map((place) => <button key={place} className={novaSetupDraft.locations.includes(place) ? "selected" : ""} onClick={() => setNovaSetupDraft((draft) => ({ ...draft, locations: draft.locations.includes(place) ? draft.locations.filter((item) => item !== place) : [...draft.locations, place] }))}>{place}</button>)}</div></fieldset>{novaSetupDraft.locations.includes("Home") && <fieldset><legend>What is available at home?</legend><div className="nova-setup-choices">{["Dumbbells", "Barbell", "Bench", "Pull-up bar", "Cable / pulley", "Bands", "Kettlebells"].map((item) => <button key={item} className={novaSetupDraft.homeEquipment.includes(item) ? "selected" : ""} onClick={() => setNovaSetupDraft((draft) => ({ ...draft, homeEquipment: draft.homeEquipment.includes(item) ? draft.homeEquipment.filter((value) => value !== item) : [...draft.homeEquipment, item] }))}>{item}</button>)}</div></fieldset>}{novaSetupDraft.locations.includes("Gym") && <fieldset><legend>How equipped is your usual gym?</legend><div className="nova-setup-choices">{["Basic", "Well equipped", "Not sure"].map((item) => <button key={item} className={novaSetupDraft.gymAccess === item ? "selected" : ""} onClick={() => setNovaSetupDraft((draft) => ({ ...draft, gymAccess: item }))}>{item}</button>)}</div></fieldset>}<fieldset><legend>When do you prefer to train?</legend><div className="nova-setup-choices">{["Morning", "Midday", "Evening", "It varies"].map((item) => <button key={item} className={novaSetupDraft.preferredTime === item ? "selected" : ""} onClick={() => setNovaSetupDraft((draft) => ({ ...draft, preferredTime: item }))}>{item}</button>)}</div></fieldset><footer><button className="secondary-button" onClick={() => setNovaSetupOpen(false)}>Back</button><button className="primary-button" onClick={() => void saveNovaSetup()} disabled={novaSetupSaving}>{novaSetupSaving ? "Saving…" : "Save setup"}<Check size={16}/></button></footer></section> : <>
             {novaStatus?.usage && <section className="nova-usage-panel"><div><p className="eyebrow">NOVA USAGE · THIS MONTH</p><strong>{novaStatus.usage.replies} {novaStatus.usage.replies === 1 ? "reply" : "replies"}</strong><span>{novaStatus.usage.tokens.toLocaleString()} tokens used</span></div><small>{novaStatus.usage.estimatedCostMicros > 0 ? `Estimated provider cost: $${(novaStatus.usage.estimatedCostMicros / 1_000_000).toFixed(2)}` : "Provider cost tracking is not configured for this environment."}</small></section>}
             <div className="nova-hub-grid">
@@ -3234,7 +3640,7 @@ function App() {
             </div>
             {!novaMemories.length && <button className="nova-setup-link" onClick={openNovaSetup}>Set up Nova in about two minutes <ArrowRight size={15}/></button>}
             </>}
-          </section>}
+          </section></div>, document.body)}
           {!novaHubOpen && novaStatus && !novaStatus.available && <button className="nova-setup-banner" onClick={() => setNovaHubOpen(true)}><span><Sparkles size={17}/><b>Nova’s intelligence is ready for local setup.</b><small>Goals and records are safe. Add the server API key to enable live conversation.</small></span><ArrowRight size={16}/></button>}
           <section className="conversation-surface" ref={novaTranscriptRef}>
             {novaMessages.length === 0 && <><div className="nova-message"><small>NOVA</small><p>{visibleLearnedInsights[0]?.novaPrompt ?? "Memory is off or no current learned observations are available. I can still help with the plan in front of you."}</p></div><div className="nova-starters">{["What is planned today?", "How does my week look?", "Help me reflect on this week", activeProgram ? `Adjust my program to ${Math.max(2, activeProgram.daysPerWeek - 1)} days a week` : "Am I ready to progress?", "I’m sore and low on energy"].map((prompt) => <button type="button" key={prompt} onClick={() => void sendToNova(prompt)}>{prompt}</button>)}</div></>}
@@ -3244,7 +3650,7 @@ function App() {
             {novaError && <div className="nova-error" role="alert"><span>{novaError}</span><button onClick={() => { const last = [...novaMessages].reverse().find((message) => message.role === "user"); if (last) sendToNova(last.text); }}>Retry</button></div>}
           </section>
           {!novaAtBottom && <button className="nova-scroll-to-latest" onClick={() => { const transcript = novaTranscriptRef.current; transcript?.scrollTo({ top: transcript.scrollHeight, behavior: profile.reducedMotion ? "auto" : "smooth" }); setNovaAtBottom(true); }} aria-label="Scroll to latest messages"><ChevronDown size={18}/></button>}
-          {createPortal(<form className="nova-input" onSubmit={(event) => { event.preventDefault(); void sendToNova(); }}><input value={novaInput} onChange={(event) => setNovaInput(event.target.value)} placeholder="Ask about today, recovery, or your week" /><button type="submit" disabled={novaThinking || !novaInput.trim()} aria-label="Send to Nova"><Send size={18} /></button></form>, document.body)}
+          <form className="nova-input" onSubmit={(event) => { event.preventDefault(); void sendToNova(); }}><input value={novaInput} onChange={(event) => setNovaInput(event.target.value)} placeholder="Ask about today, recovery, or your week" /><button type="submit" disabled={novaThinking || !novaInput.trim()} aria-label="Send to Nova"><Send size={18} /></button></form>
           <p className="nova-safety-note">Nova supports training decisions from your saved records. It does not diagnose injuries or replace medical care.</p>
         </section>
       )}
@@ -3254,60 +3660,57 @@ function App() {
           <button className="back-button" onClick={() => setScreen("you")}><ArrowLeft size={17} /> You</button>
           <header className="account-screen-header"><span><UserRound size={26} /></span><div><p className="eyebrow">ACCOUNT</p><h1>Your North.</h1><p>Sign-in, sync, and trusted devices live here—not in your personal story.</p></div></header>
           {readNorthSession() && <section className="account-panel"><div className="account-identity"><span><UserRound size={19} /></span><div><strong>{readNorthSession()?.user.displayName}</strong><small>@{readNorthSession()?.user.username} · synced account</small></div>{readNorthSession()?.user.username === "druwbi" && <a href="/admin">Owner console</a>}</div><div className="account-device-list">{accountDevices.map((device) => <article key={device.id}><span className={device.id === currentDeviceId ? "current" : ""}><Database size={16} /></span><div><strong>{device.name}{device.id === currentDeviceId ? " · This device" : ""}</strong><small>Last active {formatSessionDate(device.last_seen_at)} · {device.active_sessions} active session{device.active_sessions === 1 ? "" : "s"}</small></div>{device.revoked_at ? <b>Signed out</b> : <button onClick={() => void revokeAccountDevice(device)}>Sign out</button>}</article>)}</div>{accountStatus && <p className="account-status" role="status">{accountStatus}</p>}<button className="account-signout" onClick={signOutAccount}>Sign out of this device</button></section>}
-          <section className="account-menu-grid"><button onClick={() => setScreen("settings")}><SlidersHorizontal size={19}/><span><strong>App settings & preferences</strong><small>Units, privacy, installation and sharing</small></span><ArrowRight size={15}/></button><button onClick={() => void runAccountSync(true)}><RotateCcw size={19}/><span><strong>Sync & devices</strong><small>{lastSyncedAt ? `Last synced ${formatSessionDate(lastSyncedAt)}` : "Keep every device current"}</small></span><ArrowRight size={15}/></button></section>
+          <section className="account-menu-grid"><button onClick={() => setScreen("settings")}><SlidersHorizontal size={19}/><span><strong>App settings & preferences</strong><small>Units, account, devices, privacy and sharing</small></span><ArrowRight size={15}/></button></section>
           {healthSummary && healthSummary.types.length > 0 && <section className="health-summary-card"><header><div><p className="eyebrow">CONNECTED SERVICES</p><h2>Samsung Health</h2><p>{healthSummary.types.reduce((sum, item) => sum + item.records, 0).toLocaleString()} imported records. Wearable development remains paused while the core app is rebuilt.</p></div><HeartPulse size={24} /></header></section>}
         </section>
       )}
 
       {screen === "settings" && (
         <section className="screen destination-screen settings-screen">
-          <button className="back-button" onClick={() => setScreen("you")}><ArrowLeft size={17}/>You</button><p className="eyebrow">ACCOUNT & APP</p><h1>North, your way.</h1><p className="lead">One clear place for your account, devices, appearance, integrations, privacy and app controls.</p>
+          <button className="back-button" onClick={() => setScreen("you")}><ArrowLeft size={17}/>You</button><p className="eyebrow">ACCOUNT & APP</p><h1>North, your way.</h1><p className="lead">One clear place for your account, appearance, integrations, privacy and app controls.</p>
           {readNorthSession() && <section className="settings-account-hero"><span className="account-avatar-glyph large" aria-hidden="true"><i/><b/></span><div><small>SIGNED IN AS</small><strong>{readNorthSession()?.user.displayName}</strong><p>@{readNorthSession()?.user.username}</p></div>{readNorthSession()?.user.username === "druwbi" && <a href="/admin">Admin</a>}</section>}
-          {readNorthSession() && <details className="settings-group" open><summary><span><UserRound size={18}/><b>Your account</b><small>{accountDevices.length} connected device{accountDevices.length === 1 ? "" : "s"}</small></span><ChevronDown size={18}/></summary><div className="settings-group-body"><div className="account-device-list">{accountDevices.map((device) => <article key={device.id}><span className={device.id === currentDeviceId ? "current" : ""}><Database size={16}/></span><div><strong>{device.name}{device.id === currentDeviceId ? " · This device" : ""}</strong><small>Last active {formatSessionDate(device.last_seen_at)}</small></div>{device.revoked_at ? <b>Signed out</b> : device.id !== currentDeviceId ? <button onClick={() => void revokeAccountDevice(device)}>Sign out</button> : null}</article>)}</div><button className="settings-sync-check" onClick={() => void runAccountSync(true)} disabled={syncing || !online}><RotateCcw size={16}/><span><strong>{syncing ? "Checking your account…" : "Check for updates"}</strong><small>{lastSyncedAt ? `Everything saved · last checked ${formatSessionDate(lastSyncedAt)}` : "Automatic sync is on"}</small></span></button>{accountStatus && <p className="account-status">{accountStatus}</p>}<button className="account-signout" onClick={signOutAccount}>Sign out of this device</button></div></details>}
+          {samsungConnection && <section className="settings-health-sync" aria-label="Samsung Health sync"><span><HeartPulse size={20}/></span><div><small>SAMSUNG HEALTH</small><strong>Connected</strong><p>{samsungConnection.last_sync_at ? `Last synced ${formatSessionDate(samsungConnection.last_sync_at)}` : "Ready for your first sync"}</p></div><button onClick={openHealthSync}><RotateCcw size={16}/>Open North Health to sync</button>{healthStatus && <p role="status">{healthStatus}</p>}</section>}
           <details className="settings-group"><summary><span><Sun size={18}/><b>Appearance</b><small>{themeOptions.find((theme) => theme.id === themeName)?.name} · {profile.largeText ? "larger text" : "standard text"}</small></span><ChevronDown size={18}/></summary><div className="settings-group-body"><section className="theme-picker" aria-label="Theme palette">{themeOptions.map((theme) => <button key={theme.id} className={`${themeName === theme.id ? "selected " : ""}${theme.mode}`} onClick={() => setThemeName(theme.id)} aria-pressed={themeName === theme.id}><span className={`theme-swatch ${theme.id}`}><i/><i/><i/></span><strong>{theme.name}</strong><small>{theme.mode}</small></button>)}</section></div></details>
           <div className="section-heading"><div><p className="eyebrow">NORTH APP</p><h2>Keep North close</h2></div></div>
           <section className="install-app-card"><span><Download size={20} /></span><div><p className="eyebrow">NORTH ON YOUR PHONE</p><h2>{window.matchMedia("(display-mode: standalone)").matches ? "Installed and ready." : "Install North as an app."}</h2><p>Launch from your home screen in a clean full-screen window. Your account and synchronized plan remain the same.</p>{installStatus && <small role="status">{installStatus}</small>}</div><button onClick={() => void installNorth()}>{window.matchMedia("(display-mode: standalone)").matches ? "Installed" : "Install North"}</button></section>
           <section className="share-north-card"><span><Share2 size={22} /></span><div><p className="eyebrow">BRING SOMEONE WITH YOU</p><h2>Recommend North</h2><p>Send a thoughtful “try this out” link to someone who would value a steadier training practice.</p>{shareStatus && <small role="status">{shareStatus}</small>}</div><button onClick={() => void shareNorth()}><Share2 size={17} /> Share North</button></section>
+          <section className="whats-new-card"><span><Sparkles size={21}/></span><div><p className="eyebrow">WHAT'S NEW</p><h2>North 0.5 · Built to Train</h2><p>See the latest improvements and revisit every step in North's release history.</p></div><button onClick={() => openReleaseNotes()}>View updates <ArrowRight size={16}/></button></section>
           <div className="section-heading"><div><p className="eyebrow">MEASUREMENTS & PREFERENCES</p><h2>Independent preferences</h2></div></div><section className="preference-panel"><label><span>Lifting weight</span><select value={profile.units} onChange={(event) => setProfile((value) => ({ ...value, units: event.target.value as ProfileSettings["units"] }))}><option value="imperial">Pounds (lb)</option><option value="metric">Kilograms (kg)</option></select></label><label><span>Body weight</span><select value={profile.bodyWeightUnit} onChange={(event) => setProfile((value) => ({ ...value, bodyWeightUnit: event.target.value as ProfileSettings["bodyWeightUnit"] }))}><option value="lb">Pounds (lb)</option><option value="kg">Kilograms (kg)</option></select></label><label><span>Distance</span><select value={profile.distanceUnit} onChange={(event) => setProfile((value) => ({ ...value, distanceUnit: event.target.value as ProfileSettings["distanceUnit"] }))}><option value="mi">Miles</option><option value="km">Kilometres</option></select></label><label><span>Language</span><select value={profile.language} onChange={(event) => setProfile((value) => ({ ...value, language: event.target.value }))}><option>English</option><option>English (UK)</option><option>French</option><option>Spanish</option></select></label><label className="toggle-setting"><div><strong>Notifications</strong><small>Preference saved; delivery begins only after permission is granted.</small></div><input type="checkbox" checked={profile.notifications} onChange={(event) => setProfile((value) => ({ ...value, notifications: event.target.checked }))}/></label></section>
           <div className="section-heading"><div><p className="eyebrow">ACCESSIBILITY</p><h2>Comfort and clarity</h2></div></div><section className="preference-panel"><label className="toggle-setting"><div><strong>Reduce motion</strong><small>Turns off decorative transitions and animation.</small></div><input type="checkbox" checked={profile.reducedMotion} onChange={(event) => setProfile((value) => ({ ...value, reducedMotion: event.target.checked }))}/></label><label className="toggle-setting"><div><strong>Larger text</strong><small>Increases base interface text size.</small></div><input type="checkbox" checked={profile.largeText} onChange={(event) => setProfile((value) => ({ ...value, largeText: event.target.checked }))}/></label><label className="toggle-setting"><div><strong>Higher contrast</strong><small>Strengthens borders and secondary text.</small></div><input type="checkbox" checked={profile.highContrast} onChange={(event) => setProfile((value) => ({ ...value, highContrast: event.target.checked }))}/></label></section>
-          <div className="section-heading"><div><p className="eyebrow">PRIVACY & SERVICES</p><h2>Nothing connects silently</h2></div></div><section className="privacy-panel"><div><strong>Local-first data</strong><p>Workouts, photos, preferences and memories remain account-private.</p></div><div><strong>Connected services</strong><p>Health access is granted category by category and can be revoked.</p><section className="service-controls"><button className={healthConnections.some((item) => item.provider === "health_connect" && item.status === "connected") ? "connected" : ""} onClick={() => { window.location.href = "intent://connect#Intent;scheme=northhealth;package=io.bodhix.north.health;S.browser_fallback_url=https%3A%2F%2Fnorth.bodhix.io%2Fnorth-health.apk;end"; }}><span>Samsung Health · Health Connect</span><small>{healthConnections.find((item) => item.provider === "health_connect")?.status === "connected" ? `Connected · last sync ${formatSessionDate(healthConnections.find((item) => item.provider === "health_connect")?.last_sync_at)}` : "Not connected"}</small></button><button disabled><span>Apple Health</span><small>Deferred</small></button></section></div><div><strong>Help & support</strong><p>Replay the product tour or record a gym-floor issue.</p><button className="replay-tour-button" onClick={replayProductTour}><Compass size={15}/> Replay the North tour</button></div></section>
-          <div className="section-heading"><div><p className="eyebrow">YOUR DATA</p><h2>Ownership and recovery</h2></div></div><section className="data-controls"><button onClick={exportNorthData}><Download size={18}/><div><strong>Export North backup</strong><small>{history.length} workouts · {activities.length} activities · {checkIns.length} check-ins</small></div><ArrowRight size={15}/></button><label><Upload size={18}/><div><strong>Restore a backup</strong><small>Replace this browser’s North data from a backup file</small></div><ArrowRight size={15}/><input type="file" accept="application/json,.json" onChange={importNorthData}/></label><button className="reset-data" onClick={() => void resetNorthData()}><Database size={18}/><div><strong>Erase this device’s copy</strong><small>Signs out here; synced account records stay safe</small></div><ArrowRight size={15}/></button></section>{dataStatus && <p className="data-status">{dataStatus}</p>}<button className="test-log-link" onClick={() => openTestLog("settings")}><NotebookPen size={18}/><div><strong>Gym test notes</strong><small>{testNotes.filter((item) => !item.resolved).length} open observations</small></div><ArrowRight size={15}/></button>
+          <div className="section-heading"><div><p className="eyebrow">PRIVACY & SERVICES</p><h2>Nothing connects silently</h2></div></div><section className="privacy-panel"><div><strong>Local-first data</strong><p>Workouts, photos, preferences and memories remain account-private.</p></div><div><strong>Connected services</strong><p>Health access is granted category by category and can be revoked.</p><section className="service-controls"><button className={samsungConnection ? "connected" : ""} onClick={() => { window.location.href = "intent://connect#Intent;scheme=northhealth;package=io.bodhix.north.health;S.browser_fallback_url=https%3A%2F%2Fnorth.bodhix.io%2Fnorth-health.apk;end"; }}><span>Samsung Health · Health Connect</span><small>{samsungConnection ? `Connected · imports from ${formatSessionDate(samsungConnection.import_from)}` : "Not connected"}</small></button><button disabled><span>Apple Health</span><small>Deferred</small></button></section>{samsungConnection && <section className="health-permission-controls"><header><strong>What North can use</strong><small>Nothing recorded before the connection date is imported.</small></header>{([['workouts','Recorded workouts','Purposeful rides, walks, runs and workouts appear in Journey.'],['dailyMovement','Daily movement','Steps and distance are combined by day; short automatic walks stay out of Journey.'],['sleepRecovery','Sleep & recovery','Sleep supports Today, check-ins and your recovery trends.'],['bodyMeasurements','Body measurements','Optional weight context; off by default.']] as Array<[keyof HealthPreferences,string,string]>).map(([key,label,description]) => <label key={key}><span><strong>{label}</strong><small>{description}</small></span><input type="checkbox" checked={samsungConnection.preferences?.[key] ?? key !== 'bodyMeasurements'} onChange={(event) => void updateHealthPreferences({ [key]: event.target.checked })}/></label>)}</section>}{healthStatus && <p className="data-status" role="status">{healthStatus}</p>}</div><div><strong>Help & support</strong><p>Replay the product tour or record a gym-floor issue.</p><button className="replay-tour-button" onClick={replayProductTour}><Compass size={15}/> Replay the North tour</button></div></section>
+          <div className="section-heading"><div><p className="eyebrow">YOUR DATA</p><h2>Ownership and recovery</h2></div></div><section className="data-controls"><button onClick={exportNorthData}><Download size={18}/><div><strong>Export North backup</strong><small>{history.length} workouts · {activities.length} activities · {checkIns.length} check-ins</small></div><ArrowRight size={15}/></button><label><Upload size={18}/><div><strong>Restore a backup</strong><small>Replace this browser’s North data from a backup file</small></div><ArrowRight size={15}/><input type="file" accept="application/json,.json" onChange={importNorthData}/></label><button className="reset-data" onClick={() => void resetNorthData()}><Database size={18}/><div><strong>Erase this device’s copy</strong><small>Signs out here; synced account records stay safe</small></div><ArrowRight size={15}/></button></section>{dataStatus && <p className="data-status">{dataStatus}</p>}
         </section>
       )}
 
       {screen === "you" && (
         <section className="screen destination-screen you-screen">
-          <p className="eyebrow">YOU</p>
-          <div className="identity-header">
+          <header className="you-profile-header">
             <span className="journey-mark"><Compass size={36} /></span>
-            <div><h1>{profile.name ? `${profile.name}.` : "Your North."}</h1><p>{profile.direction}</p></div>
-          </div>
-          <p className="together">Your record contains <strong>{history.length + activities.length} completed movement sessions.</strong></p>
-          <section className="you-progress-dashboard">
-            <header><div><p className="eyebrow">YOU, IN PROGRESS</p><h2>Your body and record</h2></div><span>{Math.round(unlockedMilestones.length / milestoneResults.length * 100)}%<small>journey</small></span></header>
-            <div className="body-status-card"><div><small>CURRENT WEIGHT</small><strong>{latestBodyWeight === null ? "Add a check-in" : `${latestBodyWeight.toFixed(1)} ${bodyWeightUnit}`}</strong><span>{bodyWeightChange === null ? `${bodyWeightCheckIns.length} recorded check-in${bodyWeightCheckIns.length === 1 ? "" : "s"}` : `${bodyWeightChange > 0 ? "+" : ""}${bodyWeightChange.toFixed(1)} ${bodyWeightUnit} since first record`}</span></div><button type="button" onClick={() => document.getElementById("personal-measurements")?.scrollIntoView({ behavior: profile.reducedMotion ? "auto" : "smooth" })}>Update measurements <ArrowRight size={14} /></button></div>
-            <section className="personal-measurements" id="personal-measurements"><div><p className="eyebrow">BODY & MEASUREMENTS</p><h3>Your current baseline</h3><small className="measurement-guidance">Height is a profile detail, not a daily check-in. Set it once and only update it when needed.</small></div><div className="measurement-fields"><label><span>Height · occasional</span><input value={profile.height} onChange={(event) => setProfile((value) => ({ ...value, height: event.target.value }))} placeholder="e.g. 5 ft 11 in or 180 cm" aria-label="Height" /></label><label><span>Today's body weight ({bodyWeightUnit}) · optional</span><input inputMode="decimal" value={draftCheckIn.weight} onChange={(event) => setDraftCheckIn((value) => ({ ...value, weight: event.target.value }))} placeholder={`Add weight in ${bodyWeightUnit}`} aria-label={`Body weight in ${bodyWeightUnit}`} /></label></div><div className="measurement-actions"><select value={profile.bodyWeightUnit} onChange={(event) => setProfile((value) => ({ ...value, bodyWeightUnit: event.target.value as ProfileSettings["bodyWeightUnit"] }))} aria-label="Body weight unit"><option value="lb">lb</option><option value="kg">kg</option></select><button type="button" onClick={saveTodayBodyWeight} disabled={!draftCheckIn.weight.trim()}>Save today's weight</button></div></section>
-            <div className="personal-record-grid"><article><strong>{history.length}</strong><span>workouts</span></article><article><strong>{recordedSets}</strong><span>working sets</span></article><article><strong>{recordedVolume ? `${Math.round(displayWeight(recordedVolume)).toLocaleString()} ${weightUnit}` : "—"}</strong><span>volume</span></article><article><strong>{personalRecords.length}</strong><span>personal bests</span></article></div>
+            <div><p className="destination-subheading">Your direction, always yours.</p><h1>{profile.name ? `${profile.name}.` : "Your North."}</h1><p>{profile.direction}</p><small>{profile.trainingDays} training days each week{profile.targetDate ? ` · toward ${formatSessionDate(`${profile.targetDate}T12:00:00`)}` : ""}</small></div>
+            <button className="you-edit-profile" onClick={() => setProfileEditing((editing) => !editing)}>{profileEditing ? "Done" : "Edit"}</button>
+          </header>
+          {profileEditing && <section className="profile-editor you-profile-editor"><label><span>Name</span><input value={profile.name} onChange={(event) => setProfile((value) => ({ ...value, name: event.target.value }))} placeholder="What should North call you?" /></label><label><span>Direction</span><textarea rows={3} value={profile.direction} onChange={(event) => setProfile((value) => ({ ...value, direction: event.target.value }))} /></label><div><label><span>Training rhythm</span><select value={profile.trainingDays} onChange={(event) => setProfile((value) => ({ ...value, trainingDays: Number(event.target.value) }))}>{[2,3,4,5,6].map((days) => <option key={days} value={days}>{days} days / week</option>)}</select></label><label><span>Target date</span><input type="date" value={profile.targetDate} onChange={(event) => setProfile((value) => ({ ...value, targetDate: event.target.value }))} /></label></div></section>}
+
+          {samsungConnection && <section className="you-health-hub"><header><div><p className="eyebrow">HEALTH & RECOVERY</p><h2>Your Health Connect daily summary.</h2><p>Synced records from {formatSessionDate(samsungConnection.import_from)} onward.</p></div><span><Check size={15}/> Connected</span></header><div className="you-health-metrics"><article><Footprints/><small>STEPS TODAY</small><strong>{(todayHealth?.steps ?? 0).toLocaleString()}</strong><span>{averageHealthSteps ? `${averageHealthSteps.toLocaleString()} recent daily average` : "No post-connection step record yet"}</span></article><article><Clock3/><small>RECORDED MINUTES</small><strong>{todayHealth?.active_minutes ?? 0}</strong><span>Exercise duration shared with Health Connect</span></article><article><Flame/><small>{todayHealth?.calories_kind === "active" ? "ACTIVITY CALORIES" : "TOTAL CALORIES"}</small><strong>{Math.round(todayHealth?.active_calories ?? 0).toLocaleString()}</strong><span>{todayHealth?.calories_kind === "active" ? "Movement energy shared today" : "Includes resting energy"}</span></article><article><Bike/><small>DISTANCE TODAY</small><strong>{displayDistance((todayHealth?.distance_metres ?? 0) / 1000).toFixed(1)} {distanceUnit}</strong><span>All synced daily movement</span></article><article><BedDouble/><small>{latestSleepIsLastNight ? "LAST NIGHT" : "LATEST SLEEP"}</small><strong>{latestSleepDay ? `${Math.floor(latestSleepDay.sleep_minutes / 60)}h ${latestSleepDay.sleep_minutes % 60}m` : "—"}</strong><span>{averageHealthSleepMinutes ? `${Math.floor(averageHealthSleepMinutes / 60)}h ${averageHealthSleepMinutes % 60}m average · ${recentSleepDays.length} recorded night${recentSleepDays.length === 1 ? "" : "s"}` : "Waiting for sleep"}{latestSleepDay && !latestSleepIsLastNight ? ` · latest ${formatSessionDate(`${latestSleepDay.date}T12:00:00`)}` : ""}</span></article><article><HeartPulse/><small>RECORDED WORKOUTS</small><strong>{healthActivities.length}</strong><span>Purposeful sessions only</span></article></div>{recentHealthDays.length > 0 && <div className="you-health-week" aria-label="Recent daily movement">{[...recentHealthDays].reverse().map((day) => <article key={day.date}><span style={{ height: `${Math.max(5, Math.min(100, day.steps / Math.max(averageHealthSteps * 1.5, 1) * 100))}%` }}/><small>{new Intl.DateTimeFormat("en-CA", { weekday: "narrow" }).format(new Date(`${day.date}T12:00:00`))}</small></article>)}</div>}<footer><span>{samsungConnection.last_sync_at ? `Last synced ${formatSessionDate(samsungConnection.last_sync_at)}. ` : ""}Samsung activity time and activity calories are not shared through Health Connect.</span><button onClick={() => setScreen("settings")}>Manage access <ArrowRight size={14}/></button></footer></section>}
+
+          {samsungConnection && latestCompletedHealthDay && <section className="you-health-report"><header><div><p className="eyebrow">LATEST COMPLETE DAY · {formatSessionDate(`${latestCompletedHealthDay.date}T12:00:00`)}</p><h2>{latestHealthHeadline}</h2><p>Compared with up to seven earlier completed Health Connect days. Today is excluded until it is complete.</p></div><span><Check size={15}/> Day complete</span></header><div className="you-health-report-grid"><article><Footprints/><small>STEPS</small><strong>{latestCompletedHealthDay.steps.toLocaleString()}</strong><span>{healthChangeLabel(latestHealthChanges?.steps ?? null)}</span></article><article><Clock3/><small>RECORDED MINUTES</small><strong>{latestCompletedHealthDay.active_minutes}</strong><span>{healthChangeLabel(latestHealthChanges?.minutes ?? null)}</span></article><article><Bike/><small>MOVEMENT DISTANCE</small><strong>{displayDistance(latestCompletedHealthDay.distance_metres / 1000).toFixed(1)} {distanceUnit}</strong><span>{healthChangeLabel(latestHealthChanges?.distance ?? null)}</span></article><article><Flame/><small>{latestCompletedHealthDay.calories_kind === "active" ? "ACTIVITY ENERGY" : "TOTAL ENERGY"}</small><strong>{Math.round(latestCompletedHealthDay.active_calories).toLocaleString()} kcal</strong><span>{latestCompletedHealthDay.calories_kind === "active" ? healthChangeLabel(latestHealthChanges?.calories ?? null) : `${healthChangeLabel(latestHealthChanges?.calories ?? null)} · includes resting energy`}</span></article><article><BedDouble/><small>SLEEP</small><strong>{latestCompletedHealthDay.sleep_minutes ? `${Math.floor(latestCompletedHealthDay.sleep_minutes / 60)}h ${latestCompletedHealthDay.sleep_minutes % 60}m` : "Not shared"}</strong><span>{latestCompletedHealthDay.sleep_minutes ? healthChangeLabel(latestHealthChanges?.sleep ?? null) : "No sleep record for this day"}</span></article></div><footer><div><small>LAST {completedHealthWeek.length} COMPLETE DAYS</small><strong>{completedHealthWeekTotals.steps.toLocaleString()} steps · {completedHealthWeekTotals.active_minutes.toLocaleString()} recorded min · {displayDistance(completedHealthWeekTotals.distance_metres / 1000).toFixed(1)} {distanceUnit} · {Math.round(completedHealthWeekTotals.calories).toLocaleString()} kcal</strong><span>Sleep available for {completedHealthWeekTotals.sleep_days} of {completedHealthWeek.length} days. Daily aggregates already include purposeful workouts.</span></div><button onClick={() => { setNovaInput(`Review my Samsung daily report for ${formatSessionDate(`${latestCompletedHealthDay.date}T12:00:00`)}. Compare it with my recent Health Connect baseline and tell me what is useful for today's plan without double counting workouts.`); setScreen("nova"); }}><Sparkles size={16}/> Ask Nova about this day <ArrowRight size={14}/></button></footer></section>}
+
+          {samsungConnection && <p className="data-status">North shows records supplied through Health Connect. Samsung Health dashboard estimates, including active time and step-based distance, may differ when Samsung does not share them as Health Connect records.</p>}
+          <section className="you-wellbeing">
+            <header><div><p className="eyebrow">BODY & RECOVERY</p><h2>How you have been arriving.</h2></div><button onClick={() => { setDraftCheckIn({ id: "", date: isoDate(new Date()), weight: checkIns[0]?.weight ? displayBodyWeight(checkIns[0].weight).toFixed(1).replace(/\.0$/, "") : "", sleep: "", energy: 3, soreness: 2, note: "" }); setScreen("check-in"); }}><HeartPulse size={15}/> Add check-in</button></header>
+            <div className="you-vital-grid"><article><small>BODY WEIGHT</small><strong>{latestBodyWeight === null ? "—" : `${latestBodyWeight.toFixed(1)} ${bodyWeightUnit}`}</strong><span>{bodyWeightChange === null ? "No trend yet" : `${bodyWeightChange > 0 ? "+" : ""}${bodyWeightChange.toFixed(1)} ${bodyWeightUnit} overall`}</span></article><article><small>ENERGY</small><strong>{averageEnergy === null ? "—" : `${averageEnergy.toFixed(1)}/5`}</strong><span>Recent average</span></article><article><small>SLEEP</small><strong>{averageSleep === null ? "—" : `${averageSleep.toFixed(1)}h`}</strong><span>Recent average</span></article><article><small>SORENESS</small><strong>{averageSoreness === null ? "—" : `${averageSoreness.toFixed(1)}/5`}</strong><span>Recent average</span></article></div>
+            <div className="you-trend-grid">
+              <section className="you-trend-panel"><header><strong>Weight trend</strong><small>{weightTrend.length} recorded</small></header>{weightTrend.length ? <div className="you-weight-chart" aria-label={`Body weight trend across ${weightTrend.length} check-ins`}>{weightTrend.map((entry) => <i key={entry.date} style={{ height: `${weightTrendHeight(entry.value)}%` }} title={`${formatSessionDate(`${entry.date}T12:00:00`)}: ${entry.value.toFixed(1)} ${bodyWeightUnit}`}><span /></i>)}</div> : <p>Weight is optional. Add it during a check-in to see direction over time.</p>}</section>
+              <section className="you-trend-panel"><header><strong>Recovery signals</strong><small>Last {checkInTrend.length || 0} check-ins</small></header>{checkInTrend.length ? <div className="you-recovery-chart" aria-label={`Energy and soreness across ${checkInTrend.length} check-ins`}>{checkInTrend.map((entry) => <i key={entry.id} title={`${formatSessionDate(`${entry.date}T12:00:00`)}: energy ${entry.energy}/5, soreness ${entry.soreness}/5`}><span style={{ height: `${entry.energy * 20}%` }} /><b style={{ height: `${entry.soreness * 20}%` }} /></i>)}</div> : <p>Check in a few times to see energy and soreness move together.</p>}<footer><span><i/>Energy</span><span><b/>Soreness</span></footer></section>
+            </div>
           </section>
-          <section className="direction-statement"><div className="direction-heading"><p className="eyebrow">YOUR DIRECTION</p><button onClick={() => setProfileEditing((editing) => !editing)}>{profileEditing ? "Done" : "Edit"}</button></div>{profileEditing ? <div className="profile-editor"><label><span>Name</span><input value={profile.name} onChange={(event) => setProfile((value) => ({ ...value, name: event.target.value }))} placeholder="What should North call you?" /></label><label><span>Direction</span><textarea rows={3} value={profile.direction} onChange={(event) => setProfile((value) => ({ ...value, direction: event.target.value }))} /></label><div><label><span>Training rhythm</span><select value={profile.trainingDays} onChange={(event) => setProfile((value) => ({ ...value, trainingDays: Number(event.target.value) }))}>{[2,3,4,5,6].map((days) => <option key={days} value={days}>{days} days / week</option>)}</select></label><label><span>Target date</span><input type="date" value={profile.targetDate} onChange={(event) => setProfile((value) => ({ ...value, targetDate: event.target.value }))} /></label></div></div> : <><h2>{profile.direction}</h2><small>{profile.trainingDays} planned training days per week{profile.targetDate ? ` · target ${formatSessionDate(`${profile.targetDate}T12:00:00`)}` : ""} · Chapter {Math.floor(unlockedMilestones.length / 4) + 1}</small></>}</section>
+
+          <section className="you-training-record"><header><div><p className="eyebrow">YOUR RECORD</p><h2>What you have built.</h2></div><button onClick={() => { setJourneyTab("timeline"); setScreen("journey"); }}>Open Journey <ArrowRight size={14}/></button></header><div className="personal-record-grid"><article><strong>{history.length + activities.length + healthActivities.length}</strong><span>movement sessions</span></article><article><strong>{lifetimeTrainingMinutes}</strong><span>active minutes</span></article><article><strong>{recordedSets}</strong><span>working sets</span></article><article><strong>{personalRecords.length}</strong><span>personal bests</span></article></div>{recordedVolume > 0 && <p>{Math.round(displayWeight(recordedVolume)).toLocaleString()} {weightUnit} of recorded training volume.</p>}{recentMovementRecords.length > 0 && <div className="you-recent-records"><h3>Recently recorded</h3>{recentMovementRecords.map((item) => { const content = <><span>{journeyMomentIcon(item)}</span><div><small>{item.type.slice(0, -1).toUpperCase()} · {formatSessionDate(item.date)}</small><strong>{item.title}</strong><p>{item.summary}</p></div><ArrowRight size={14}/></>; return "workout" in item && item.workout ? <button key={item.id} onClick={() => openHistory(item.workout, "you")}>{content}</button> : <button key={item.id} onClick={() => { setTimelineDate(isoDate(new Date(item.date))); setJourneyTab("timeline"); setScreen("journey"); }}>{content}</button>; })}</div>}</section>
           {earnedIdentities.length > 0 && <section className="earned-identities"><p className="eyebrow">QUIETLY EARNED</p><div>{earnedIdentities.map((identity) => <span key={identity}>{identity}</span>)}</div></section>}
           <div className="section-heading"><div><p className="eyebrow">WHAT NORTH HAS LEARNED</p><h2>A clearer picture of you</h2></div></div>
-          <section className="memory-controls"><label><div><strong>Permissioned memory</strong><small>{profile.memoryEnabled ? "North may surface observations derived from your records." : "Learned observations are hidden from North and Nova."}</small></div><input type="checkbox" checked={profile.memoryEnabled} onChange={(event) => setProfile((value) => ({ ...value, memoryEnabled: event.target.checked }))} /></label>{profile.memoryEnabled && visibleLearnedInsights.map((insight) => <article key={insight.id}><span>{insight.icon}</span><div><strong>{insight.title}</strong><small>{profile.memoryCorrections[insight.id] || insight.summary}</small><p>{insight.evidence}</p><input value={profile.memoryCorrections[insight.id] ?? ""} onChange={(event) => setProfile((value) => ({ ...value, memoryCorrections: { ...value.memoryCorrections, [insight.id]: event.target.value } }))} placeholder="Correct how North describes this…" /></div><button onClick={() => setProfile((value) => ({ ...value, dismissedInsights: [...value.dismissedInsights, insight.id] }))}>Forget</button></article>)}{profile.dismissedInsights.length > 0 && <button className="restore-memory" onClick={() => setProfile((value) => ({ ...value, dismissedInsights: [] }))}>Restore {profile.dismissedInsights.length} forgotten observation{profile.dismissedInsights.length === 1 ? "" : "s"}</button>}</section>
-          <div className="legacy-you-technical-settings" aria-hidden="true"><div className="section-heading"><div><p className="eyebrow">ACCOUNT & APP</p><h2>Keep North close</h2></div></div>
-          <section className="account-menu-grid you-account-menu"><button onClick={() => setScreen("settings")}><SlidersHorizontal size={19}/><span><strong>App settings</strong><small>Preferences, privacy, installation and sharing</small></span><ArrowRight size={15}/></button>{readNorthSession() && <button onClick={() => setScreen("account")}><UserRound size={19}/><span><strong>Account & devices</strong><small>Sync, connected devices and sign-in</small></span><ArrowRight size={15}/></button>}</section>
-          <div className="section-heading"><div><p className="eyebrow">APPEARANCE</p><h2>Choose a palette</h2></div></div>
-          <section className="theme-picker" aria-label="Theme palette">{themeOptions.map((theme) => <button key={theme.id} className={`${themeName === theme.id ? "selected " : ""}${theme.mode}`} onClick={() => setThemeName(theme.id)} aria-pressed={themeName === theme.id}><span className={`theme-swatch ${theme.id}`}><i /><i /><i /></span><strong>{theme.name}</strong><small>{theme.mode}</small></button>)}</section>
-          <div className="section-heading"><div><p className="eyebrow">PERSONALISATION</p><h2>How North meets you</h2></div></div><section className="preference-panel"><label><span>Lifting weight</span><select value={profile.units} onChange={(event) => setProfile((value) => ({ ...value, units: event.target.value as ProfileSettings["units"] }))}><option value="imperial">Pounds (lb)</option><option value="metric">Kilograms (kg)</option></select></label><label><span>Body weight</span><select value={profile.bodyWeightUnit} onChange={(event) => setProfile((value) => ({ ...value, bodyWeightUnit: event.target.value as ProfileSettings["bodyWeightUnit"] }))}><option value="lb">Pounds (lb)</option><option value="kg">Kilograms (kg)</option></select></label><label><span>Distance</span><select value={profile.distanceUnit} onChange={(event) => setProfile((value) => ({ ...value, distanceUnit: event.target.value as ProfileSettings["distanceUnit"] }))}><option value="mi">Miles</option><option value="km">Kilometres</option></select></label><label><span>Language</span><select value={profile.language} onChange={(event) => setProfile((value) => ({ ...value, language: event.target.value }))}><option>English</option><option>English (UK)</option><option>French</option><option>Spanish</option></select></label><label className="toggle-setting"><div><strong>Notifications</strong><small>Preference saved; delivery begins when accounts and notification permission are implemented.</small></div><input type="checkbox" checked={profile.notifications} onChange={(event) => setProfile((value) => ({ ...value, notifications: event.target.checked }))} /></label></section>
-          <div className="section-heading"><div><p className="eyebrow">ACCESSIBILITY</p><h2>Comfort and clarity</h2></div></div><section className="preference-panel"><label className="toggle-setting"><div><strong>Reduce motion</strong><small>Turns off decorative transitions and animation.</small></div><input type="checkbox" checked={profile.reducedMotion} onChange={(event) => setProfile((value) => ({ ...value, reducedMotion: event.target.checked }))} /></label><label className="toggle-setting"><div><strong>Larger text</strong><small>Increases base interface text size.</small></div><input type="checkbox" checked={profile.largeText} onChange={(event) => setProfile((value) => ({ ...value, largeText: event.target.checked }))} /></label><label className="toggle-setting"><div><strong>Higher contrast</strong><small>Strengthens borders and secondary text.</small></div><input type="checkbox" checked={profile.highContrast} onChange={(event) => setProfile((value) => ({ ...value, highContrast: event.target.checked }))} /></label></section>
-          <div className="section-heading"><div><p className="eyebrow">PRIVACY & SERVICES</p><h2>Nothing connects silently</h2></div></div><section className="privacy-panel"><div><strong>Local-first data</strong><p>Workouts, photos, preferences, and memories remain account-private. Weather coordinates are sent only to Open-Meteo when you request weather and are not saved by North.</p></div><div><strong>Connected services</strong><p>Health access is granted on the phone, category by category. North records scopes, source apps, last sync, pause and revocation state.</p><section className="service-controls"><button className={healthConnections.some((item) => item.provider === "health_connect" && item.status === "connected") ? "connected" : ""} onClick={() => { window.location.href = "intent://connect#Intent;scheme=northhealth;package=io.bodhix.north.health;S.browser_fallback_url=https%3A%2F%2Fnorth.bodhix.io%2Fnorth-health.apk;end"; }}><span>Samsung Health · Health Connect</span><small>{healthConnections.find((item) => item.provider === "health_connect")?.status === "connected" ? `Connected · last sync ${formatSessionDate(healthConnections.find((item) => item.provider === "health_connect")?.last_sync_at)} · Tap to sync` : "Tap to connect through the North Health app"}</small></button><button disabled><span>Apple Health</span><small>Not connected · iPhone bridge next</small></button><button disabled><span>Strava</span><small>Not connected</small></button></section></div><div><strong>Help & support</strong><p>Use Gym test notes to preserve confusing, slow, missing, or broken moments. Emergency and medical guidance are outside North’s role.</p><button className="replay-tour-button" onClick={replayProductTour}><Compass size={15} /> Replay the North tour</button></div></section>
-          <div className="section-heading"><div><p className="eyebrow">YOUR DATA</p><h2>Ownership and recovery</h2></div></div>
-          <section className="data-controls">
-            <button onClick={exportNorthData}><Download size={18} /><div><strong>Export North backup</strong><small>{history.length} workouts · {activities.length} activities · {checkIns.length} check-ins</small></div><ArrowRight size={15} /></button>
-            <label><Upload size={18} /><div><strong>Restore a backup</strong><small>Replace this browser’s North data from a backup file</small></div><ArrowRight size={15} /><input type="file" accept="application/json,.json" onChange={importNorthData} /></label>
-            <button className="reset-data" onClick={() => void resetNorthData()}><Database size={18} /><div><strong>Erase this device’s copy</strong><small>Signs out here; synced account records stay safe</small></div><ArrowRight size={15} /></button>
-          </section>
-          {dataStatus && <p className="data-status">{dataStatus}</p>}
-          <button className="test-log-link" onClick={() => openTestLog("you")}><NotebookPen size={18} /><div><strong>Gym test notes</strong><small>{testNotes.filter((item) => !item.resolved).length} open observations</small></div><ArrowRight size={15} /></button></div>
+          <section className="memory-controls"><label><div><strong>Permissioned memory</strong><small>{profile.memoryEnabled ? "North may surface observations derived from your records." : "Learned observations are hidden from North and Nova."}</small></div><input type="checkbox" checked={profile.memoryEnabled} onChange={(event) => setProfile((value) => ({ ...value, memoryEnabled: event.target.checked }))} /></label>{profile.memoryEnabled && visibleLearnedInsights.map((insight) => <details className="memory-observation" key={insight.id}><summary><span>{insight.icon}</span><div><strong>{insight.title}</strong><small>{profile.memoryCorrections[insight.id] || insight.summary}</small></div><ChevronDown size={15}/></summary><div className="memory-observation-detail"><p>{insight.evidence}</p><label><span>Correct this observation</span><input value={profile.memoryCorrections[insight.id] ?? ""} onChange={(event) => setProfile((value) => ({ ...value, memoryCorrections: { ...value.memoryCorrections, [insight.id]: event.target.value } }))} placeholder="Tell North what is more accurate…" /></label><button onClick={() => setProfile((value) => ({ ...value, dismissedInsights: [...value.dismissedInsights, insight.id] }))}>Forget this observation</button></div></details>)}{profile.dismissedInsights.length > 0 && <button className="restore-memory" onClick={() => setProfile((value) => ({ ...value, dismissedInsights: [] }))}>Restore {profile.dismissedInsights.length} forgotten observation{profile.dismissedInsights.length === 1 ? "" : "s"}</button>}</section>
+          <div className="section-heading"><div><p className="eyebrow">ACCOUNT & APP</p><h2>Keep North close</h2></div></div>
+          <section className="account-menu-grid you-account-menu"><button onClick={() => setScreen("settings")}><SlidersHorizontal size={19}/><span><strong>App settings</strong><small>Preferences, privacy, installation and sharing</small></span><ArrowRight size={15}/></button>{readNorthSession() && <><button onClick={() => setScreen("account")}><UserRound size={19}/><span><strong>Account & devices</strong><small>Sync, connected devices and sign-in</small></span><ArrowRight size={15}/></button><button className="you-signout-button" onClick={signOutAccount}><LogOut size={19}/><span><strong>Sign out</strong><small>Sign out on this device; synced records stay safe</small></span><ArrowRight size={15}/></button></>}</section>
         </section>
       )}
 
@@ -3359,26 +3762,23 @@ function App() {
           <div className="exercise-list">
             {session.exercises.map((exercise, index) => {
               const definition = exerciseLibrary.find((item) => item.name.toLowerCase() === exercise.name.toLowerCase());
-              const demo = getApprovedExerciseDemo(exercise.name);
               const completedSets = exercise.sets.filter((set) => set.complete).length;
               const completion = Math.round(completedSets / Math.max(1, exercise.sets.length) * 100);
               return (
               <Fragment key={exercise.id}>
-                <article className={`prepare-row premium-exercise-card ${demo ? "has-demo" : ""}`}>
-                  <span className="exercise-number">{String(index + 1).padStart(2, "0")}</span>
-                  <span className="prepare-exercise-media">{demo ? <img src={demo} alt="" /> : <Dumbbell size={22} />}</span>
-                  <div>
-                    <h3>{exercise.name}</h3>
+                <article className="prepare-row premium-exercise-card">
+                  <span className="prepare-exercise-index">{String(index + 1).padStart(2, "0")}</span>
+                  <div className="prepare-exercise-content">
+                    <div className="prepare-exercise-title"><h3>{exercise.name}</h3></div>
                     <div className="movement-card-tags"><span>{definition?.category ?? "Custom"}</span><span>{definition?.equipment ?? "Your setup"}</span><span>{definition?.movementPattern ?? "Movement"}</span></div>
                     <p>{exercise.target} · {exercise.sets.length} sets · {exercise.rest}s rest</p>
                     <small>Last recorded: {previousPerformance(exercise)}</small>
                     <div className="movement-card-progress"><i style={{ width: `${completion}%` }} /><span>{completedSets}/{exercise.sets.length}</span></div>
-                    <div className="prepare-row-actions"><button className="exercise-profile-button" onClick={() => { setSession((value) => ({ ...value, currentId: exercise.id })); setExerciseDetailReturn("prepare"); setScreen("exercise-detail"); }}><Play size={13} /> View exercise</button><button className="adjust-button" onClick={() => setEditingExerciseId((value) => value === exercise.id ? null : exercise.id)}><SlidersHorizontal size={13} /> {editingExerciseId === exercise.id ? "Close adjustments" : "Adjust"}</button></div>
+                    <div className="prepare-row-actions"><button className="exercise-profile-button" onClick={() => { setSession((value) => ({ ...value, currentId: exercise.id })); setExerciseDetailReturn("prepare"); setScreen("exercise-detail"); }}><Play size={13} /> View exercise</button><button className="adjust-button" onClick={() => setEditingExerciseId((value) => value === exercise.id ? null : exercise.id)}><SlidersHorizontal size={13} /> {editingExerciseId === exercise.id ? "Close adjustments" : "Adjust"}</button><button className="prepare-delete-button" onClick={() => removeExercise(exercise.id)} disabled={session.exercises.length === 1} aria-label={`Remove ${exercise.name}`}><Trash2 size={15} /></button></div>
                   </div>
                   <div className="order-controls">
                     <button onClick={() => moveExercise(index, -1)} disabled={index === 0} aria-label={`Move ${exercise.name} up`}><ChevronUp size={17} /></button>
                     <button onClick={() => moveExercise(index, 1)} disabled={index === session.exercises.length - 1} aria-label={`Move ${exercise.name} down`}><ChevronDown size={17} /></button>
-                    <button onClick={() => removeExercise(exercise.id)} disabled={session.exercises.length === 1} aria-label={`Remove ${exercise.name}`}><Trash2 size={15} /></button>
                   </div>
                 </article>
                 {editingExerciseId === exercise.id && (
@@ -3444,11 +3844,28 @@ function App() {
                 <span className="set-count">{current.sets.filter((set) => set.complete).length}/{current.sets.length} sets</span>
               </div>
             </div>
+            {timer > 0 && timerControlsOpen && (
+              <section className={`timer-panel timer-panel-inline${timer <= 10 ? " timer-final-10" : ""}`}>
+                <div><TimerReset size={20} /><span>REST</span><strong>{Math.floor(timer / 60)}:{String(timer % 60).padStart(2, "0")}</strong></div>
+                <button onClick={() => setTimer((value) => Math.max(0, value - 15))} aria-label="Remove 15 seconds from rest">−15</button>
+                <button onClick={() => setTimerRunning((value) => !value)} aria-label={timerRunning ? "Pause rest timer" : "Resume rest timer"}>{timerRunning ? <Pause size={18} /> : <Play size={18} />}</button>
+                <button onClick={() => setTimer((value) => value + 15)} aria-label="Add 15 seconds to rest">+15</button>
+                <button onClick={() => { setTimer(0); setTimerControlsOpen(false); }}>Skip</button>
+              </section>
+            )}
+            {timer === 0 && holdTimer?.exerciseId === current.id && (
+              <section className={`hold-timer-panel hold-phase-${holdTimer.phase}${holdImprovementSeconds(holdTimer) > 0 ? " hold-is-ahead" : ""}`} aria-label="Timed hold controls">
+                <div><span>{holdTimer.phase === "ready" ? "READY" : holdTimer.phase === "preparing" ? "START IN" : "HOLD"}</span><strong>{holdTimer.phase === "preparing" ? holdTimer.remaining : holdTimer.phase === "holding" ? holdTimer.elapsed : holdTimer.goal}</strong><small>sec</small>{holdTimer.phase === "ready" && <em>{holdTimer.goal > 0 ? `Goal ${holdTimer.goal}s` : "Open hold"}{holdTimer.previous > 0 ? ` · Beat ${holdTimer.previous}s` : ""}</em>}{holdTimer.phase === "holding" && holdImprovementSeconds(holdTimer) > 0 && <b>+{holdImprovementSeconds(holdTimer)} sec</b>}</div>
+                {holdTimer.phase === "ready" && <><button className="hold-primary" onClick={() => startHold(5)}><Play size={16} /> Start in 5</button><button onClick={() => startHold(0)}>Start now</button></>}
+                {holdTimer.phase === "preparing" && <button onClick={() => setHoldTimer((value) => value ? { ...value, phase: "ready", remaining: 0, elapsed: 0, startedAt: null } : value)}>Cancel</button>}
+                {holdTimer.phase === "holding" && <><button onClick={() => setHoldTimer((value) => value ? { ...value, phase: "ready", remaining: 0, elapsed: 0, startedAt: null } : value)}>Discard attempt</button><button className="hold-primary" onClick={completeTimedHold}><Check size={16} /> Stop set</button></>}
+              </section>
+            )}
           </div>
 
           <section className="cue"><Compass size={18} /><p>{current.cue}</p></section>
 
-          {(() => { const canonical=canonicalExerciseFor(current); const trackingTemplate=trackingTemplates.find((item)=>item.id===canonical?.trackingTemplateId); const usesClassicTable=!trackingTemplate||trackingTemplate.requiredFieldIds.every((fieldId)=>fieldId==="weight"||fieldId==="reps"); return !usesClassicTable&&canonical&&trackingTemplate?<DynamicSetLogger exercise={canonical} template={trackingTemplate} sets={current.sets.map(legacyCompatibleSet)} preferences={defaultUnitPreferences(profile.units==="metric")} onChange={(index,patch)=>updateSet(index,patch)} onComplete={(index)=>{const wasComplete=current.sets[index]?.complete;updateSet(index,{complete:!wasComplete});if(!wasComplete){setTimer(current.sets[index]?.restSeconds || current.rest);setTimerRunning(true);}}}/>:<div className="sets-table">
+          {(() => { const canonical=canonicalExerciseFor(current); const trackingTemplate=trackingTemplates.find((item)=>item.id===canonical?.trackingTemplateId); const usesClassicTable=!trackingTemplate||trackingTemplate.requiredFieldIds.every((fieldId)=>fieldId==="weight"||fieldId==="reps"); return !usesClassicTable&&canonical&&trackingTemplate?<DynamicSetLogger exercise={canonical} template={trackingTemplate} sets={current.sets.map(legacyCompatibleSet)} preferences={defaultUnitPreferences(profile.units==="metric")} onChange={(index,patch)=>updateSet(index,patch)} onComplete={(index)=>{const wasComplete=current.sets[index]?.complete;if(!wasComplete&&currentTimedHold){const priorCurrent=current.sets.slice(0,index).reverse().find((set)=>set.complete&&Number(set.values?.duration)>0);const enteredDuration=Number(current.sets[index]?.values?.duration)||0;setTimer(0);setTimerRunning(false);setHoldTimer({exerciseId:current.id,setIndex:index,phase:"ready",remaining:0,goal:prescribedHoldSeconds(current.target),previous:enteredDuration||Number((priorCurrent??previousHoldSets[index]??previousHoldSets.at(-1))?.values?.duration)||0,elapsed:0,startedAt:null});return;}updateSet(index,{complete:!wasComplete});}}/>:<div className="sets-table">
             <div className="set-row set-head"><span>SET</span><span>WEIGHT</span><span>REPS</span><span>DONE</span></div>
             {current.sets.map((set, index) => (
               <Fragment key={index}><div className={`set-row ${set.complete ? "set-complete" : ""}`}>
@@ -3468,37 +3885,33 @@ function App() {
             <textarea value={current.note} onChange={(event) => patchExercise(current.id, { note: event.target.value })} placeholder="How did that feel?" rows={2} />
           </label>
 
-          {timer > 0 && timerControlsOpen && createPortal(
-            <section className={`timer-panel${timer <= 10 && timer > 0 ? " timer-final-10" : ""}`}>
-              <div><TimerReset size={20} /><span>REST</span><strong>{Math.floor(timer / 60)}:{String(timer % 60).padStart(2, "0")}</strong></div>
-              <button onClick={() => setTimer((value) => Math.max(0, value - 15))} aria-label="Remove 15 seconds from rest">−15</button>
-              <button onClick={() => setTimerRunning((value) => !value)}>{timerRunning ? <Pause size={18} /> : <Play size={18} />}</button>
-              <button onClick={() => setTimer((value) => value + 15)} aria-label="Add 15 seconds to rest">+15</button>
-              <button onClick={() => { setTimer(0); setTimerControlsOpen(false); }}>Skip</button>
-            </section>,
-            document.body,
-          )}
-
-          <div className="workout-actions">
-            <button className="exercise-nav-btn" onClick={() => {
-              if (currentIndex > 0) {
-                setSession((s) => ({ ...s, currentId: session.exercises[currentIndex - 1].id }));
-              }
-            }} disabled={currentIndex === 0} aria-label="Previous exercise"><ChevronLeft size={20} /></button>
-            <button className={`workout-continue-button${current.sets.every((set) => set.complete) ? " ready-to-finish" : ""}`} onClick={() => current.sets.every((set) => set.complete) ? finishExercise() : completeNextSet()}>
-              <span className="workout-continue-icon">{current.sets.every((set) => set.complete) ? <ArrowRight size={22} /> : <Check size={22} />}</span>
-              <span>{current.sets.every((set) => set.complete) ? <><small>All sets logged</small><strong>Finish {current.name}</strong></> : <><small>Set {current.sets.findIndex((set) => !set.complete) + 1} of {current.sets.length}</small><strong>Complete set {current.sets.findIndex((set) => !set.complete) + 1}</strong></>}</span>
-              {current.sets.every((set) => set.complete) ? <ArrowRight size={20} /> : <Check size={20} />}
-            </button>
-            <button className="exercise-nav-btn" onClick={() => {
-              if (currentIndex < session.exercises.length - 1) {
-                setSession((s) => ({ ...s, currentId: session.exercises[currentIndex + 1].id }));
-              } else {
-                setScreen("workout-review");
-              }
-            }} aria-label={currentIndex < session.exercises.length - 1 ? "Next exercise" : "Review workout"}><ChevronRight size={20} /></button>
+          <div className="workout-mobile-dock">
+            <div className="workout-actions">
+              <button className="exercise-nav-btn" onClick={() => {
+                if (currentIndex > 0) {
+                  setSession((s) => ({ ...s, currentId: session.exercises[currentIndex - 1].id }));
+                }
+              }} disabled={currentIndex === 0} aria-label="Previous exercise"><ChevronLeft size={20} /></button>
+              <button className={`workout-continue-button${current.sets.every((set) => set.complete) ? " ready-to-finish" : ""}`} onClick={() => current.sets.every((set) => set.complete) ? finishExercise() : completeNextSet()}>
+                <span className="workout-continue-icon">{current.sets.every((set) => set.complete) ? <ArrowRight size={22} /> : <Check size={22} />}</span>
+                <span>{current.sets.every((set) => set.complete) ? <><small>All sets logged</small><strong>Finish {current.name}</strong></> : <><small>Set {current.sets.findIndex((set) => !set.complete) + 1} of {current.sets.length}</small><strong>Complete set {current.sets.findIndex((set) => !set.complete) + 1}</strong></>}</span>
+                {current.sets.every((set) => set.complete) ? <ArrowRight size={20} /> : <Check size={20} />}
+              </button>
+              <button className="exercise-nav-btn" onClick={() => {
+                if (currentIndex < session.exercises.length - 1) {
+                  setSession((s) => ({ ...s, currentId: session.exercises[currentIndex + 1].id }));
+                } else {
+                  setScreen("workout-review");
+                }
+              }} aria-label={currentIndex < session.exercises.length - 1 ? "Next exercise" : "Review workout"}><ChevronRight size={20} /></button>
+            </div>
+            <WorkoutProgressBar
+              currentExerciseIndex={currentIndex}
+              totalExercises={session.exercises.length}
+              completedExercises={session.exercises.filter((exercise) => exercise.sets.every((set) => set.complete)).length}
+              onExpand={() => setRoutineSheetOpen(true)}
+            />
           </div>
-          <button className="test-note-button" onClick={() => openTestLog("workout")}><Bug size={14} /> Something got in the way</button>
 
           {returnQueue.length > 0 && (
             <section className="return-queue">
@@ -3512,13 +3925,6 @@ function App() {
           {available.length === 0 && returnQueue.length === 0 && (
             <button className="primary-button" onClick={() => setScreen("review")}>Review workout <ArrowRight size={17} /></button>
           )}
-
-          <WorkoutProgressBar
-            currentExerciseIndex={currentIndex}
-            totalExercises={session.exercises.length}
-            completedExercises={session.exercises.filter((e) => e.sets.every((s) => s.complete)).length}
-            onExpand={() => setRoutineSheetOpen(true)}
-          />
 
           {routineSheetOpen && (
             <RoutineChecklistSheet
@@ -3597,7 +4003,7 @@ function App() {
       {screen === "session-detail" && selectedHistory && (
         <section className="screen session-detail-screen">
           <div className="detail-topline">
-            <button className="back-button" onClick={() => setScreen(historyReturnScreen)}><ArrowLeft size={17} /> {historyReturnScreen === "training" ? "Training" : "Journey"}</button>
+            <button className="back-button" onClick={() => setScreen(historyReturnScreen)}><ArrowLeft size={17} /> {historyReturnScreen === "training" ? "Training" : historyReturnScreen === "journey" ? "Journey" : "You"}</button>
             <button className="text-button" onClick={() => setHistoryEditing((value) => !value)}>{historyEditing ? <><Save size={14} /> Done</> : "Correct record"}</button>
           </div>
           <p className="eyebrow">COMPLETED WORKOUT</p>
@@ -3622,7 +4028,7 @@ function App() {
 
       {screen === "activity-log" && (
         <section className="screen activity-log-screen">
-          <button className="back-button" onClick={() => setScreen("training")}><ArrowLeft size={17} /> Training</button>
+          <button className="back-button" onClick={() => { setScreen(activityReturnScreen); setActivityReturnScreen("training"); }}><ArrowLeft size={17} /> {activityReturnScreen === "workout-history" ? "Training calendar" : "Training"}</button>
           <p className="eyebrow">QUICK LOG</p>
           <h1>{draftActivity.kind === "bike" ? "Bike ride" : draftActivity.kind === "walk" ? "Walk" : draftActivity.kind === "run" ? "Run" : "Recovery"}</h1>
           <p className="lead">Capture what happened without turning movement into paperwork.</p>
@@ -3692,25 +4098,29 @@ function App() {
       {screen === "test-log" && (
         <section className="screen test-log-screen">
           <button className="back-button" onClick={() => setScreen(testReturnScreen)}><ArrowLeft size={17} /> Back</button>
-          <p className="eyebrow">GYM TEST</p>
-          <h1>What got in the way?</h1>
-          <p className="lead">Capture the friction while it is fresh. Short and honest is more useful than polished.</p>
+          <p className="eyebrow">REPORT TO NORTH</p>
+          <h1>Report a bug, issue or problem.</h1>
+          <p className="lead">Tell us what happened and where. Your current page and device details are included so the owner can investigate.</p>
           <section className="test-note-form">
-            <div className="kind-picker">{(["confusing", "slow", "missing", "bug"] as TestNote["category"][]).map((category) => <button key={category} className={draftTestNote.category === category ? "active" : ""} onClick={() => setDraftTestNote((value) => ({ ...value, category }))}>{category}</button>)}</div>
-            <textarea rows={5} autoFocus value={draftTestNote.text} onChange={(event) => setDraftTestNote((value) => ({ ...value, text: event.target.value }))} placeholder="Example: I needed two taps to log a set while holding the dumbbell." />
-            <button className="primary-button" onClick={saveTestNote} disabled={!draftTestNote.text.trim()}>Save observation</button>
+            <div className="kind-picker">{(["bug", "issue", "problem"] as TestNote["category"][]).map((category) => <button key={category} className={draftTestNote.category === category ? "active" : ""} onClick={() => setDraftTestNote((value) => ({ ...value, category }))}>{category}</button>)}</div>
+            <textarea rows={5} autoFocus value={draftTestNote.text} onChange={(event) => setDraftTestNote((value) => ({ ...value, text: event.target.value }))} placeholder="What happened? What did you expect instead?" maxLength={5000} />
+            <button className="primary-button" onClick={() => void saveTestNote()} disabled={!draftTestNote.text.trim() || reportSending}>{reportSending ? "Sending…" : "Send report"}</button>
+            {reportStatus && <p className="report-status" role="status">{reportStatus}</p>}
           </section>
-          {testNotes.length > 0 && <><div className="section-heading"><div><p className="eyebrow">RECORDED</p><h2>Test observations</h2></div></div><section className="test-notes-list">{testNotes.map((item) => <button key={item.id} className={item.resolved ? "resolved" : ""} onClick={() => toggleTestNote(item.id)}><span>{item.resolved ? <Check size={14} /> : <Bug size={14} />}</span><div><strong>{item.category} · {item.source}</strong><p>{item.text}</p><small>{formatSessionDate(item.createdAt)} · tap to mark {item.resolved ? "open" : "resolved"}</small></div></button>)}</section></>}
+          {testNotes.length > 0 && <><div className="section-heading"><div><p className="eyebrow">SENT</p><h2>Your recent reports</h2></div></div><section className="test-notes-list">{testNotes.map((item) => <article key={item.id}><span><Check size={14} /></span><div><strong>{item.category} · {item.source}</strong><p>{item.text}</p><small>{formatSessionDate(item.createdAt)} · delivered to North</small></div></article>)}</section></>}
         </section>
       )}
 
+      {screen !== "workout" && <footer className="global-report-footer"><div className="global-footer-brand"><img className="global-footer-mark global-footer-mark-light" src="/png/transparent/footprint-clean-teal.png" alt="" /><img className="global-footer-mark global-footer-mark-dark" src="/png/transparent/footprint-clean-offwhite.png" alt="" /><div><strong>North™</strong><span>Find your direction™ · Head North. Every day™</span></div></div><small className="global-footer-copyright">© {new Date().getFullYear()} North. All rights reserved.</small>{screen !== "test-log" && <button className="test-note-button" onClick={() => openTestLog(screen)}><Bug size={15} /> Report a bug / issue / problem</button>}</footer>}
+
       {progressionTransaction?.appliedAt && !progressionTransaction.undoneAt && !progressionTransaction.dismissedAt && <aside className="recommendation-undo" role="status"><span><Check size={16} /></span><div><strong>Recommendation applied</strong><small>{progressionTransaction.suggestion.title}</small></div><button onClick={undoProgressionTransaction}><RotateCcw size={14} /> Undo</button><button aria-label="Dismiss undo" onClick={() => setProgressionTransaction((transaction) => transaction ? { ...transaction, dismissedAt: new Date().toISOString() } : transaction)}><X size={15} /></button></aside>}
+      {updateNoticeOpen && !activeTourStep && createPortal(<aside className="release-update-notice" role="status"><span><Sparkles size={18}/></span><button className="release-update-copy" onClick={() => openReleaseNotes()}><small>NEW UPDATE</small><strong>North updated to version 0.5</strong><em>See what's new</em></button><button className="release-update-dismiss" onClick={dismissUpdateNotice} aria-label="Dismiss North 0.5 update"><X size={16}/></button></aside>, document.body)}
       {workoutCancelOpen && createPortal(<div className="exercise-finish-overlay" role="presentation"><section className="exercise-finish-dialog" role="dialog" aria-modal="true" aria-labelledby="cancel-workout-title"><p className="eyebrow">CURRENT WORKOUT</p><h2 id="cancel-workout-title">Cancel this workout?</h2><p>{sessionSetCount(session)} completed set{sessionSetCount(session) === 1 ? "" : "s"} will be discarded. No workout record will be created.{session.planDayId ? " The planned workout will remain available to start again." : ""}</p><footer><button className="secondary-button" onClick={() => setWorkoutCancelOpen(false)}>Keep training</button><button className="danger-confirm-button" onClick={() => cancelActiveWorkout()}><Trash2 size={15} /> Cancel workout</button></footer></section></div>, document.body)}
       {screen === "workout" && session.pausedAt && !workoutCancelOpen && createPortal(<div className="exercise-finish-overlay workout-pause-overlay" role="presentation"><section className="exercise-finish-dialog" role="dialog" aria-modal="true" aria-labelledby="paused-workout-title"><p className="eyebrow">WORKOUT PAUSED · {pausedWorkoutLabel}</p><h2 id="paused-workout-title">{longWorkoutPause ? "Is this still the same workout?" : "Take the time you need."}</h2><p>{longWorkoutPause ? "This pause crossed a day or lasted more than six hours. Resume only if you are continuing the same session." : "Workout time and the rest countdown are stopped. Paused time will not be included in your workout duration."}</p><footer><button className="secondary-button" onClick={() => setWorkoutCancelOpen(true)}>Cancel workout</button><button className="primary-button" onClick={resumeWorkout}><Play size={15} /> Resume workout</button></footer></section></div>, document.body)}
       {pendingWorkoutChange && createPortal(<div className="exercise-finish-overlay" role="presentation"><section className="exercise-finish-dialog" role="dialog" aria-modal="true" aria-labelledby="workout-conflict-title"><p className="eyebrow">WORKOUT IN PROGRESS</p><h2 id="workout-conflict-title">Keep your current workout?</h2><p>You already have {sessionSetCount(session)} completed set{sessionSetCount(session) === 1 ? "" : "s"} in this workout. To {pendingWorkoutChange.prepareNow ? "start" : "schedule"} {workoutDisplayName(pendingWorkoutChange.template.name)} here, you must cancel the current workout and discard that progress.</p><footer><button className="secondary-button" onClick={() => { setPendingWorkoutChange(null); setScreen("workout"); }}>Resume current</button><button className="danger-confirm-button" onClick={confirmPendingWorkoutChange}><Trash2 size={15} /> Cancel current &amp; {pendingWorkoutChange.prepareNow ? "start" : "schedule"}</button></footer></section></div>, document.body)}
       {releaseNotesV4Open && !activeTourStep && createPortal(<div className="release-notes-backdrop" role="presentation"><section className="release-notes release-notes-v4" role="dialog" aria-modal="true" aria-labelledby="release-notes-v4-title"><header><div><p className="eyebrow">NORTH 0.4 · NOVA WAKES UP</p><h2 id="release-notes-v4-title">Your coach now<br/>knows your direction.</h2></div><button onClick={closeReleaseNotes} aria-label="Close updates"><X size={18}/></button></header><p className="release-notes-intro"><strong>North already knew how to record the work.</strong> Now Nova can understand the story behind it, talk it through with you and prepare real changes—without ever silently taking control.</p><ul><li><strong>Talk like a person. Get a real answer.</strong><span>Ask about today’s plan, recovery, progress, exercises or what to do next. Nova answers from your saved North records, not a generic fitness script.</span></li><li><strong>Your goals have a home.</strong><span>Create, pause, complete and refine your direction in a private goal ledger that belongs only to your account.</span></li><li><strong>You control what Nova remembers.</strong><span>Review what Nova knows, confirm useful context, pause its influence or erase it completely.</span></li><li><strong>Changes come with a preview.</strong><span>Goals, check-ins, reflections and workout decisions require your approval. Nothing meaningful moves behind your back.</span></li><li><strong>One conversation on every device.</strong><span>Your Nova thread now follows your signed-in account from desktop to phone, just like your workouts and plans.</span></li><li><strong>Evidence, confidence and receipts.</strong><span>See what informed a response, where the limits are and exactly what was saved after you approve an action.</span></li></ul><p className="release-notes-thanks"><strong>This is Nova’s foundation—not the finish line.</strong><br/>Bring the messy day, the big goal or the “what now?” North 0.4 is ready to think it through with you.</p><details className="release-history"><summary><span>Previous update</span><strong>See what North 0.3 added</strong><ChevronDown size={17}/></summary><div><p className="eyebrow">NORTH 0.3 · BUILT TO MOVE</p><ul><li><strong>784 real exercises</strong><span>A deep searchable library spanning strength, cardio, mobility, machines, free weights and bodyweight training.</span></li><li><strong>Interactive muscle activation</strong><span>Front-and-back anatomy with distinct primary, secondary and supporting roles.</span></li><li><strong>Movement-aware recording</strong><span>The right controls for weighted sets, unilateral work, timed holds, carries, intervals and cardio.</span></li><li><strong>Smarter progress and substitutions</strong><span>Exercise-specific PR logic plus stable progressions, regressions and alternatives.</span></li></ul></div></details><label className="release-notes-dismiss"><input type="checkbox" checked={dismissReleaseNotes} onChange={(event) => setDismissReleaseNotes(event.target.checked)}/><strong>Don’t show again until the next update</strong></label><button className="primary-button" onClick={closeReleaseNotes}>Meet the new Nova <Sparkles size={16}/></button></section></div>,document.body)}
       {releaseNotesOpen && !activeTourStep && createPortal(<div className="release-notes-backdrop" role="presentation"><section className="release-notes release-notes-v3" role="dialog" aria-modal="true" aria-labelledby="release-notes-title"><header><div><p className="eyebrow">NORTH 0.3 · BUILT TO MOVE</p><h2 id="release-notes-title">Your training system<br />just got seriously stronger.</h2></div><button onClick={closeReleaseNotes} aria-label="Close updates"><X size={18} /></button></header><p className="release-notes-intro"><strong>0.2 gave you better builders, themes and cross-device control.</strong> Now 0.3 powers up the engine underneath it all. More movements. Better records. Smarter muscle detail. Let’s work. 💪</p><ul><li><strong>784 real exercises. One serious library.</strong><span>Strength, cardio, mobility, calisthenics, machines, free weights, timed holds and more—searchable by muscle, equipment, movement, difficulty and training style.</span></li><li><strong>Muscles you can actually explore</strong><span>Every reviewed movement connects to North’s interactive front-and-back muscle system, with primary, secondary and supporting roles kept visually distinct.</span></li><li><strong>A recorder built for the gym floor</strong><span>Log weight and reps, left and right sides, timed holds, carries, distance, intervals and cardio using the right controls for the movement—not one generic form.</span></li><li><strong>Pull-up and push-up holds are in</strong><span>Top, midpoint, bottom, 90-degree and multi-position hold variations are ready with proper timed-set tracking.</span></li><li><strong>Progress that understands the exercise</strong><span>PRs and trends now respect the tracking style. North won’t pretend a plank has a one-rep max or judge a run like a bench press.</span></li><li><strong>Swap without losing direction</strong><span>Progressions, regressions and equipment alternatives connect through stable exercise records, so a busy machine doesn’t wreck the session.</span></li><li><strong>Old workouts still belong here</strong><span>Existing records remain compatible while new sessions gain richer detail. Your history stays yours.</span></li></ul><p className="release-notes-thanks"><strong>This is the biggest training-engine upgrade North has had yet.</strong><br />Pick something hard. Record it properly. Watch the story build. North 0.3 is ready. ⚡</p><details className="release-history"><summary><span>Previous updates</span><strong>See what North 0.2 added</strong><ChevronDown size={17} /></summary><div><p className="eyebrow">NORTH 0.2 · BUILD YOUR WAY</p><ul><li><strong>Build with Nova</strong><span>Set your goal, available time, equipment and location, then build a guided workout one movement at a time.</span></li><li><strong>A cleaner workout library</strong><span>Clearer names, honest time estimates including rest, useful sorting and focused filters.</span></li><li><strong>Plan the right day</strong><span>Choose an exact day before adding a workout without accidentally reshuffling the week.</span></li><li><strong>Preview before adding</strong><span>Open an exercise profile before committing it to your workout.</span></li><li><strong>Cross-device account control</strong><span>Your account copy became the source of truth when devices disagreed, with safer syncing and conflict handling.</span></li><li><strong>More personal North</strong><span>New themes, refined cards, clearer measurements, improved labels and better navigation.</span></li></ul></div></details><label className="release-notes-dismiss"><input type="checkbox" checked={dismissReleaseNotes} onChange={(event) => setDismissReleaseNotes(event.target.checked)} /><strong>Don't show again until the next update</strong></label><button className="primary-button" onClick={closeReleaseNotes}>Let’s go</button></section></div>, document.body)}
-      {releaseNotesV4Open && !activeTourStep && (() => {
+      {releaseHistoryOpen && !activeTourStep && (() => {
         const releaseIndex = releaseNotes.findIndex((release) => release.version === releaseNotesVersion);
         const release = releaseNotes[releaseIndex];
         const newerRelease = releaseNotes[releaseIndex - 1];
@@ -3718,14 +4128,14 @@ function App() {
         return createPortal(<div className="release-notes-backdrop release-carousel-backdrop" role="presentation"><section className={`release-notes release-notes-carousel release-notes-v${release.version.replace(".", "-")}`} role="dialog" aria-modal="true" aria-labelledby="release-notes-title"><header><div><p className="eyebrow">{release.eyebrow}</p><h2 id="release-notes-title">{release.title}</h2></div><button onClick={closeReleaseNotes} aria-label="Close updates"><X size={18}/></button></header><nav className="release-carousel-tabs" aria-label="North release history">{releaseNotes.map((item) => <button key={item.version} className={item.version === release.version ? "active" : ""} aria-current={item.version === release.version ? "page" : undefined} onClick={() => setReleaseNotesVersion(item.version)}>North {item.version}</button>)}</nav><div className="release-carousel-stage" key={release.version}><p className="release-notes-intro"><strong>{release.introLead}</strong> {release.intro}</p><ul>{release.items.map((item) => <li key={item.title}><strong>{item.title}</strong><span>{item.detail}</span></li>)}</ul><p className="release-notes-thanks"><strong>{release.thanksLead}</strong><br/>{release.thanks}</p></div><footer className="release-carousel-controls"><button className="release-carousel-nav" onClick={() => newerRelease && setReleaseNotesVersion(newerRelease.version)} disabled={!newerRelease}><ArrowLeft size={16}/> {newerRelease ? `North ${newerRelease.version}` : "Newest release"}</button><span>Release {releaseIndex + 1} of {releaseNotes.length}</span><button className="release-carousel-nav" onClick={() => olderRelease && setReleaseNotesVersion(olderRelease.version)} disabled={!olderRelease}>{olderRelease ? `North ${olderRelease.version}` : "First release"} <ArrowRight size={16}/></button></footer><label className="release-notes-dismiss"><input type="checkbox" checked={dismissReleaseNotes} onChange={(event) => setDismissReleaseNotes(event.target.checked)}/><strong>Don’t show again until the next update</strong></label><button className="primary-button" onClick={closeReleaseNotes}>{release.action} {release.version === "0.4" && <Sparkles size={16}/>}</button></section></div>, document.body);
       })()}
       {activeTourStep && <div className="product-tour" role="dialog" aria-labelledby="north-tour-title"><button className="tour-scrim" onClick={closeProductTour} aria-label="Skip product tour" /><article><header><div className="product-tour-brand"><img className="product-tour-brand-light" src="/png/transparent/lockup-horizontal-teal.png" alt="North" /><img className="product-tour-brand-dark" src="/png/transparent/lockup-horizontal-offwhite.png" alt="" /></div><button onClick={closeProductTour}>Skip</button></header><div className="tour-progress" aria-label={`Tour step ${tourStep + 1} of ${productTourSteps.length}`}>{productTourSteps.map((step, index) => <i key={step.screen} className={index <= tourStep ? "active" : ""} />)}</div><span className="tour-icon">{activeTourStep.screen === "today" ? <CalendarDays /> : activeTourStep.screen === "training" ? <Dumbbell /> : activeTourStep.screen === "nova" ? <Sparkles /> : activeTourStep.screen === "journey" ? <MapIcon /> : <UserRound />}</span><p className="onboarding-kicker">{activeTourStep.eyebrow}</p><h2 id="north-tour-title">{activeTourStep.title}</h2><p>{activeTourStep.body}</p><footer>{tourStep > 0 ? <button onClick={() => { const previous = tourStep - 1; setTourStep(previous); setScreen(productTourSteps[previous].screen); }}><ArrowLeft size={15} /> Back</button> : <span />}<button onClick={advanceProductTour}>{activeTourStep.action}<ArrowRight size={16} /></button></footer></article></div>}
-      {coreScreen && <BottomNav screen={screen} onNavigate={setScreen} desktopOnly={focusedTrainingScreen} />}
+      <BottomNav key={`${screen}-${journeyTab}-${templateEditing && selectedTemplate.source === "personal"}`} screen={screen} journeyTab={journeyTab} expertStudioActive={screen === "workout-template" && templateEditing && selectedTemplate.source === "personal"} onNavigate={(destination) => { setNovaHubOpen(false); setScreen(destination); }} onSectionNavigate={navigateToDestinationSection} desktopOnly={screen === "workout"} />
       {syncVisible && <aside className="north-sync-loader"><BrandLoader label="Syncing your North" compact /></aside>}
       {loginReveal && <LoginBrandReveal onDone={() => setLoginReveal(false)} />}
     </main>
   );
 }
 
-function BottomNav({ screen, onNavigate, desktopOnly = false }: { screen: Screen; onNavigate: (screen: Screen) => void; desktopOnly?: boolean }) {
+function BottomNav({ screen, journeyTab, expertStudioActive, onNavigate, onSectionNavigate, desktopOnly = false }: { screen: Screen; journeyTab: "timeline" | "milestones" | "insights" | "this-day"; expertStudioActive: boolean; onNavigate: (screen: Screen) => void; onSectionNavigate: (screen: Screen, section: string) => void; desktopOnly?: boolean }) {
   const items: Array<{ id: Screen; label: string; icon: typeof CalendarDays; desktopOnly?: boolean }> = [
     { id: "today", label: "Today", icon: CalendarDays },
     { id: "journey", label: "Journey", icon: MapIcon },
@@ -3734,8 +4144,27 @@ function BottomNav({ screen, onNavigate, desktopOnly = false }: { screen: Screen
     { id: "nova", label: "Nova", icon: MessageCircle },
     { id: "you", label: "You", icon: UserRound },
   ];
-  const activeScreen = ["prepare", "workout", "workout-review", "review"].includes(screen) ? "training" : screen;
-  return createPortal(<nav className={`primary-nav${desktopOnly ? " desktop-training-nav" : ""}`} aria-label="Primary navigation">{items.map((item) => { const Icon = item.icon; return <button key={item.id} className={`${activeScreen === item.id ? "active" : ""}${item.desktopOnly ? " desktop-only-nav-item" : ""}`} onClick={() => onNavigate(item.id)}><Icon size={21} /><span>{item.label}</span></button>; })}</nav>, document.body);
+  const activeScreen: Screen = expertStudioActive
+    ? "nova-workout-builder"
+    : screen === "check-in"
+    ? "today"
+    : ["nova-routine-builder"].includes(screen)
+      ? "nova-workout-builder"
+      : ["account", "settings"].includes(screen)
+        ? "you"
+        : ["prepare", "exercise-detail", "workout", "workout-review", "review", "week-plan", "progression", "programs", "program-detail", "workout-library", "workout-template", "workout-history", "activity-log", "coach-import", "weekly-review", "session-detail", "test-log"].includes(screen)
+          ? "training"
+          : screen;
+  const sections: Partial<Record<Screen, Array<{ id: string; label: string }>>> = {
+    today: [{ id: "direction", label: "Direction" }, { id: "check-in", label: "Check-in" }, { id: "week", label: "Your week" }, { id: "record", label: "The record" }],
+    journey: [{ id: "timeline", label: "Timeline" }, { id: "milestones", label: "Milestones" }, { id: "insights", label: "Insights" }, { id: "this-day", label: "This Day" }],
+    training: [{ id: "plan", label: "Week plan" }, { id: "workout", label: "Current workout" }, { id: "build", label: "Build options" }, { id: "quick-log", label: "Quick log" }, { id: "recent", label: "Recent sessions" }, { id: "load", label: "Weekly load" }, { id: "trophy-room", label: "Trophy Room" }, { id: "weekly-review", label: "Weekly Review" }],
+    "nova-workout-builder": [{ id: "setup", label: "Workout setup" }, { id: "expert-studio", label: "Expert Studio" }, { id: "personal", label: "My workouts" }, { id: "north", label: "North workouts" }, { id: "community", label: "Community" }],
+    nova: [{ id: "context", label: "Nova context" }, { id: "conversation", label: "Conversation" }],
+    you: [{ id: "health", label: "Health" }, { id: "recovery", label: "Body & recovery" }, { id: "record", label: "Your record" }, { id: "memory", label: "North memory" }, { id: "account", label: "Account & app" }],
+  };
+  const [expanded, setExpanded] = useState<Screen | null>(activeScreen);
+  return createPortal(<nav className={`primary-nav${desktopOnly ? " desktop-training-nav" : ""}`} aria-label="Primary navigation">{items.map((item) => { const Icon = item.icon; const itemSections = sections[item.id] ?? []; const open = activeScreen === item.id && expanded === item.id; return <Fragment key={item.id}><button className={`${activeScreen === item.id ? "active" : ""}${item.desktopOnly ? " desktop-only-nav-item" : ""}`} onClick={() => { onNavigate(item.id); setExpanded(activeScreen === item.id && expanded === item.id ? null : item.id); }} aria-expanded={itemSections.length ? open : undefined}><Icon size={21} /><span>{item.label}</span>{itemSections.length > 0 && <ChevronDown className={`nav-disclosure${open ? " open" : ""}`} size={15} aria-hidden="true" />}</button>{open && <div className="nav-submenu" role="group" aria-label={`${item.label} sections`}>{itemSections.map((section) => <button key={section.id} className={(item.id === "journey" && journeyTab === section.id) || (screen === "check-in" && item.id === "today" && section.id === "check-in") || (screen === "progression" && item.id === "training" && section.id === "trophy-room") || (screen === "weekly-review" && item.id === "training" && section.id === "weekly-review") || (expertStudioActive && item.id === "nova-workout-builder" && section.id === "expert-studio") ? "current" : ""} onClick={() => onSectionNavigate(item.id, section.id)}>{section.label}</button>)}</div>}</Fragment>; })}</nav>, document.body);
 }
 
 function Rating({ label, value, onChange }: { label: string; value: number; onChange: (value: number) => void }) {

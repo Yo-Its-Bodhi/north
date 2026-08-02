@@ -15,6 +15,7 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.time.Instant
 import java.util.UUID
 
 class MainActivity : ComponentActivity() {
@@ -64,15 +65,18 @@ class MainActivity : ComponentActivity() {
     private fun sync() = lifecycleScope.launch {
         if (!health.granted()) { status.text = "Choose Health Connect access first."; return@launch }
         if (username.text.isBlank() || password.text.isBlank()) { status.text = "Enter your North username and password."; return@launch }
-        status.text = "Reading today and yesterday from Health Connect…"
+        status.text = "Connecting securely to your North account…"
         runCatching {
-            val records = health.read(30)
+            val token = withContext(Dispatchers.IO) { api.login(username.text.toString(), password.text.toString(), deviceId) }
+            val connection = withContext(Dispatchers.IO) { api.connect(token, deviceId) }
+            val importFrom = Instant.parse(connection.getString("import_from"))
+            status.text = "Reading Samsung Health from ${importFrom}…"
+            val records = health.read(importFrom)
             status.text = "Uploading ${records.length()} records securely…"
-            withContext(Dispatchers.IO) { val token = api.login(username.text.toString(), password.text.toString(), deviceId); api.importAll(token, deviceId, records) }
+            if (records.length() == 0) 0 else withContext(Dispatchers.IO) { api.importAll(token, deviceId, records) }
         }.onSuccess { count ->
-            password.text.clear(); username.visibility = android.view.View.GONE; password.visibility = android.view.View.GONE
-            permissionButton.visibility = android.view.View.GONE; syncButton.text = "Sync again"; openNorthButton.visibility = android.view.View.VISIBLE
-            status.text = "Connected to North\n\n$count Samsung Health records synced successfully."
+            password.text.clear(); syncButton.text = "Sync again"; openNorthButton.visibility = android.view.View.VISIBLE
+            status.text = "Connected to North\n\n$count new Samsung Health records synced. Nothing from before this connection is imported."
             (getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager).hideSoftInputFromWindow(status.windowToken, 0)
         }
             .onFailure { status.text = "Sync failed: ${it.message ?: "Unknown error"}" }

@@ -198,15 +198,18 @@ function inferEquipmentMemoryProposal(text,context){
 
 async function buildNovaContext(pool,owner,conversationId,prompt=""){
   const allowed=["week-plan","workouts","check-ins","activities","profile","active-program","reviews","personal-workouts"];
-  const [documents,goals,memories,messages,userResult]=await Promise.all([
+  const [documents,goals,memories,messages,userResult,healthDays,healthActivities]=await Promise.all([
     pool.query("select collection,data,updated_at from sync_documents where owner_user_id=$1 and collection=any($2::text[]) and deleted_at is null",[owner,allowed]),
     pool.query("select id,title,description,category,priority,status,target_date,source_type,confirmed_at from nova_goals where owner_user_id=$1 and status in ('active','draft') order by priority desc,updated_at desc limit 20",[owner]),
     pool.query("select kind,label,value,source_type,confidence,confirmed_at,expires_at from nova_memory_entries where owner_user_id=$1 and status='active' and influence_enabled=true and (expires_at is null or expires_at>now()) order by updated_at desc limit 40",[owner]),
     pool.query("select role,content,created_at from nova_messages where owner_user_id=$1 and conversation_id=$2 order by created_at desc limit 16",[owner,conversationId]),
     pool.query("select timezone from app_users where id=$1",[owner]),
+    pool.query(`select started_at,ended_at,payload from health_records where owner_user_id=$1 and record_type='daily_summary' order by started_at desc limit 60`,[owner]),
+    pool.query(`select started_at,ended_at,payload from health_records where owner_user_id=$1 and record_type='exercise' order by started_at desc limit 30`,[owner]),
   ]);
   const records={};for(const row of documents.rows)records[row.collection]=summarizeDocument(row.collection,row.data);
-  const evidence=[...documents.rows.map((row)=>`${row.collection} updated ${new Date(row.updated_at).toISOString()}`),`${goals.rows.length} active or draft goals`,`${memories.rows.length} confirmed memory entries`];
+  records.health={daily:healthDays.rows,activities:healthActivities.rows,note:"Daily summaries already include exercise. Do not add activity duration, distance or calories to the same day's aggregate totals.",interpretation:"Treat the member's current local date as provisional. For day comparisons, use the newest completed local day against up to seven earlier completed days, state how many days have data, and describe patterns without diagnosis. Distance is aggregate movement distance, active_minutes is recorded exercise duration, and total calories include resting energy; never relabel them as walking distance, Samsung active time, or activity calories."};
+  const evidence=[...documents.rows.map((row)=>`${row.collection} updated ${new Date(row.updated_at).toISOString()}`),`${healthDays.rows.length} Health Connect daily summaries`,`${healthActivities.rows.length} imported health activities`,`${goals.rows.length} active or draft goals`,`${memories.rows.length} confirmed memory entries`];
   const timezone=userResult.rows[0]?.timezone||"UTC";
   const parts=new Intl.DateTimeFormat("en-CA",{timeZone:timezone,year:"numeric",month:"2-digit",day:"2-digit",weekday:"long"}).formatToParts(new Date());
   const currentDate=parts.map((part)=>part.value).join("");const values=Object.fromEntries(parts.map((part)=>[part.type,part.value]));

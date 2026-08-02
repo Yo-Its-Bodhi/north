@@ -11,7 +11,7 @@ export function WorkoutProgressBar({ currentExerciseIndex, totalExercises, compl
   const progressPercent = (completedExercises / totalExercises) * 100;
 
   return (
-    <div className="workout-progress-bar">
+    <div className="workout-progress-bar" aria-label={`Exercise ${currentExerciseIndex + 1} of ${totalExercises}`}>
       <div className="progress-bar-content">
         <div className="progress-info">
           <span className="progress-label">{completedExercises}/{totalExercises} complete</span>

@@ -1,4 +1,4 @@
-export type NorthUser = { id: string; username: string; displayName: string; timezone: string };
+export type NorthUser = { id: string; username: string; displayName: string; timezone: string; isAdmin: boolean };
 
 export interface NorthSession {
   user: NorthUser;
@@ -6,13 +6,12 @@ export interface NorthSession {
   accessToken: string;
   refreshToken: string;
   recoveryCode?: string;
-  isAdmin?: boolean;
 }
 
 const SESSION_KEY = "north-account-session-v1";
 const DEVICE_KEY = "north-device-id-v1";
 const LAST_LOCAL_OWNER_KEY = "north-last-local-owner-v1";
-export const NORTH_API_BASE = import.meta.env?.VITE_API_BASE_URL || (import.meta.env.DEV ? "/api" : location.origin);
+export const NORTH_API_BASE = import.meta.env?.VITE_API_BASE_URL || (import.meta.env?.DEV ? "/api" : location.origin);
 
 export function northDevice() {
   let id = localStorage.getItem(DEVICE_KEY);
@@ -30,6 +29,10 @@ export function readNorthSession(): NorthSession | null {
   try { return JSON.parse(localStorage.getItem(SESSION_KEY) || "null") as NorthSession | null; } catch { return null; }
 }
 
+export function northSessionIsAdmin(session: NorthSession | null) {
+  return session?.user.isAdmin === true;
+}
+
 function saveSession(session: NorthSession | null) {
   if (session) {
     const previousOwner = localStorage.getItem(LAST_LOCAL_OWNER_KEY);
@@ -44,8 +47,19 @@ function saveSession(session: NorthSession | null) {
     const { recoveryCode: _oneTimeSecret, ...persistentSession } = session;
     void _oneTimeSecret;
     localStorage.setItem(SESSION_KEY, JSON.stringify(persistentSession));
-  } else localStorage.removeItem(SESSION_KEY);
+  } else {
+    for (let index = localStorage.length - 1; index >= 0; index -= 1) {
+      const key = localStorage.key(index);
+      if (key?.startsWith("north-") && ![DEVICE_KEY, LAST_LOCAL_OWNER_KEY].includes(key)) localStorage.removeItem(key);
+    }
+  }
   return session;
+}
+
+function isNorthSession(value: unknown): value is NorthSession {
+  if (!value || typeof value !== "object") return false;
+  const session = value as Partial<NorthSession>;
+  return Boolean(session.user && typeof session.user.id === "string" && session.user.id && typeof session.accessToken === "string" && session.accessToken && typeof session.refreshToken === "string" && session.refreshToken);
 }
 
 async function sessionRequest(path: string, body: unknown) {
@@ -53,12 +67,14 @@ async function sessionRequest(path: string, body: unknown) {
   try {
     response = await fetch(`${NORTH_API_BASE}${path}`, { method: "POST", headers: { "Content-Type": "application/json", ...northDeviceHeaders() }, body: JSON.stringify(body) });
   } catch (error) {
-    if (error instanceof TypeError) throw new Error("North sign-in service is unavailable. Start the local API and database, then try again.");
+    if (error instanceof TypeError) throw new Error("North sign-in service is unavailable. Start the local API and database, then try again.", { cause: error });
     throw error;
   }
   const result = await response.json().catch(() => ({})) as NorthSession & { error?: string };
   if (!response.ok) throw new Error(result.error || `Account request returned ${response.status}`);
-  return saveSession(result) as NorthSession;
+  if (!isNorthSession(result)) throw new Error("North opened locally, but its account API is not running. Start the local API and database to sign in, or use Preview locally.");
+  saveSession(result);
+  return result;
 }
 
 export const registerNorthAccount = (username: string, password: string, displayName: string, accessCode?: string) => sessionRequest("/v1/auth/register", { username, password, displayName, accessCode, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone });

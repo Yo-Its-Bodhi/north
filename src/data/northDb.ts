@@ -141,14 +141,14 @@ export const northRepository = {
     return requestResult(transaction.objectStore("outbox").getAll()) as Promise<OutboxMutation[]>;
   },
 
-  async acceptRemote(document: NorthDocument) {
+  async acceptRemote(document: NorthDocument, force = false) {
     const database = await openNorthDatabase();
     const transaction = database.transaction(["documents", "outbox"], "readwrite");
     const store = transaction.objectStore("documents");
     const existing = await requestResult(store.get(document.key)) as NorthDocument | undefined;
     
     // Don't overwrite if local document is newer
-    if (existing && new Date(existing.updatedAt).getTime() > new Date(document.updatedAt).getTime()) {
+    if (!force && existing && new Date(existing.updatedAt).getTime() > new Date(document.updatedAt).getTime()) {
       await transactionDone(transaction);
       return;
     }

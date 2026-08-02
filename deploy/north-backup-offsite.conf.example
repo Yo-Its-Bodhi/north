@@ -1,0 +1,3 @@
+# Copy to /etc/north-backup-offsite.conf, set mode 600, and use a dedicated
+# rclone destination. Configure provider credentials with `rclone config`.
+NORTH_BACKUP_OFFSITE_REMOTE="north-offsite:north-production"

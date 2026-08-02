@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { AlertCircle, Check, ChevronDown, ChevronUp, X } from "lucide-react";
 import type { Session, Exercise } from "../App";
+import { trackingTemplates } from "../exerciseDatabase/taxonomies";
+import { normalizeExerciseKey, productionExerciseLibrary } from "../exerciseDatabase/libraryExercises";
 
 type Props = {
   session: Session;
@@ -12,9 +14,25 @@ type Props = {
 export function PreSubmitReview({ session, onEdit, onConfirm, onCancel }: Props) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
+  function requiredFields(exercise: Exercise) {
+    const canonical = productionExerciseLibrary.find((item) => item.id === exercise.canonicalExerciseId)
+      ?? productionExerciseLibrary.find((item) => [item.canonicalName, item.displayName, ...item.aliases].some((name) => normalizeExerciseKey(name) === normalizeExerciseKey(exercise.name)));
+    const template = trackingTemplates.find((item) => item.id === (exercise.trackingTemplateId ?? canonical?.trackingTemplateId));
+    return template ? template.requiredFieldIds : ["weight", "reps"];
+  }
+
+  function setFieldValue(set: Exercise["sets"][number], fieldId: string) {
+    return set.values?.[fieldId] ?? (fieldId === "weight" ? set.weight : fieldId === "reps" ? set.reps : "");
+  }
+
+  function isMissingValue(value: unknown) {
+    return value === undefined || value === null || value === "" || value === 0 || value === "0";
+  }
+
   function getExerciseStatus(exercise: Exercise) {
     const complete = exercise.sets.every((s) => s.complete);
-    const hasMissingData = exercise.sets.some((s) => !s.weight || !s.reps);
+    const fields = requiredFields(exercise);
+    const hasMissingData = exercise.sets.some((set) => set.complete && fields.some((fieldId) => isMissingValue(setFieldValue(set, fieldId))));
     return { complete, hasMissingData, completedSets: exercise.sets.filter((s) => s.complete).length };
   }
 
@@ -43,7 +61,7 @@ export function PreSubmitReview({ session, onEdit, onConfirm, onCancel }: Props)
           <AlertCircle size={20} />
           <div>
             <strong>⚠️ Missing Data</strong>
-            <p>Some sets are missing weight or reps. Fill these in for accurate workout tracking.</p>
+            <p>Some sets are missing required tracking data. Fill these in for accurate workout tracking.</p>
           </div>
         </div>
       )}
@@ -77,14 +95,22 @@ export function PreSubmitReview({ session, onEdit, onConfirm, onCancel }: Props)
                 <div className="review-exercise-details">
                   <div className="review-sets-grid">
                     {exercise.sets.map((set, index) => {
-                      const missing = !set.weight || !set.reps;
+                      const canonical = productionExerciseLibrary.find((item) => item.id === exercise.canonicalExerciseId)
+                        ?? productionExerciseLibrary.find((item) => [item.canonicalName, item.displayName, ...item.aliases].some((name) => normalizeExerciseKey(name) === normalizeExerciseKey(exercise.name)));
+                      const template = trackingTemplates.find((item) => item.id === (exercise.trackingTemplateId ?? canonical?.trackingTemplateId));
+                      const fields = requiredFields(exercise);
+                      const missing = set.complete && fields.some((fieldId) => isMissingValue(setFieldValue(set, fieldId)));
                       return (
                         <div key={index} className={`review-set ${set.complete ? "set-complete" : ""} ${missing ? "set-missing" : ""}`}>
                           <strong>Set {index + 1}</strong>
                           <div className="review-set-values">
                             {missing && <span className="warning-indicator">⚠️</span>}
-                            <span className={missing ? "value-missing" : ""}>{set.weight || "—"} {set.weight ? "lbs" : ""}</span>
-                            <span className={missing ? "value-missing" : ""}>{set.reps || "—"} reps</span>
+                            {fields.map((fieldId) => {
+                              const value = setFieldValue(set, fieldId);
+                              const field = template?.fields.find((item) => item.id === fieldId);
+                              const unit = set.units?.[fieldId] ?? field?.defaultUnit ?? (fieldId === "weight" ? "lb" : fieldId === "reps" ? "reps" : "");
+                              return <span key={fieldId} className={set.complete && isMissingValue(value) ? "value-missing" : ""}>{isMissingValue(value) ? "—" : value} {unit.replaceAll("_", "/")}</span>;
+                            })}
                           </div>
                           {set.complete && <Check size={16} className="set-check-icon" />}
                         </div>
@@ -105,7 +131,7 @@ export function PreSubmitReview({ session, onEdit, onConfirm, onCancel }: Props)
         <button className="btn-secondary" onClick={onCancel}>
           Back to Workout
         </button>
-        <button className="btn-primary" onClick={onConfirm} disabled={anyMissing && !allComplete}>
+        <button className="btn-primary" onClick={onConfirm} disabled={anyMissing}>
           {allComplete ? "Submit Workout" : "Submit Anyway"}
         </button>
       </div>

@@ -8,6 +8,10 @@ API_PORT=3020
 OWNER_USERNAME="${NORTH_OWNER_USERNAME:-druwbi}"
 
 cd "$APP_DIR"
+if ! command -v rclone >/dev/null; then
+  apt-get update
+  DEBIAN_FRONTEND=noninteractive apt-get install -y rclone
+fi
 npm ci --omit=dev
 chmod 755 "$APP_DIR" "$APP_DIR/db" "$APP_DIR/db/migrations" "$APP_DIR/dist"
 find "$APP_DIR/db/migrations" -type f -name '*.sql' -exec chmod 644 {} +
@@ -66,20 +70,13 @@ alter default privileges in schema public grant select, insert, update, delete o
 alter default privileges in schema public grant usage, select, update on sequences to $DB_USER;
 SQL
 
-chmod 700 deploy/backup-north.sh deploy/verify-north-restore.sh deploy/maintain-north.sh
+chmod 700 deploy/*.sh
 if [[ ! -s /root/.north-backup-key ]]; then
   openssl rand -base64 48 > /root/.north-backup-key
   chmod 600 /root/.north-backup-key
 fi
 install -d -m 700 /var/backups/north
-cat > /etc/cron.d/north-operations <<'CRON'
-SHELL=/bin/bash
-PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-10 3 * * * root /opt/north/deploy/backup-north.sh >> /var/log/north-backup.log 2>&1
-10 4 * * 0 root /opt/north/deploy/verify-north-restore.sh >> /var/log/north-restore-test.log 2>&1
-40 3 * * * root /opt/north/deploy/maintain-north.sh >> /var/log/north-maintenance.log 2>&1
-CRON
-chmod 644 /etc/cron.d/north-operations
+deploy/install-north-operations.sh
 
 set -a
 source .env

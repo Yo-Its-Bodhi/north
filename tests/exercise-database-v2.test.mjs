@@ -8,7 +8,7 @@ import { resolveExerciseRelationships } from "../src/exerciseDatabase/relationsh
 import { stageExerciseImports } from "../src/exerciseDatabase/import.ts";
 
 const database=canonicalExerciseDatabase(reviewedExercises);
-test("reviewed architecture contains exactly the requested 20 valid exercises",()=>{ assert.equal(reviewedExercises.length,20); assert.deepEqual(validateExerciseDatabase(database),[]); });
+test("reviewed architecture contains exactly 21 valid exercises",()=>{ assert.equal(reviewedExercises.length,21); assert.deepEqual(validateExerciseDatabase(database),[]); });
 test("every reference taxonomy uses stable snake-case IDs",()=>{ for(const row of [...muscles,...equipment,...categories,...trackingTemplates]) assert.match(row.id,/^[a-z0-9]+(?:_[a-z0-9]+)*$/); });
 test("strength units permit kg and lb without coupling profile units",()=>{ const weight=trackingTemplates.find((x)=>x.id==="reps_and_weight").fields.find((x)=>x.id==="weight"); assert.deepEqual(weight.units,["kg","lb"]); });
 test("muscle mappings preserve rich roles and visual regions",()=>{ const squat=reviewedExercises.find((x)=>x.id==="barbell_back_squat"); assert.deepEqual(new Set(squat.muscles.map((x)=>x.role)),new Set(["primary","synergist","stabilizer"])); assert.ok(squat.muscles.every((x)=>x.visualRegionId)); });

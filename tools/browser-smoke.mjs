@@ -44,8 +44,10 @@ try {
   await context.route("**/v1/**", async (route) => {
     const path = new URL(route.request().url()).pathname;
     if (path === "/v1/me/devices") return route.fulfill({ json: { devices: [], currentDeviceId: "test-device" } });
-    if (path === "/v1/health/connections") return route.fulfill({ json: { connections: [] } });
+    if (path === "/v1/health/connections") return route.fulfill({ json: { connections: [{ provider: "health_connect", status: "connected", scopes: ["steps", "sleep", "exercise"], source_apps: ["Samsung Health"], preferences: { workouts: true, dailyMovement: true, sleepRecovery: true, bodyMeasurements: false }, connected_at: `${testDate}T06:00:00.000Z`, import_from: `${testDate}T06:00:00.000Z`, last_sync_at: `${testDate}T12:00:00.000Z` }] } });
     if (path === "/v1/health/summary") return route.fulfill({ json: { days: 30, types: [] } });
+    if (path === "/v1/health/activities") return route.fulfill({ json: { activities: [{ id: "browser-health-ride", started_at: `${testDate}T07:00:00.000Z`, ended_at: `${testDate}T07:46:00.000Z`, title: "Morning ride", notes: "Steady ride", recording_method: "actively_recorded", kind: "bike", exercise_type: 8, distance_metres: 18400, duration_minutes: 46, source_app: "Samsung Health" }] } });
+    if (path === "/v1/health/context") return route.fulfill({ json: { days: 14, daily: [{ date: testDate, steps: 7842, distance_metres: 6200, active_calories: 430, total_calories: 2180, active_minutes: 64, sleep_minutes: 448 }], latest_weight: null } });
     if (path === "/v1/nova/status") return route.fulfill({ json: { available: true, model: "test-model", mode: "connected", usage: { period: "this_month", replies: 0, tokens: 0, estimatedCostMicros: 0 } } });
     if (path === "/v1/nova/bootstrap") return route.fulfill({ json: { conversations: [], goals: [], memories: [], pendingProposals: [] } });
     if (path === "/v1/nova/conversations" && route.request().method() === "POST") return route.fulfill({ json: { id: "browser-conversation" } });
@@ -74,8 +76,32 @@ try {
       await page.getByRole("button", { name: destination, exact: true }).last().click();
       await page.waitForTimeout(80);
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1), true, `${destination} overflows horizontally`);
+      const nativeControls = await page.evaluate(() => [...document.querySelectorAll("button,input,textarea,select")].filter((element) => {
+        const box = element.getBoundingClientRect();
+        const style = getComputedStyle(element);
+        if (box.width === 0 || box.height === 0 || style.display === "none" || style.visibility === "hidden") return false;
+        if (element instanceof HTMLInputElement && ["checkbox", "radio", "file", "range"].includes(element.type)) return false;
+        return style.borderStyle === "outset" || style.backgroundColor === "rgb(240, 240, 240)";
+      }).map((element) => element.getAttribute("aria-label") || element.textContent?.trim() || element.tagName));
+      assert.deepEqual(nativeControls, [], `${destination} contains browser-default controls: ${nativeControls.join(", ")}`);
       await page.screenshot({ path: `artifacts/visual/mobile-${destination.toLowerCase()}.png`, fullPage: true });
     }
+  });
+
+  await check("connected Samsung context appears only on its intended product surfaces", async () => {
+    for (const viewport of [{ width: 430, height: 932 }, { width: 1440, height: 1000 }]) {
+      await page.setViewportSize(viewport);
+      await page.getByRole("button", { name: "Today", exact: true }).last().click();
+      assert.match(await page.locator(".today-health-context").innerText(), /7,842\s*STEPS\s*64\s*MINS\s*2,180\s*KCAL\s*3\.9 mi\s*DISTANCE/);
+      await page.getByRole("button", { name: "Journey", exact: true }).last().click();
+      await page.getByText("Morning ride", { exact: true }).waitFor();
+      await page.getByRole("button", { name: "You", exact: true }).last().click();
+      assert.match(await page.locator(".you-health-hub").innerText(), /Purposeful sessions only/);
+      await page.getByRole("button", { name: "Open account and app settings" }).click();
+      assert.equal(await page.locator(".health-permission-controls").count(), 1);
+      assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1), true, `Health settings overflow at ${viewport.width}px`);
+    }
+    await page.setViewportSize({ width: 430, height: 932 });
   });
 
   await check("weekly plan can be selected, edited, and opened for preparation", async () => {

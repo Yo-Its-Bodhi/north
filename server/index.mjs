@@ -7,6 +7,7 @@ import rateLimit from "@fastify/rate-limit";
 import bcrypt from "bcryptjs";
 import pg from "pg";
 import { registerCommunityRoutes } from "./community-routes.mjs";
+import { healthExerciseKind, isPurposefulExercise, recordStartsAfterConnection, recordingMethodName } from "./health-policy.mjs";
 import { registerNovaRoutes } from "./nova-routes.mjs";
 
 if (existsSync(".env.local")) process.loadEnvFile(".env.local");
@@ -71,6 +72,20 @@ app.decorate("requireAdmin", async (request, reply) => {
 async function recordOperationalEvent({ severity = "warning", source = "api", category, message, request, metadata = {} }) {
   try { await pool.query("insert into operational_events(severity,source,category,message,request_id,ip_address,metadata) values($1,$2,$3,$4,$5,$6,$7)", [severity, source, category, String(message).slice(0, 2000), request?.id ?? null, request?.ip ?? null, metadata]); } catch (error) { app.log.error({ err: error }, "Could not persist operational event"); }
 }
+
+async function notifyOwnerOfIssue(report, member) {
+  const webhookUrl = String(process.env.NORTH_ISSUE_WEBHOOK_URL ?? "").trim();
+  if (!webhookUrl) return { notifiedAt: null, error: null };
+  const text = `North ${report.category} report from @${member.username} (${report.source_screen}): ${report.message}`;
+  try {
+    const response = await fetch(webhookUrl, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text, content: text, report: { id: report.id, category: report.category, source: report.source_screen, createdAt: report.created_at } }) });
+    if (!response.ok) throw new Error(`Webhook returned ${response.status}`);
+    return { notifiedAt: new Date(), error: null };
+  } catch (error) {
+    app.log.error({ err: error, reportId: report.id }, "Could not notify owner about issue report");
+    return { notifiedAt: null, error: error instanceof Error ? error.message.slice(0, 500) : "Webhook delivery failed" };
+  }
+}
 app.addHook("onError", async (request, _reply, error) => recordOperationalEvent({ severity: "error", category: "request_error", message: error.message, request, metadata: { method: request.method, url: request.url, code: error.code } }));
 app.addHook("onRequest", async (request) => { request.northStartedAt = performance.now(); });
 app.addHook("preHandler", async (request, reply) => {
@@ -91,6 +106,22 @@ app.get("/v1/config", async () => {
   const settings = await pool.query("select key,value from system_settings where key in ('registration_requires_code','maintenance_mode')");
   const values = Object.fromEntries(settings.rows.map((row) => [row.key, row.value]));
   return { registrationRequiresCode: values.registration_requires_code === true, maintenanceMode: values.maintenance_mode === true };
+});
+
+app.post("/v1/issues", { preHandler: app.authenticate, config: { rateLimit: { max: 10, timeWindow: "15 minutes" } } }, async (request, reply) => {
+  const category = String(request.body?.category ?? "");
+  const message = String(request.body?.message ?? "").trim();
+  const sourceScreen = String(request.body?.sourceScreen ?? "unknown").trim().slice(0, 80);
+  const pageUrl = String(request.body?.pageUrl ?? "").trim().slice(0, 500);
+  const viewport = request.body?.viewport && typeof request.body.viewport === "object" ? request.body.viewport : {};
+  if (!["bug","issue","problem"].includes(category)) return reply.code(400).send({ error: "Choose bug, issue, or problem." });
+  if (message.length < 3 || message.length > 5000) return reply.code(400).send({ error: "Reports must be 3–5000 characters." });
+  const member = await pool.query("select u.id,u.display_name,c.username from app_users u join local_credentials c on c.owner_user_id=u.id where u.id=$1", [request.user.sub]);
+  const created = await pool.query(`insert into issue_reports(owner_user_id,category,message,source_screen,page_url,viewport,user_agent)
+    values($1,$2,$3,$4,$5,$6::jsonb,$7) returning id,category,message,source_screen,created_at,status`, [request.user.sub, category, message, sourceScreen || "unknown", pageUrl, JSON.stringify(viewport), String(request.headers["user-agent"] ?? "").slice(0, 500)]);
+  const notification = await notifyOwnerOfIssue(created.rows[0], member.rows[0]);
+  if (notification.notifiedAt || notification.error) await pool.query("update issue_reports set notified_at=$1,notification_error=$2,updated_at=now() where id=$3", [notification.notifiedAt, notification.error, created.rows[0].id]);
+  return reply.code(201).send({ ...created.rows[0], deliveredToOwnerInbox: true, webhookNotified: Boolean(notification.notifiedAt) });
 });
 
 app.post("/v1/auth/register", { config: { rateLimit: { max: 8, timeWindow: "15 minutes" } } }, async (request, reply) => {
@@ -234,11 +265,11 @@ app.delete("/v1/me/devices/:id", { preHandler: app.authenticate }, async (reques
   return reply.code(204).send();
 });
 
-const healthRecordTypes = new Set(["steps", "heart_rate", "sleep", "exercise", "distance", "active_calories", "weight"]);
+const healthRecordTypes = new Set(["steps", "heart_rate", "sleep", "exercise", "distance", "active_calories", "total_calories", "daily_summary", "weight"]);
 const healthProviders = new Set(["health_connect", "apple_health"]);
 
 app.get("/v1/health/connections", { preHandler: app.authenticate }, async (request) => ({
-  connections: (await pool.query(`select provider,status,scopes,source_apps,last_sync_at,last_error,created_at,updated_at
+  connections: (await pool.query(`select provider,status,scopes,source_apps,preferences,connected_at,import_from,last_sync_at,last_error,created_at,updated_at
     from health_connections where owner_user_id=$1 order by provider`, [request.user.sub])).rows,
 }));
 
@@ -246,11 +277,17 @@ app.put("/v1/health/connections/:provider", { preHandler: app.authenticate }, as
   const provider = String(request.params.provider);
   const scopes = Array.isArray(request.body?.scopes) ? [...new Set(request.body.scopes.map(String))].slice(0, 30) : [];
   const sourceApps = Array.isArray(request.body?.sourceApps) ? [...new Set(request.body.sourceApps.map(String))].slice(0, 20) : [];
+  const preferences = {
+    workouts: request.body?.preferences?.workouts !== false,
+    dailyMovement: request.body?.preferences?.dailyMovement !== false,
+    sleepRecovery: request.body?.preferences?.sleepRecovery !== false,
+    bodyMeasurements: request.body?.preferences?.bodyMeasurements === true,
+  };
   const status = ["connected", "paused"].includes(request.body?.status) ? request.body.status : "connected";
   if (!healthProviders.has(provider)) return reply.code(400).send({ error: "Unsupported health provider." });
-  const result = await pool.query(`insert into health_connections(owner_user_id,provider,device_id,status,scopes,source_apps)
-    values($1,$2,$3,$4,$5,$6) on conflict(owner_user_id,provider) do update set device_id=$3,status=$4,scopes=$5,source_apps=$6,last_error=null,updated_at=now()
-    returning provider,status,scopes,source_apps,last_sync_at,last_error,created_at,updated_at`, [request.user.sub, provider, request.device.id, status, JSON.stringify(scopes), JSON.stringify(sourceApps)]);
+  const result = await pool.query(`insert into health_connections(owner_user_id,provider,device_id,status,scopes,source_apps,preferences,connected_at,import_from)
+    values($1,$2,$3,$4,$5,$6,$7,now(),now()) on conflict(owner_user_id,provider) do update set device_id=$3,status=$4,scopes=$5,source_apps=$6,preferences=$7,last_error=null,updated_at=now()
+    returning provider,status,scopes,source_apps,preferences,connected_at,import_from,last_sync_at,last_error,created_at,updated_at`, [request.user.sub, provider, request.device.id, status, JSON.stringify(scopes), JSON.stringify(sourceApps), JSON.stringify(preferences)]);
   return result.rows[0];
 });
 
@@ -264,12 +301,17 @@ app.post("/v1/health/import", { preHandler: app.authenticate, config: { rateLimi
   const provider = String(request.body?.provider ?? "");
   const records = request.body?.records;
   if (!healthProviders.has(provider) || !Array.isArray(records) || records.length < 1 || records.length > 500) return reply.code(400).send({ error: "Provide 1–500 records for a supported provider." });
+  const connection = (await pool.query("select import_from,status from health_connections where owner_user_id=$1 and provider=$2", [request.user.sub, provider])).rows[0];
+  if (!connection || connection.status !== "connected") return reply.code(409).send({ error: "Connect this health provider before importing records." });
   const normalized = [];
+  let rejectedBeforeConnection = 0;
   for (const item of records) {
     const startedAt = new Date(item.startedAt);
     const endedAt = new Date(item.endedAt);
     if (!item.externalRecordId || !healthRecordTypes.has(item.recordType) || !Number.isFinite(startedAt.valueOf()) || !Number.isFinite(endedAt.valueOf()) || endedAt < startedAt || typeof item.payload !== "object" || item.payload === null || Array.isArray(item.payload)) return reply.code(400).send({ error: "A health record is malformed." });
-    const payload = JSON.stringify(item.payload);
+    if (!recordStartsAfterConnection(startedAt, connection.import_from)) { rejectedBeforeConnection += 1; continue; }
+    const normalizedPayload = item.recordType === "exercise" ? { ...item.payload, recordingMethod: recordingMethodName(item.payload.recordingMethod) } : item.payload;
+    const payload = JSON.stringify(normalizedPayload);
     normalized.push({ externalRecordId: String(item.externalRecordId).slice(0, 300), recordType: item.recordType, sourceApp: String(item.sourceApp ?? "").slice(0, 200) || null, sourceDevice: String(item.sourceDevice ?? "").slice(0, 200) || null, startedAt: startedAt.toISOString(), endedAt: endedAt.toISOString(), payload, contentHash: sha256(`${item.recordType}:${startedAt.toISOString()}:${endedAt.toISOString()}:${payload}`) });
   }
   const client = await pool.connect();
@@ -282,34 +324,93 @@ app.post("/v1/health/import", { preHandler: app.authenticate, config: { rateLimi
         where health_records.content_hash<>excluded.content_hash returning id`, [request.user.sub, provider, item.externalRecordId, item.recordType, item.sourceApp, item.sourceDevice, item.startedAt, item.endedAt, item.payload, item.contentHash]);
       imported += result.rowCount;
     }
-    await client.query(`insert into health_connections(owner_user_id,provider,device_id,status,scopes,last_sync_at)
-      values($1,$2,$3,'connected','[]',now()) on conflict(owner_user_id,provider) do update set device_id=$3,status='connected',last_sync_at=now(),last_error=null,updated_at=now()`, [request.user.sub, provider, request.device.id]);
+    await client.query("update health_connections set device_id=$3,last_sync_at=now(),last_error=null,updated_at=now() where owner_user_id=$1 and provider=$2", [request.user.sub, provider, request.device.id]);
     await client.query("commit");
-    return { accepted: records.length, imported, syncedAt: new Date().toISOString() };
+    return { offered: records.length, accepted: normalized.length, imported, rejectedBeforeConnection, syncedAt: new Date().toISOString() };
   } catch (error) { await client.query("rollback"); throw error; } finally { client.release(); }
 });
 
 app.get("/v1/health/summary", { preHandler: app.authenticate }, async (request) => {
   const days = Math.min(90, Math.max(1, Number(request.query?.days ?? 7)));
   const result = await pool.query(`select record_type,count(*)::int records,min(started_at) first_record,max(ended_at) latest_record
-    from health_records where owner_user_id=$1 and started_at>=now()-($2::text||' days')::interval group by record_type order by record_type`, [request.user.sub, days]);
+    from health_records r join health_connections c on c.owner_user_id=r.owner_user_id and c.provider=r.provider
+    where r.owner_user_id=$1 and c.status='connected' and r.started_at>=c.import_from
+      and r.started_at>=now()-($2::text||' days')::interval group by record_type order by record_type`, [request.user.sub, days]);
   return { days, types: result.rows };
 });
 
 app.get("/v1/health/activities", { preHandler: app.authenticate }, async (request) => {
-  const days = Math.min(90, Math.max(1, Number(request.query?.days ?? 30)));
+  const days = Math.min(365, Math.max(1, Number(request.query?.days ?? 30)));
   const result = await pool.query(`select e.external_record_id id,e.started_at,e.ended_at,e.source_app,e.source_device,
-      e.payload->>'title' title,(e.payload->>'exerciseType')::int exercise_type,
+      e.payload,e.payload->>'title' title,(e.payload->>'exerciseType')::int exercise_type,
       coalesce((select (d.payload->>'metres')::double precision from health_records d
         where d.owner_user_id=e.owner_user_id and d.provider=e.provider and d.record_type='distance'
-          and d.started_at=e.started_at and d.ended_at=e.ended_at limit 1),0) distance_metres
-    from health_records e where e.owner_user_id=$1 and e.record_type='exercise'
-      and e.started_at>=now()-($2::text||' days')::interval order by e.started_at desc limit 200`, [request.user.sub, days]);
-  return { days, activities: result.rows.map((item) => ({
-    ...item,
-    kind: item.exercise_type === 8 ? "bike" : item.exercise_type === 56 ? "run" : item.exercise_type === 79 ? "walk" : "workout",
+          and d.started_at=e.started_at and d.ended_at=e.ended_at limit 1),0) distance_metres,
+      coalesce(
+        (select sum((cal.payload->>'kilocalories')::double precision) from health_records cal
+          where cal.owner_user_id=e.owner_user_id and cal.provider=e.provider and cal.record_type='active_calories'
+            and cal.started_at>=e.started_at and cal.ended_at<=e.ended_at),
+        (select sum((cal.payload->>'kilocalories')::double precision) from health_records cal
+          where cal.owner_user_id=e.owner_user_id and cal.provider=e.provider and cal.record_type='total_calories'
+            and cal.started_at>=e.started_at and cal.ended_at<=e.ended_at),0) calories,
+      coalesce((select round(avg((sample->>'beatsPerMinute')::numeric))::int from health_records heart
+        cross join lateral jsonb_array_elements(coalesce(heart.payload->'samples','[]'::jsonb)) sample
+        where heart.owner_user_id=e.owner_user_id and heart.provider=e.provider and heart.record_type='heart_rate'
+          and (sample->>'time')::timestamptz between e.started_at and e.ended_at),0) average_heart_rate,
+      coalesce((select max((sample->>'beatsPerMinute')::double precision)::int from health_records heart
+        cross join lateral jsonb_array_elements(coalesce(heart.payload->'samples','[]'::jsonb)) sample
+        where heart.owner_user_id=e.owner_user_id and heart.provider=e.provider and heart.record_type='heart_rate'
+          and (sample->>'time')::timestamptz between e.started_at and e.ended_at),0) maximum_heart_rate
+    from health_records e join health_connections c on c.owner_user_id=e.owner_user_id and c.provider=e.provider
+    where e.owner_user_id=$1 and e.record_type='exercise' and c.status='connected' and coalesce((c.preferences->>'workouts')::boolean,true)
+      and e.started_at>=c.import_from and e.started_at>=now()-($2::text||' days')::interval order by e.started_at desc limit 500`, [request.user.sub, days]);
+  return { days, activities: result.rows.filter((item) => isPurposefulExercise(item.payload)).slice(0, 200).map(({ payload, ...item }) => ({
+    ...item, recording_method: recordingMethodName(payload.recordingMethod), notes: payload.notes ?? "",
+    kind: healthExerciseKind(item.exercise_type),
     duration_minutes: Math.max(1, Math.round((new Date(item.ended_at) - new Date(item.started_at)) / 60000)),
+    average_speed_kmh: item.distance_metres > 0 ? item.distance_metres / 1000 / ((new Date(item.ended_at) - new Date(item.started_at)) / 3600000) : 0,
   })) };
+});
+
+app.get("/v1/health/context", { preHandler: app.authenticate }, async (request) => {
+  const days = Math.min(365, Math.max(1, Number(request.query?.days ?? 14)));
+    const result = await pool.query(`select r.record_type,r.started_at,r.ended_at,r.payload,
+      to_char((case when r.record_type='sleep' then r.ended_at else r.started_at end) at time zone coalesce(u.timezone,'UTC'),'YYYY-MM-DD') local_date,c.preferences
+    from health_records r join health_connections c on c.owner_user_id=r.owner_user_id and c.provider=r.provider
+    join app_users u on u.id=r.owner_user_id
+    where r.owner_user_id=$1 and c.status='connected' and r.started_at>=c.import_from
+      and r.started_at>=now()-($2::text||' days')::interval and r.record_type in ('steps','distance','active_calories','total_calories','daily_summary','exercise','sleep','weight')
+    order by r.started_at`, [request.user.sub, days]);
+  const daily = new Map();
+  let latestWeight = null;
+  for (const row of result.rows) {
+    const preferences = row.preferences ?? {};
+    const day = daily.get(row.local_date) ?? { date: row.local_date, steps: 0, distance_metres: 0, active_calories: 0, total_calories: 0, active_milliseconds: 0, sleep_minutes: 0, summary: null };
+    if (preferences.dailyMovement !== false && row.record_type === "steps") day.steps += Number(row.payload?.count) || 0;
+    if (preferences.dailyMovement !== false && row.record_type === "distance") day.distance_metres += Number(row.payload?.metres) || 0;
+    if (preferences.dailyMovement !== false && row.record_type === "active_calories") day.active_calories += Number(row.payload?.kilocalories) || 0;
+    if (preferences.dailyMovement !== false && row.record_type === "total_calories") day.total_calories += Number(row.payload?.kilocalories) || 0;
+    if (preferences.dailyMovement !== false && row.record_type === "exercise") day.active_milliseconds += Math.max(0, new Date(row.ended_at) - new Date(row.started_at));
+    if (preferences.dailyMovement !== false && row.record_type === "daily_summary") day.summary = {
+      steps: Number(row.payload?.steps) || 0,
+      active_minutes: Number(row.payload?.activeMinutes) || 0,
+      active_calories: Number(row.payload?.activeKilocalories) || 0,
+      total_calories: Number(row.payload?.totalKilocalories) || 0,
+      distance_metres: Number(row.payload?.distanceMetres) || 0,
+    };
+    if (preferences.sleepRecovery !== false && row.record_type === "sleep") day.sleep_minutes += Math.max(0, Math.round((new Date(row.ended_at) - new Date(row.started_at)) / 60000));
+    if (preferences.bodyMeasurements === true && row.record_type === "weight") latestWeight = { kilograms: Number(row.payload?.kilograms) || 0, recorded_at: row.started_at };
+    daily.set(row.local_date, day);
+  }
+  return { days, daily: [...daily.values()].map(({ active_milliseconds, summary, ...day }) => ({
+    ...day,
+    steps: summary?.steps ?? day.steps,
+    distance_metres: summary?.distance_metres ?? day.distance_metres,
+    active_calories: summary?.active_calories ?? day.active_calories,
+    total_calories: summary?.total_calories ?? day.total_calories,
+    calories_kind: summary ? summary.active_calories > 0 ? "active" : "total" : day.active_calories > 0 ? "active" : "total",
+    active_minutes: summary?.active_minutes ?? Math.round(active_milliseconds / 60000),
+  })).sort((left, right) => right.date.localeCompare(left.date)), latest_weight: latestWeight };
 });
 
 async function auditAdmin(request, action, targetUserId, reason, metadata = {}) {
@@ -324,6 +425,25 @@ app.get("/v1/admin/overview", { preHandler: app.requireAdmin }, async () => {
     pool.query("select count(*)::int admin_actions from admin_audit_events where created_at>now()-interval '24 hours'"),
   ]);
   return { ...users.rows[0], ...documents.rows[0], ...conflicts.rows[0], ...events.rows[0], generatedAt: new Date().toISOString() };
+});
+
+app.get("/v1/admin/issues", { preHandler: app.requireAdmin }, async (request) => {
+  const status = String(request.query?.status ?? "all");
+  const result = await pool.query(`select r.id,r.category,r.message,r.source_screen,r.page_url,r.viewport,r.user_agent,r.status,r.notified_at,r.notification_error,r.created_at,r.updated_at,c.username,u.display_name
+    from issue_reports r join app_users u on u.id=r.owner_user_id join local_credentials c on c.owner_user_id=u.id
+    where ($1='all' or r.status=$1) order by r.created_at desc limit 250`, [status]);
+  const unread = await pool.query("select count(*)::int count from issue_reports where status='unread'");
+  return { reports: result.rows, unread: unread.rows[0].count };
+});
+
+app.patch("/v1/admin/issues/:id", { preHandler: app.requireAdmin }, async (request, reply) => {
+  const status = String(request.body?.status ?? "");
+  if (!["read","resolved"].includes(status)) return reply.code(400).send({ error: "Choose read or resolved." });
+  const result = await pool.query(`update issue_reports set status=$1,updated_at=now(),resolved_at=case when $1='resolved' then now() else resolved_at end,resolved_by=case when $1='resolved' then $2 else resolved_by end
+    where id=$3 returning id,status,updated_at,resolved_at`, [status, request.user.sub, request.params.id]);
+  if (!result.rows[0]) return reply.code(404).send({ error: "Report not found." });
+  await auditAdmin(request, `issue_report.${status}`, null, `Owner marked issue report ${status}`, { reportId: request.params.id });
+  return result.rows[0];
 });
 
 app.get("/v1/admin/operations", { preHandler: app.requireAdmin }, async () => {

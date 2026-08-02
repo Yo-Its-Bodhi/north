@@ -52,6 +52,16 @@ test("Nova normalizes today proposals against the account timezone",()=>{
   assert.match(routes,/formatToParts\(new Date\(\)\)/);
 });
 
+test("Nova receives account-scoped Health Connect evidence without double counting",()=>{
+  assert.match(routes,/record_type='daily_summary'/);
+  assert.match(routes,/record_type='exercise'/);
+  assert.match(routes,/Daily summaries already include exercise/);
+  assert.match(routes,/Health Connect daily summaries/);
+  assert.match(routes,/current local date as provisional/);
+  assert.match(routes,/newest completed local day against up to seven earlier completed days/);
+  assert.match(routes,/total calories include resting energy/);
+});
+
 test("Nova can persist explicitly requested reusable workouts",()=>{
   assert.match(routes,/saveToMyWorkouts:true/);
   assert.match(routes,/\["create_workout","adjust_plan_day"\].*payload\.saveToMyWorkouts=payload\.saveToMyWorkouts===true/);
