@@ -213,6 +213,23 @@
   line-height: 1.45;
 }
 
+.anatomy-explorer-muscle-region {
+  position: relative;
+  min-height: 0;
+  border-top: 1px solid var(--line);
+}
+
+.anatomy-explorer-muscle-region.has-more::after {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 38px;
+  pointer-events: none;
+  content: "";
+  background: linear-gradient(180deg, transparent, var(--surface-solid));
+}
+
 .anatomy-explorer-muscles {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -220,9 +237,36 @@
   max-height: 190px;
   padding: 14px 24px 20px;
   overflow-y: auto;
-  border-top: 1px solid var(--line);
-  scrollbar-width: thin;
+  overscroll-behavior-y: contain;
+  scrollbar-color: var(--blue) color-mix(in srgb, var(--muted) 12%, transparent);
+  scrollbar-gutter: stable;
+  scrollbar-width: auto;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
 }
+
+.anatomy-explorer-muscles::-webkit-scrollbar { width: 8px; }
+.anatomy-explorer-muscles::-webkit-scrollbar-track { background: color-mix(in srgb, var(--muted) 12%, transparent); }
+.anatomy-explorer-muscles::-webkit-scrollbar-thumb { border: 2px solid var(--surface-solid); border-radius: 8px; background: var(--blue); }
+
+.anatomy-muscle-scroll-cue {
+  position: absolute;
+  z-index: 2;
+  right: 12px;
+  bottom: 8px;
+  display: none;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--blue) 35%, var(--line));
+  border-radius: 50%;
+  color: var(--blue);
+  background: var(--surface-solid);
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--ink) 16%, transparent);
+  pointer-events: none;
+}
+
+.anatomy-explorer-muscle-region.has-more .anatomy-muscle-scroll-cue { display: grid; }
 
 .anatomy-explorer-muscles button {
   --role-color: var(--muscle-supporting);
@@ -336,8 +380,10 @@
   .anatomy-explorer-muscles {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     max-height: min(27dvh, 220px);
-    padding: 11px 16px max(14px, env(safe-area-inset-bottom));
+    padding: 11px 16px max(28px, calc(env(safe-area-inset-bottom) + 14px));
   }
+
+  .anatomy-muscle-scroll-cue { right: 10px; bottom: max(7px, env(safe-area-inset-bottom)); }
 
   .anatomy-explorer-muscles button { min-height: 58px; }
   .anatomy-expand { width: 38px; height: 38px; }

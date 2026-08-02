@@ -1,9 +1,9 @@
 # 08 - Parking Lot
 
-Version: 0.0.5
+Version: 0.0.6
 Last updated: 2026-08-02
 Author: Dru + GPT
-Reason for change: Parked possible North 0.7 education, guidance and promotional work
+Reason for change: Parked possible North 0.7 brand-colour redesign
 
 Ideas that matter, but do not belong in the first build yet.
 
@@ -107,6 +107,23 @@ Questions for 0.7 planning:
 - Which walkthrough guidance is contextual, which belongs in a searchable guide and how users restart or resume it.
 - Which screenshot sizes, templates, themes and privacy-safe demo data are required for each promotional channel.
 - How much anatomy depth is useful before it becomes elaborate 3D anatomy or medical-style content, which remains deferred.
+
+### Possible North 0.7: brand colour system
+
+Planning note only. Do not redesign the active product until North 0.7 visual-direction work begins.
+
+- The current Mediterranean-inspired colour direction is not the intended North brand and should not be treated as approved.
+- Re-establish the core North colour identity before producing the 0.7 promotional screenshots, social assets and campaign templates.
+- Define a restrained primary brand palette, functional semantic colours and clear rules for light, dark and accessibility variants.
+- Audit every destination, chart, anatomy role, activity colour, navigation state and exported asset against the approved system instead of recolouring isolated screens.
+- Preserve the product's clarity, contrast and recognisable North footprint while removing colour choices that make it feel like a different brand.
+
+Questions for 0.7 planning:
+
+- Which existing North brand references best represent the intended colour character.
+- Which current colours are functional signals that should remain distinct, and which are decorative or theme-specific.
+- Whether optional member themes remain, and how tightly they should inherit the core North brand.
+- Which production screens and export formats become the acceptance set for the approved palette.
 
 ### Guided timed sets
 

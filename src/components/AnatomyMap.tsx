@@ -1,6 +1,6 @@
 import { memo, useEffect, useMemo, useRef, useState, type FocusEvent, type MouseEvent } from "react";
 import { createPortal } from "react-dom";
-import { Maximize2, X } from "lucide-react";
+import { ChevronDown, Maximize2, X } from "lucide-react";
 import { anatomyPaths, displayNameFor, plainNameFor, plainPurposeFor, resolveVisualActivation, type AnatomySide, type VisualActivation, type VisualActivationMap, type VisualRole } from "./anatomyVisualMap";
 import "./AnatomyExplorer.css";
 
@@ -26,9 +26,11 @@ function AnatomyMap(props:AnatomyMapProps){
  const [selected,setSelected]=useState<string>();
  const [expanded,setExpanded]=useState(false);
  const [explorerSide,setExplorerSide]=useState<AnatomySide>("front");
+ const [muscleListHasMore,setMuscleListHasMore]=useState(false);
  const expandButton=useRef<HTMLButtonElement>(null);
  const closeButton=useRef<HTMLButtonElement>(null);
  const selectedCard=useRef<HTMLButtonElement>(null);
+ const muscleList=useRef<HTMLDivElement>(null);
  const legacyInput=useMemo(()=>legacyActivation({primary,secondary,synergist,supporting,stabilizer,antagonist}),[primary,secondary,synergist,supporting,stabilizer,antagonist]);
  const input=providedActivation??legacyInput;
  const filter:AnatomyFilter=visibility==="primary"?"primary":chosenFilter;
@@ -42,13 +44,14 @@ function AnatomyMap(props:AnatomyMapProps){
  const closeExplorer=()=>{setExpanded(false);window.requestAnimationFrame(()=>expandButton.current?.focus())};
  useEffect(()=>{if(!expanded)return;const previousOverflow=document.body.style.overflow;document.body.style.overflow="hidden";const closeOnEscape=(event:KeyboardEvent)=>{if(event.key==="Escape")closeExplorer()};window.addEventListener("keydown",closeOnEscape);window.requestAnimationFrame(()=>closeButton.current?.focus());return()=>{document.body.style.overflow=previousOverflow;window.removeEventListener("keydown",closeOnEscape)};},[expanded]);
  useEffect(()=>{if(expanded&&selected)selectedCard.current?.scrollIntoView({block:"nearest",inline:"nearest"})},[expanded,selected]);
+ useEffect(()=>{if(!expanded)return;const update=()=>{const list=muscleList.current;if(list)setMuscleListHasMore(list.scrollHeight-list.scrollTop-list.clientHeight>2)};const frame=window.requestAnimationFrame(update);const observer=new ResizeObserver(update);if(muscleList.current)observer.observe(muscleList.current);window.addEventListener("resize",update);return()=>{window.cancelAnimationFrame(frame);observer.disconnect();window.removeEventListener("resize",update)};},[expanded,entries.length]);
  const selectedSources=selected?resolvedSources[selected]??[]:[];
  const roleSummary=(role:VisualRole)=>role==="primary"?"Main focus today":role==="secondary"?"Supporting today":role==="stabilizer"?"Keeping you steady today":"Helping today";
  const explorer=expanded&&createPortal(<div className="anatomy-explorer-backdrop" role="presentation" onMouseDown={(event)=>{if(event.target===event.currentTarget)closeExplorer()}}><section className="anatomy-explorer holo-anatomy" role="dialog" aria-modal="true" aria-labelledby="anatomy-explorer-title">
   <header><div><p>TODAY&apos;S MUSCLE USE</p><h2 id="anatomy-explorer-title">Your muscles today.</h2><span>Only muscles involved in today&apos;s plan are highlighted.</span></div><button ref={closeButton} type="button" className="anatomy-explorer-close" onClick={closeExplorer} aria-label="Close muscle explorer"><X size={22}/></button></header>
   <div className="anatomy-side-switch" role="group" aria-label="Body view"><button type="button" className={explorerSide==="front"?"active":""} aria-pressed={explorerSide==="front"} onClick={()=>setExplorerSide("front")}>Front</button><button type="button" className={explorerSide==="back"?"active":""} aria-pressed={explorerSide==="back"} onClick={()=>setExplorerSide("back")}>Back</button></div>
   <div className="anatomy-explorer-body"><div className="anatomy-explorer-figure"><BodyFrame side={explorerSide} activation={activation} filter={filter} selected={selected} onSelect={select}/></div><div className="anatomy-explorer-info" role="status" aria-live="polite">{selected&&selectedActivation?<><p>{roleSummary(selectedActivation.role)}</p><h3>{plainNameFor(selected)}</h3><span>{plainPurposeFor(selected)}</span>{selectedSources.length>0&&<div><small>USED BY TODAY</small><strong>{selectedSources.join(" · ")}</strong></div>}</>:<><p>LEARN THE MAP</p><h3>Tap a highlighted muscle.</h3><span>Choose the body or a name below to see what it does in today&apos;s plan.</span></>}</div></div>
-  <div className="anatomy-explorer-muscles" aria-label="Muscles used today">{entries.filter(([id])=>anatomyPaths.some((path)=>path.id===id)).map(([id,value])=><button ref={selected===id?selectedCard:undefined} type="button" key={id} data-muscle-id={id} className={`${selected===id?"selected ":""}role-${value.role}`} aria-pressed={selected===id} onClick={()=>select(id)}><span>{plainNameFor(id)}</span><small>{roleSummary(value.role)}</small></button>)}</div>
+  <div className={`anatomy-explorer-muscle-region${muscleListHasMore?" has-more":""}`}><div ref={muscleList} className="anatomy-explorer-muscles" aria-label="Muscles used today" onScroll={()=>{const list=muscleList.current;if(list)setMuscleListHasMore(list.scrollHeight-list.scrollTop-list.clientHeight>2)}}>{entries.filter(([id])=>anatomyPaths.some((path)=>path.id===id)).map(([id,value])=><button ref={selected===id?selectedCard:undefined} type="button" key={id} data-muscle-id={id} className={`${selected===id?"selected ":""}role-${value.role}`} aria-pressed={selected===id} onClick={()=>select(id)}><span>{plainNameFor(id)}</span><small>{roleSummary(value.role)}</small></button>)}</div><span className="anatomy-muscle-scroll-cue" aria-hidden="true"><ChevronDown size={18}/></span></div>
  </section></div>,document.body);
  return <div className={`anatomy-map holo-anatomy ${compact?"compact":"detailed"}`} data-filter={filter}>
   {compact&&expandable&&<button ref={expandButton} type="button" className="anatomy-expand" onClick={openExplorer} aria-label="Open today’s muscle explorer" aria-expanded={expanded}><Maximize2 size={17}/></button>}
