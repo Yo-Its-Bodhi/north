@@ -2,6 +2,17 @@
 
 All meaningful changes to North will be recorded here.
 
+## 0.6.0 - The Whole Picture
+
+- Introduced Training Atlas with multi-range trends, period comparisons, metric switching, drill-down evidence, streaks, personal highs, composition, and private-safe recap exports.
+- Released the first seven days of NORTH: ORIGINALS workouts.
+- Connected Samsung Health through Android Health Connect for activity and recovery context.
+- Streamlined the workout tracker with updated rest controls and built-in timers for hold exercises.
+- Added the training calendar for date-based history and manual backfilling of missed sessions and activities.
+- Overhauled the Trophy Room to make personal records and their evidence easier to explore.
+- Rebuilt You around personal direction, current signals, connected health, training history, and North memory.
+- Upgraded desktop navigation, workspace layouts, responsive behavior, themes, and accessibility across the app.
+
 ## 0.1.0 - First Usable Loop
 
 - Created the mobile-first Morning and Night application shell.

@@ -31,24 +31,47 @@ test("the training calendar can backfill dated activities as well as strength wo
   assert.doesNotMatch(source, /screen === "workout-history"/);
 });
 
-test("weekly load belongs to Journey insights rather than Training", () => {
+test("Training Atlas is the primary Journey insights explorer", () => {
   const source = readFileSync(new URL("../src/App.tsx", import.meta.url), "utf8");
+  const atlas = readFileSync(new URL("../src/components/TrainingAtlas.tsx", import.meta.url), "utf8");
+  const atlasStyles = readFileSync(new URL("../src/components/TrainingAtlas.css", import.meta.url), "utf8");
   const insightsStart = source.indexOf('journeyTab === "insights"');
   const trainingStart = source.indexOf('screen === "training"');
   const trainingEnd = source.indexOf('screen === "week-plan"');
   assert.ok(insightsStart >= 0 && trainingStart > insightsStart && trainingEnd > trainingStart);
-  assert.match(source.slice(insightsStart, trainingStart), /className="insights-weekly-load"/);
-  assert.match(source.slice(insightsStart, trainingStart), /What actually happened/);
-  assert.doesNotMatch(source.slice(trainingStart, trainingEnd), /What actually happened/);
+  assert.match(source.slice(insightsStart, trainingStart), /<TrainingAtlas records=\{atlasRecords\}/);
+  assert.match(atlas, /Week.*Month.*Quarter.*Year.*All time/s);
+  assert.match(atlas, /Sessions.*Minutes.*Reps.*Volume.*Distance/s);
+  assert.match(atlas, /PERIOD ACTIVITIES/);
+  assert.match(atlas, /Export private-safe PNG/);
+  assert.match(atlas, /bodyweight, recovery and exact activity dates are always excluded/);
+  assert.match(atlasStyles, /--atlas-accent: var\(--blue\)/);
+  assert.match(atlas, /getPropertyValue\("--blue"\)/);
+  assert.doesNotMatch(`${atlas}\n${atlasStyles}`, /#087f7b|--atlas-teal/);
+  assert.doesNotMatch(source.slice(trainingStart, trainingEnd), /TrainingAtlas/);
   assert.doesNotMatch(source, /id: "load", label: "Weekly load"/);
 });
 
 test("primary destinations use the shared North-branded header system", () => {
   const source = readFileSync(new URL("../src/App.tsx", import.meta.url), "utf8");
+  const styles = readFileSync(new URL("../src/destination-reliability.css", import.meta.url), "utf8");
   for (const destination of ["today", "journey", "training", "nova", "you"]) {
     assert.match(source, new RegExp(`destination-brand-header destination-brand-${destination}`));
   }
   for (const label of ["Today", "Journey", "Training", "Nova", "You"]) assert.match(source, new RegExp(`<h1>${label}<`));
+  assert.match(source, /className="primary-nav-brand"[\s\S]*aria-label="North home"[\s\S]*lockup-horizontal-offwhite\.png/);
+  assert.match(styles, /\.member-shell \.topbar-actions \{ margin-left: auto; \}/);
+  assert.match(styles, /@media \(min-width: 1024px\) \{[\s\S]*\.member-shell \.topbar \.brand \{ display: none !important; \}[\s\S]*\.primary-nav-brand \{/);
+  assert.match(source, /className=\{`nova-context-trigger[\s\S]*Open Nova memory and setup[\s\S]*<BrainCircuit size=\{18\}/);
+  assert.match(styles, /\.destination-brand-nova \.nova-context-trigger \{[\s\S]*position: absolute;[\s\S]*width: 38px;[\s\S]*height: 38px;/);
+});
+
+test("member workspaces use theme-aware desktop depth and a quieter mobile wash", () => {
+  const styles = readFileSync(new URL("../src/destination-reliability.css", import.meta.url), "utf8");
+  assert.match(styles, /:root\[data-palette\] \.member-shell \{[\s\S]*repeating-linear-gradient[\s\S]*var\(--north-workspace\) !important;/);
+  assert.match(styles, /:root\[data-theme="night"\]\[data-palette\] \.member-shell \{[\s\S]*var\(--blue\) 5%/);
+  assert.doesNotMatch(styles.slice(styles.indexOf("Give the shared workspace")), /repeating-radial-gradient/);
+  assert.match(styles, /@media \(max-width: 1023px\) \{[\s\S]*linear-gradient\(180deg[\s\S]*background-attachment: scroll !important;/);
 });
 
 test("completed Journey milestones use a filled trophy badge", () => {
@@ -58,14 +81,16 @@ test("completed Journey milestones use a filled trophy badge", () => {
   assert.match(styleSource, /chapter-milestone-list article\.unlocked > span[\s\S]*color: var\(--surface-solid\);[\s\S]*background: var\(--blue\);/);
 });
 
-test("Today places direction between the week days and next milestone", () => {
+test("Today follows the decision-first section order", () => {
   const source = readFileSync(new URL("../src/App.tsx", import.meta.url), "utf8");
-  const pulseStart = source.indexOf('<section className="today-week-pulse">');
-  const pulseEnd = source.indexOf('</section>', pulseStart);
-  const pulse = source.slice(pulseStart, pulseEnd);
-  assert.ok(pulseStart >= 0 && pulseEnd > pulseStart);
-  assert.ok(pulse.indexOf('className="week-pulse-days"') < pulse.indexOf('{todayDirectionPanel}'));
-  assert.ok(pulse.indexOf('{todayDirectionPanel}') < pulse.indexOf('className="week-pulse-milestone"'));
+  const todayStart = source.indexOf('<section className="screen today-screen"');
+  const today = source.slice(todayStart, source.indexOf('{screen === "journey"', todayStart));
+  const sections = ['className="daily-check-in"', '{todayDirectionPanel}', 'className="today-muscle-focus"', 'className="today-health-context"', 'className="today-week-pulse"', 'className="week-pulse-milestone"', 'className="today-record"'];
+  const positions = sections.map((section) => today.indexOf(section));
+  assert.ok(positions.every((position) => position >= 0));
+  assert.deepEqual(positions, [...positions].sort((left, right) => left - right));
+  const pulse = today.slice(positions[4], positions[5]);
+  assert.doesNotMatch(pulse, /todayDirectionPanel|week-pulse-milestone/);
 });
 
 test("You separates declaration from current signals and keeps the relevance order", () => {

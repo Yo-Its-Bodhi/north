@@ -380,6 +380,8 @@
 }
 
 .primary-nav::before { content: none !important; }
+.primary-nav-brand { display: none; }
+.member-shell .topbar-actions { margin-left: auto; }
 
 .member-shell .destination-subheading,
 .member-shell .today-greeting {
@@ -738,7 +740,7 @@
     box-shadow: none !important;
   }
 
-  .member-shell .topbar .brand { display: grid !important; }
+  .member-shell .topbar .brand { display: none !important; }
 
   .primary-nav,
   .primary-nav.desktop-training-nav {
@@ -769,6 +771,27 @@
     display: none !important;
     content: none !important;
   }
+
+  .primary-nav-brand {
+    height: 52px;
+    margin: 0 14px 28px;
+    display: flex;
+    align-items: center;
+    flex: 0 0 52px;
+  }
+  .primary-nav-brand > button {
+    width: 116px;
+    height: 46px;
+    padding: 0;
+    border: 0;
+    display: grid;
+    place-items: center;
+    color: inherit;
+    background: transparent;
+    cursor: pointer;
+  }
+  .primary-nav-brand img { width: 116px; height: auto; display: block; object-fit: contain; }
+  .primary-nav-brand > button:focus-visible { outline: 2px solid color-mix(in srgb, var(--north-rail-text) 72%, transparent); outline-offset: 4px; }
 
   :root .primary-nav > button {
     position: relative !important;
@@ -955,6 +978,7 @@
 
 .week-pulse-milestone {
   grid-column: 1 / -1;
+  width: 100%;
   min-height: 62px;
   margin-top: 12px;
   padding: 12px 42px 12px 14px;
@@ -2128,27 +2152,16 @@
   .routine-checklist-sheet { width: 100%; max-height: min(72dvh, 560px); border-right: 0; border-left: 0; }
 }
 
-/* Today pairs readiness context with the muscle focus for the actual current plan. */
-.member-shell .today-context-column {
-  min-width: 0;
-  margin-top: var(--north-space-5);
-  display: grid;
-  gap: var(--north-space-3);
-}
-.member-shell .today-context-column .daily-check-in {
-  grid-column: auto;
-  grid-row: auto;
-  margin: 0;
-}
-.member-shell .today-week-pulse > .direction-panel {
-  grid-column: 1 / -1;
-  grid-row: auto;
+/* Today follows the same decision-first order in source and on screen. */
+.member-shell .today-screen > .daily-check-in { margin: var(--north-space-5) 0 0; }
+.member-shell .today-screen > .direction-panel {
   width: 100%;
   margin: var(--north-space-4) 0 0;
 }
 .member-shell .today-muscle-focus {
   min-width: 0;
   height: 220px;
+  margin-top: var(--north-space-4);
 }
 .member-shell .today-muscle-focus .anatomy-map.compact {
   width: 100%;
@@ -2177,32 +2190,46 @@
 }
 
 @media (min-width: 1024px) {
-  .member-shell .today-week-pulse {
-    grid-column: 1;
+  .member-shell .today-screen > .daily-check-in {
+    grid-column: 2;
     grid-row: 2;
-    margin-top: 0;
-    padding-top: 0;
-    border-top: 0;
+    margin: 0;
+    align-self: start;
   }
-  .member-shell .today-week-pulse > .direction-panel {
+  .member-shell .today-screen > .direction-panel {
+    grid-column: 1;
+    grid-row: 2 / span 3;
     min-height: 360px;
+    margin: 0;
     padding: 32px;
   }
-  .member-shell .today-context-column {
+  .member-shell .today-muscle-focus {
     grid-column: 2;
-    grid-row: 2;
-    height: 360px;
-    margin: 0;
-    grid-template-rows: auto minmax(0, 1fr);
-    gap: 14px;
+    grid-row: 3;
+    height: 220px;
+    margin-top: 14px;
+  }
+  .member-shell .today-health-context {
+    grid-column: 2;
+    grid-row: 4;
+    margin: 14px 0 0;
+  }
+  .member-shell .today-week-pulse {
+    grid-column: 1;
+    grid-row: 5;
+    margin-top: 32px;
+  }
+  .member-shell .week-pulse-milestone {
+    grid-column: 2;
+    grid-row: 5;
+    align-self: end;
+    margin: 32px 0 0;
   }
   .member-shell .today-record {
-    grid-column: 2;
-    grid-row: 2;
-    align-self: start;
-    margin-top: 392px;
+    grid-column: 1 / -1;
+    grid-row: 6;
+    margin-top: 32px;
   }
-  .member-shell .today-muscle-focus { height: auto; min-height: 0; }
 }
 
 /* One North-branded destination identity across mobile and desktop. */
@@ -2329,6 +2356,27 @@
   }
 }
 
+:root .member-shell .destination-brand-nova .nova-context-trigger {
+  position: absolute;
+  z-index: 2;
+  top: 24px;
+  right: 26px;
+  width: 38px;
+  min-width: 38px;
+  height: 38px;
+  min-height: 38px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+}
+:root .member-shell .destination-brand-nova .nova-heading-actions { position: static !important; }
+:root .member-shell .destination-brand-nova .destination-header-copy { width: calc(100% - 52px); }
+:root .member-shell .destination-brand-nova .nova-context-trigger.active {
+  color: var(--surface-solid);
+  background: var(--destination-tone);
+}
+
 @media (max-width: 700px) {
   :root .member-shell .destination-brand-header {
     min-height: 148px;
@@ -2348,6 +2396,7 @@
   :root .member-shell .destination-brand-header .destination-header-detail { max-width: 275px; font-size: 10px !important; }
   :root .member-shell .destination-brand-nova { align-items: start; }
   :root .member-shell .destination-brand-nova .nova-heading-actions { grid-column: 1 / -1; justify-content: flex-start; }
+  :root .member-shell .destination-brand-nova .nova-context-trigger { top: 18px; right: 18px; }
   :root .member-shell .destination-brand-you .destination-header-actions { flex-direction: column; align-items: flex-end; }
   :root .member-shell .destination-brand-you .you-edit-profile { min-height: 34px; }
 }
@@ -2416,5 +2465,30 @@
     padding-inline: 10px;
     flex: 0 0 auto;
     font-size: 11px;
+  }
+}
+
+/* Give the shared workspace quiet depth without competing with its tools. */
+:root[data-palette] .member-shell {
+  background:
+    linear-gradient(142deg, color-mix(in srgb, var(--blue) 5%, transparent), transparent 32%, transparent 76%, color-mix(in srgb, var(--navy) 4%, transparent)),
+    repeating-linear-gradient(115deg, transparent 0 179px, color-mix(in srgb, var(--ink) 1.5%, transparent) 180px, transparent 181px 340px),
+    var(--north-workspace) !important;
+  background-attachment: fixed !important;
+}
+
+:root[data-theme="night"][data-palette] .member-shell {
+  background:
+    linear-gradient(142deg, color-mix(in srgb, var(--blue) 5%, transparent), transparent 34%, transparent 78%, color-mix(in srgb, var(--navy) 4%, transparent)),
+    repeating-linear-gradient(115deg, transparent 0 179px, color-mix(in srgb, var(--ink) 2%, transparent) 180px, transparent 181px 340px),
+    var(--north-workspace) !important;
+}
+
+@media (max-width: 1023px) {
+  :root[data-palette] .member-shell {
+    background:
+      linear-gradient(180deg, color-mix(in srgb, var(--blue) 7%, var(--north-workspace)) 0, var(--north-workspace) 300px),
+      var(--north-workspace) !important;
+    background-attachment: scroll !important;
   }
 }
