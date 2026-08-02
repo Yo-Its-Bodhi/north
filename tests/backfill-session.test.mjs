@@ -49,3 +49,10 @@ test("primary destinations keep their theme-coloured page labels", () => {
     assert.match(source, new RegExp(`className="eyebrow destination-eyebrow">${label}<`));
   }
 });
+
+test("completed Journey milestones use a filled trophy badge", () => {
+  const appSource = readFileSync(new URL("../src/App.tsx", import.meta.url), "utf8");
+  const styleSource = readFileSync(new URL("../src/destination-reliability.css", import.meta.url), "utf8");
+  assert.match(appSource, /milestone\.unlocked \? <Trophy size=\{17\} fill="currentColor"/);
+  assert.match(styleSource, /chapter-milestone-list article\.unlocked > span[\s\S]*color: var\(--surface-solid\);[\s\S]*background: var\(--blue\);/);
+});

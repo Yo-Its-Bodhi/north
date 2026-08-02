@@ -17,6 +17,12 @@
 :root[data-theme="night"] { --north-complete-foreground: var(--surface-solid); }
 :root:is([data-palette="cloud"], [data-palette="lavender"], [data-palette="spectrum"]) { --north-complete-foreground: var(--surface-solid); }
 
+.journey-destination .chapter-milestone-list article.unlocked > span {
+  border-color: var(--blue);
+  color: var(--surface-solid);
+  background: var(--blue);
+}
+
 :root[data-palette="teal"] {
   --surface: rgba(5, 17, 18, .94) !important;
   --surface-solid: #051112 !important;
