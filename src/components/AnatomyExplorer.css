@@ -1,0 +1,355 @@
+.anatomy-expand {
+  position: absolute;
+  z-index: 3;
+  top: 2px;
+  right: 2px;
+  display: grid;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--blue) 22%, var(--line));
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--surface-solid) 88%, transparent);
+  color: var(--blue);
+  cursor: pointer;
+}
+
+.anatomy-expand:hover,
+.anatomy-expand:focus-visible {
+  border-color: var(--blue);
+  background: color-mix(in srgb, var(--blue) 10%, var(--surface-solid));
+  outline: none;
+}
+
+.anatomy-caption.selected {
+  display: grid !important;
+  gap: 2px;
+  min-width: 112px;
+  text-align: left !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+}
+
+.anatomy-caption.selected strong {
+  color: var(--ink);
+  font-size: 12px;
+  line-height: 1.15;
+}
+
+.anatomy-caption.selected small {
+  color: var(--muted);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.anatomy-explorer-backdrop {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  display: grid;
+  padding: 24px;
+  place-items: center;
+  background: color-mix(in srgb, var(--ink) 62%, transparent);
+  backdrop-filter: blur(10px);
+}
+
+.anatomy-explorer {
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  width: min(760px, calc(100vw - 48px));
+  max-height: min(860px, 88dvh);
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--blue) 28%, var(--line));
+  border-radius: 8px;
+  background: var(--surface-solid);
+  box-shadow: 0 28px 90px color-mix(in srgb, var(--ink) 35%, transparent);
+  color: var(--ink);
+}
+
+.anatomy-explorer > header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 24px 24px 18px;
+  border-bottom: 1px solid var(--line);
+}
+
+.anatomy-explorer > header p,
+.anatomy-explorer-info > p {
+  margin: 0 0 5px;
+  color: var(--blue);
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .14em;
+}
+
+.anatomy-explorer > header h2 {
+  margin: 0;
+  font-size: 24px;
+  line-height: 1.1;
+  letter-spacing: 0;
+}
+
+.anatomy-explorer > header span {
+  display: block;
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.anatomy-explorer-close {
+  display: grid;
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--surface-solid) 90%, var(--blue) 10%);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.anatomy-explorer-close:hover,
+.anatomy-explorer-close:focus-visible {
+  border-color: var(--blue);
+  color: var(--blue);
+  outline: none;
+}
+
+.anatomy-side-switch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3px;
+  margin: 16px 24px 0;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--muted) 7%, var(--surface-solid));
+}
+
+.anatomy-side-switch button {
+  min-height: 40px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.anatomy-side-switch button.active {
+  background: var(--blue);
+  color: var(--surface-solid);
+}
+
+.anatomy-explorer-body {
+  display: grid;
+  grid-template-columns: minmax(220px, .9fr) minmax(260px, 1.1fr);
+  min-height: 0;
+  padding: 18px 24px;
+  overflow: auto;
+}
+
+.anatomy-explorer-figure {
+  display: grid;
+  min-height: 320px;
+  place-items: center;
+  border-right: 1px solid var(--line);
+}
+
+.anatomy-explorer-figure .holo-body-frame {
+  width: 190px;
+}
+
+.anatomy-explorer-figure .holo-body-frame > small {
+  display: none;
+}
+
+.anatomy-explorer-info {
+  align-self: center;
+  padding: 28px;
+}
+
+.anatomy-explorer-info h3 {
+  margin: 0 0 10px;
+  font-size: 26px;
+  line-height: 1.08;
+  letter-spacing: 0;
+}
+
+.anatomy-explorer-info > span {
+  display: block;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.anatomy-explorer-info > div {
+  display: grid;
+  gap: 4px;
+  margin-top: 22px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.anatomy-explorer-info > div small {
+  color: var(--muted);
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: .13em;
+}
+
+.anatomy-explorer-info > div strong {
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.anatomy-explorer-muscles {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  max-height: 190px;
+  padding: 14px 24px 20px;
+  overflow-y: auto;
+  border-top: 1px solid var(--line);
+  scrollbar-width: thin;
+}
+
+.anatomy-explorer-muscles button {
+  --role-color: var(--muscle-supporting);
+  display: grid;
+  grid-template-rows: auto auto;
+  align-content: center;
+  justify-items: center;
+  min-width: 0;
+  min-height: 58px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-left: 5px solid var(--role-color);
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--surface-solid) 92%, var(--muted) 8%);
+  color: var(--ink);
+  text-align: center;
+  cursor: pointer;
+}
+
+.anatomy-explorer-muscles button.selected {
+  border-color: var(--role-color);
+  background: color-mix(in srgb, var(--role-color) 12%, var(--surface-solid));
+  box-shadow: inset 0 0 0 1px var(--role-color);
+}
+
+.anatomy-explorer-muscles .role-primary { --role-color: var(--muscle-primary); }
+.anatomy-explorer-muscles .role-secondary { --role-color: var(--muscle-secondary); }
+.anatomy-explorer-muscles .role-synergist { --role-color: var(--muscle-synergist); }
+.anatomy-explorer-muscles .role-stabilizer { --role-color: var(--muscle-stabilizer); }
+.anatomy-explorer-muscles .role-antagonist { --role-color: var(--muscle-antagonist); }
+
+.anatomy-explorer-muscles span {
+  width: 100%;
+  font-size: 11px;
+  font-weight: 850;
+  line-height: 1.15;
+}
+
+.anatomy-explorer-muscles small {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 8px;
+  font-weight: 750;
+  line-height: 1.2;
+}
+
+.anatomy-explorer .holo-muscle { cursor: pointer; }
+
+.holo-ambient,
+.holo-silhouette,
+.holo-skeleton,
+.holo-inactive-muscles {
+  pointer-events: none;
+}
+
+@media (max-width: 700px) {
+  .anatomy-explorer-backdrop {
+    display: block;
+    padding: 0;
+    background: var(--surface-solid);
+    backdrop-filter: none;
+  }
+
+  .anatomy-explorer {
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
+    width: 100%;
+    height: 100dvh;
+    max-height: none;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .anatomy-explorer > header {
+    padding: max(16px, env(safe-area-inset-top)) 16px 13px;
+  }
+
+  .anatomy-explorer > header h2 { font-size: 21px; }
+  .anatomy-explorer > header span { max-width: 260px; font-size: 11px; }
+
+  .anatomy-explorer-close {
+    flex-basis: 48px;
+    width: 48px;
+    height: 48px;
+  }
+
+  .anatomy-side-switch { margin: 10px 16px 0; }
+  .anatomy-side-switch button { min-height: 44px; }
+
+  .anatomy-explorer-body {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    align-content: center;
+    padding: 12px 16px;
+    overflow-y: auto;
+  }
+
+  .anatomy-explorer-figure {
+    min-height: clamp(340px, 42dvh, 390px);
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .anatomy-explorer-figure .holo-body-frame { width: clamp(170px, 50vw, 190px); }
+  .anatomy-explorer-info { width: min(100%, 440px); padding: 18px 4px 14px; justify-self: center; }
+  .anatomy-explorer-info h3 { font-size: 20px; }
+  .anatomy-explorer-info > span { font-size: 12px; line-height: 1.4; }
+  .anatomy-explorer-info > div { margin-top: 14px; padding-top: 12px; }
+  .anatomy-explorer-info > div strong { font-size: 10px; }
+
+  .anatomy-explorer-muscles {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    max-height: min(27dvh, 220px);
+    padding: 11px 16px max(14px, env(safe-area-inset-bottom));
+  }
+
+  .anatomy-explorer-muscles button { min-height: 58px; }
+  .anatomy-expand { width: 38px; height: 38px; }
+}
+
+@media (max-width: 390px) {
+  .anatomy-explorer > header span { display: none; }
+  .anatomy-explorer-body { padding-top: 7px; padding-bottom: 7px; }
+  .anatomy-explorer-info h3 { font-size: 18px; }
+  .anatomy-explorer-info > span { font-size: 11px; }
+}
+
+@media (min-width: 360px) and (max-width: 700px) {
+  .anatomy-explorer-muscles { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}

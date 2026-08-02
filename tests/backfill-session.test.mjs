@@ -144,11 +144,11 @@ test("Today follows the decision-first section order", () => {
   const source = readFileSync(new URL("../src/App.tsx", import.meta.url), "utf8");
   const todayStart = source.indexOf('<section className="screen today-screen"');
   const today = source.slice(todayStart, source.indexOf('{screen === "journey"', todayStart));
-  const sections = ['className="daily-check-in"', '{todayDirectionPanel}', 'className="today-muscle-focus"', 'className="today-health-context"', 'className="today-week-pulse"', 'className="week-pulse-milestone"', 'className="today-record"'];
+  const sections = ['className="daily-check-in"', '{todayDirectionPanel}', 'className="today-muscle-focus"', 'className="today-week-pulse"', 'className="today-health-context"', 'className="week-pulse-milestone"', 'className="today-record"'];
   const positions = sections.map((section) => today.indexOf(section));
   assert.ok(positions.every((position) => position >= 0));
   assert.deepEqual(positions, [...positions].sort((left, right) => left - right));
-  const pulse = today.slice(positions[4], positions[5]);
+  const pulse = today.slice(positions[3], positions[4]);
   assert.doesNotMatch(pulse, /todayDirectionPanel|week-pulse-milestone/);
 });
 

@@ -1,9 +1,9 @@
 # 08 - Parking Lot
 
-Version: 0.0.4
-Last updated: 2026-07-29
+Version: 0.0.5
+Last updated: 2026-08-02
 Author: Dru + GPT
-Reason for change: Parked guided timed sets for holds and position-based exercises
+Reason for change: Parked possible North 0.7 education, guidance and promotional work
 
 Ideas that matter, but do not belong in the first build yet.
 
@@ -90,6 +90,23 @@ What problem does this solve?
 - Cookbook and meal prep builder
 - Shopping lists
 - Mobility and recovery library
+
+### Possible North 0.7: anatomy, guidance and learning
+
+Planning note only. This is not part of the active release roadmap and should not be built until North 0.7 planning begins.
+
+- Expand the interactive anatomy experience into a deeper dedicated section, building on the current linked body map, plain-language muscle roles and exercise attribution.
+- Add a complete, resumable "How to use North" walkthrough covering every meaningful screen, control and capability rather than only first-run onboarding.
+- Produce current, theme-aware product screenshots and branded promotional assets for social media, release announcements and product promotion.
+- Add a dedicated learning section that connects exercise profiles, technique, anatomy, movement purpose, setup, common mistakes, breathing, safety and useful alternatives.
+- Keep educational language practical and understandable; detailed anatomy should explain training without becoming clinical or diagnostic.
+
+Questions for 0.7 planning:
+
+- Where the learning section lives in navigation and how it connects to Today, Training and exercise profiles.
+- Which walkthrough guidance is contextual, which belongs in a searchable guide and how users restart or resume it.
+- Which screenshot sizes, templates, themes and privacy-safe demo data are required for each promotional channel.
+- How much anatomy depth is useful before it becomes elaborate 3D anatomy or medical-style content, which remains deferred.
 
 ### Guided timed sets
 
