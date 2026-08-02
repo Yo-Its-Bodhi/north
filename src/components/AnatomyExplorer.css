@@ -283,6 +283,7 @@
   background: color-mix(in srgb, var(--surface-solid) 92%, var(--muted) 8%);
   color: var(--ink);
   text-align: center;
+  touch-action: pan-y;
   cursor: pointer;
 }
 
