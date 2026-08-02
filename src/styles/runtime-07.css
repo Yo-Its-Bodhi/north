@@ -981,7 +981,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   --workout-card-image:none;
   border-color:color-mix(in srgb,var(--training-tone) 58%,transparent);
   color:#eef8fa;
-  background-image:linear-gradient(180deg,rgba(10,29,37,.08) 0%,rgba(10,29,37,.28) 43%,rgba(8,24,31,.94) 100%),linear-gradient(90deg,rgba(8,25,32,.58),rgba(8,25,32,.06) 82%),var(--workout-card-image);
+  background-image:linear-gradient(180deg,rgba(10,29,37,.08) 0%,rgba(10,29,37,.24) 43%,rgba(8,24,31,.72) 70%,rgba(8,24,31,.97) 100%),linear-gradient(90deg,rgba(8,25,32,.58),rgba(8,25,32,.06) 82%),var(--workout-card-image);
   background-position:center;
   background-size:cover;
   box-shadow:0 14px 30px color-mix(in srgb,var(--navy) 24%,transparent);
@@ -990,8 +990,27 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
 .training-destination .workout-builder-option.premade{--workout-card-image:url("/png/premadeworkout.jpg")}
 .training-destination .workout-builder-option.custom{--workout-card-image:url("/png/buildwithnova.jpg")}
 .training-destination .workout-builder-option.personal{--workout-card-image:url("/png/myworkouts.jpg")}
-.training-destination .workout-builder-option::after{display:none}
-.training-destination .workout-builder-option>svg{color:#d8f2f5;filter:drop-shadow(0 1px 3px rgba(0,0,0,.72))}
+.training-destination .workout-builder-option::after,
+.training-destination .quick-log-section .activity-shortcuts button::after{
+  inset:0;
+  width:auto;
+  height:auto;
+  border:0;
+  border-radius:inherit;
+  display:block;
+  background:var(--training-tone);
+  opacity:0;
+  transition:opacity .18s ease;
+}
+@media(hover:hover) and (pointer:fine){
+  .training-destination .workout-builder-option:hover::after,
+  .training-destination .quick-log-section .activity-shortcuts button:hover::after{opacity:.12}
+}
+.training-destination .workout-builder-option:focus-visible::after,
+.training-destination .quick-log-section .activity-shortcuts button:focus-visible::after{opacity:.12}
+.training-destination .workout-builder-option:active::after,
+.training-destination .quick-log-section .activity-shortcuts button:active::after{opacity:.16}
+.training-destination .workout-builder-option>svg{z-index:1;color:#d8f2f5;filter:drop-shadow(0 1px 3px rgba(0,0,0,.72))}
 .training-destination .workout-builder-option strong{
   max-width:100%;
   color:#fff;
@@ -1011,7 +1030,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   --quick-log-image:none;
   border-color:color-mix(in srgb,var(--training-tone) 58%,transparent);
   color:#fff;
-  background-image:linear-gradient(180deg,rgba(7,23,30,.72) 0%,rgba(7,23,30,.08) 44%,rgba(7,23,30,.9) 100%),linear-gradient(90deg,rgba(7,23,30,.38),transparent 48%,rgba(7,23,30,.36)),var(--quick-log-image);
+  background-image:linear-gradient(180deg,rgba(7,23,30,.72) 0%,rgba(7,23,30,.08) 44%,rgba(7,23,30,.68) 70%,rgba(7,23,30,.96) 100%),linear-gradient(90deg,rgba(7,23,30,.38),transparent 48%,rgba(7,23,30,.36)),var(--quick-log-image);
   background-position:center;
   background-size:cover;
   box-shadow:0 14px 30px color-mix(in srgb,var(--navy) 24%,transparent);
@@ -1023,7 +1042,6 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
 .training-destination .quick-log-section .activity-shortcuts .activity-walk{--quick-log-image:url("/png/walk.jpg")}
 .training-destination .quick-log-section .activity-shortcuts .activity-run{--quick-log-image:url("/png/run.jpg")}
 .training-destination .quick-log-section .activity-shortcuts .activity-recovery{--quick-log-image:url("/png/recovery.jpg")}
-.training-destination .quick-log-section .activity-shortcuts button::after{display:none}
 .training-destination .quick-log-section .activity-shortcuts button>svg{
   z-index:1;
   color:#d8f2f5;

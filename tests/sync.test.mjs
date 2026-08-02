@@ -78,6 +78,16 @@ test("network failure leaves the mutation queued with retry evidence", async () 
   assert.equal(pending.lastError, "network down");
 });
 
+test("unauthorized sync escapes to the account refresh boundary without consuming a retry", async () => {
+  useOwner("sync-unauthorized");
+  await northRepository.put("profile", "primary", { name: "Refresh me" });
+  globalThis.fetch = async () => Response.json({ error: "Unauthorized" }, { status: 401 });
+
+  await assert.rejects(() => syncNorth("https://north.example", token), (error) => error.status === 401);
+  const pending = (await northRepository.pendingMutations())[0];
+  assert.equal(pending.attempts, 0);
+});
+
 test("pull restores repository documents and their legacy UI storage projections", async () => {
   useOwner("sync-pull");
   const documents = [
@@ -94,6 +104,25 @@ test("pull restores repository documents and their legacy UI storage projections
   assert.deepEqual(JSON.parse(localStorage.getItem("north-favorite-exercises-v1")), ["Back squat"]);
   assert.equal(localStorage.getItem("north-theme"), "night");
   assert.deepEqual((await northRepository.get("profile", "primary")).data, { name: "Restored" });
+});
+
+test("unauthorized pull exposes its status to the account refresh boundary", async () => {
+  useOwner("pull-unauthorized");
+  globalThis.fetch = async () => Response.json({ error: "Unauthorized" }, { status: 401 });
+
+  await assert.rejects(() => pullNorth("https://north.example", token), (error) => error.status === 401);
+});
+
+test("a stalled account restore times out so local North can finish loading", async () => {
+  useOwner("pull-timeout");
+  globalThis.fetch = async (_url, options) => new Promise((_resolve, reject) => {
+    options.signal.addEventListener("abort", () => reject(new DOMException("Aborted", "AbortError")), { once: true });
+  });
+
+  await assert.rejects(
+    () => pullNorth("https://north.example", token, undefined, false, 10),
+    /Account restore timed out.*saved on this device/,
+  );
 });
 
 test("pull cannot erase a queued local workout plan with a remote deletion", async () => {

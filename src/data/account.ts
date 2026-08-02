@@ -96,7 +96,13 @@ export async function withFreshAccess<T>(operation: (token: string) => Promise<T
   if (tokenExpiresSoon(session.accessToken)) {
     session = await refreshNorthSession(session.refreshToken);
   }
-  return operation(session.accessToken);
+  try {
+    return await operation(session.accessToken);
+  } catch (error) {
+    if (!(error instanceof Error) || (error as Error & { status?: number }).status !== 401) throw error;
+    session = await refreshNorthSession(session.refreshToken);
+    return operation(session.accessToken);
+  }
 }
 
 export async function ensureNorthTimezone() {

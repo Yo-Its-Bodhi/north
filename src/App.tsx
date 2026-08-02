@@ -646,7 +646,7 @@ function App() {
   const [dismissReleaseNotes, setDismissReleaseNotes] = useState(false);
   const [releaseNotesVersion, setReleaseNotesVersion] = useState<ReleaseNotesVersion>("0.6");
   const [tourStep, setTourStep] = useState(() => readNorthSession() && !localStorage.getItem(productTourStorageKey()) ? 0 : -1);
-  const [screen, setScreen] = useState<Screen>(() => new URLSearchParams(location.search).get("open") === "training" ? "training" : "today");
+  const [screen, setCurrentScreen] = useState<Screen>(() => new URLSearchParams(location.search).get("open") === "training" ? "training" : "today");
   const [trainingDetailsOpen, setTrainingDetailsOpen] = useState(false);
   const [exerciseDetailReturn, setExerciseDetailReturn] = useState<"prepare" | "workout" | "workout-template">("prepare");
   const [exerciseDetailPreview, setExerciseDetailPreview] = useState<Exercise | null>(null);
@@ -730,8 +730,9 @@ function App() {
   const [programLevel, setProgramLevel] = useState("Beginner");
   const [programEquipment, setProgramEquipment] = useState<string[]>(["Any equipment"]);
   const [programPriority, setProgramPriority] = useState("Balanced");
-  const [calorieEstimates, setCalorieEstimates] = useState(() => localStorage.getItem("north-calorie-estimates") === "on");
+  const [calorieEstimates] = useState(() => localStorage.getItem("north-calorie-estimates") === "on");
   const [journeyTab, setJourneyTab] = useState<"timeline" | "milestones" | "insights" | "this-day">("timeline");
+  const [journeyAnalysisOpen, setJourneyAnalysisOpen] = useState(false);
   const [timelineFilter, setTimelineFilter] = useState("All");
   const [timelineDate, setTimelineDate] = useState("");
   const [timelineSort, setTimelineSort] = useState<"newest" | "oldest">("newest");
@@ -740,11 +741,18 @@ function App() {
   const [calendarBackfillOpen, setCalendarBackfillOpen] = useState(false);
   const [journeyPhotos, setJourneyPhotos] = useState<JourneyPhoto[]>(readJourneyPhotos);
   const [milestoneFilter, setMilestoneFilter] = useState("All");
+  const [expandedMilestoneId, setExpandedMilestoneId] = useState<string | null>(null);
   const [selectedMilestoneChapter, setSelectedMilestoneChapter] = useState(1);
   const [weather, setWeather] = useState<WeatherContext | null>(readWeatherCache);
   const [weatherStatus, setWeatherStatus] = useState("");
   const [profile, setProfile] = useState<ProfileSettings>(readProfile);
   const [profileEditing, setProfileEditing] = useState(false);
+  const [youTrendsOpen, setYouTrendsOpen] = useState(false);
+  const [settingsView, setSettingsView] = useState<"index" | "appearance" | "app" | "preferences" | "privacy" | "data">("index");
+  const setScreen = (nextScreen: Screen) => {
+    if (nextScreen === "settings") setSettingsView("index");
+    setCurrentScreen(nextScreen);
+  };
   const [copyStatus, setCopyStatus] = useState("");
   const [weeklyPlan, setWeeklyPlan] = useState<PlanDay[]>(readPlan);
   const [planSaveStatus, setPlanSaveStatus] = useState("Saved on this device");
@@ -941,6 +949,16 @@ function App() {
     void (async () => {
       try {
         await migrateLegacyStorage();
+      } catch (reason) {
+        if (!cancelled) {
+          setSyncError(reason instanceof Error ? reason.message : "Your saved data could not be opened yet.");
+          setAccountDataReady(true);
+        }
+        return;
+      }
+      if (cancelled) return;
+      setAccountDataReady(true);
+      try {
         await ensureNorthTimezone();
         const account = readNorthSession();
         if (!account) return;
@@ -952,8 +970,6 @@ function App() {
         if (!cancelled) reloadSyncedAccountState();
       } catch (reason) {
         if (!cancelled) setSyncError(reason instanceof Error ? reason.message : "Your account could not be restored yet.");
-      } finally {
-        if (!cancelled) setAccountDataReady(true);
       }
     })();
     return () => { cancelled = true; };
@@ -1316,44 +1332,6 @@ function App() {
   const walkTotals = activityTotals("walk");
   const runTotals = activityTotals("run");
   const recoveryTotals = activityTotals("recovery");
-  const weekTonnage = weekSessions.reduce((total, workout) => total + sessionTonnage(workout), 0);
-  const weekReps = weekSessions.reduce((total, workout) => total + workout.exercises.flatMap((exercise) => exercise.sets).filter((set) => set.complete).reduce((sum, set) => sum + (Number.parseFloat(set.reps) || 0), 0), 0);
-  const weekDistance = weekActivities.reduce((total, activity) => total + (Number.parseFloat(activity.distance) || 0), 0) + weekHealthActivities.reduce((total, activity) => total + activity.distance_metres / 1000, 0);
-  const muscleDistribution = (() => {
-    const totals = new Map<string, number>();
-    weekSessions.forEach((workout) => workout.exercises.forEach((exercise) => {
-      const category = exerciseLibrary.find((item) => item.name.toLowerCase() === exercise.name.toLowerCase())?.category ?? "Other";
-      totals.set(category, (totals.get(category) ?? 0) + exercise.sets.filter((set) => set.complete).length);
-    }));
-    return [...totals.entries()].sort((a, b) => b[1] - a[1]);
-  })();
-  const loadWeekDays = weeklyPlan.slice(0, 7);
-  const weekDayLoads = loadWeekDays.map((day) => {
-    const daySessions = weekSessions.filter((workout) => isoDate(new Date(workoutRecordDate(workout) || 0)) === day.date);
-    const dayActivities = weekActivities.filter((activity) => activity.date === day.date);
-    return {
-      sessions: daySessions.length + dayActivities.length,
-      minutes: daySessions.reduce((total, workout) => total + (sessionMinutes(workout) ?? 0), 0) + dayActivities.reduce((total, activity) => total + (Number.parseFloat(activity.duration) || 0), 0),
-      reps: daySessions.reduce((total, workout) => total + workout.exercises.flatMap((exercise) => exercise.sets).filter((set) => set.complete).reduce((sum, set) => sum + (Number.parseFloat(set.reps) || 0), 0), 0),
-      volume: daySessions.reduce((total, workout) => total + sessionTonnage(workout), 0),
-      distance: dayActivities.reduce((total, activity) => total + (Number.parseFloat(activity.distance) || 0), 0),
-    };
-  });
-  const finiteLoadValue = (value: number) => Number.isFinite(value) && value > 0 ? value : 0;
-  const weekLoadMaximums = weekDayLoads.reduce((maximums, day) => ({
-    sessions: Math.max(maximums.sessions, finiteLoadValue(day.sessions)),
-    minutes: Math.max(maximums.minutes, finiteLoadValue(day.minutes)),
-    reps: Math.max(maximums.reps, finiteLoadValue(day.reps)),
-    volume: Math.max(maximums.volume, finiteLoadValue(day.volume)),
-    distance: Math.max(maximums.distance, finiteLoadValue(day.distance)),
-  }), { sessions: 0, minutes: 0, reps: 0, volume: 0, distance: 0 });
-  const weekLoadScores = weekDayLoads.map((day) => (Object.keys(weekLoadMaximums) as Array<keyof typeof weekLoadMaximums>).reduce((score, metric) => score + (weekLoadMaximums[metric] ? finiteLoadValue(day[metric]) / weekLoadMaximums[metric] : 0), 0));
-  const maximumWeekLoadScore = Math.max(...weekLoadScores, 1);
-  const latestBodyweightKg = (Number.parseFloat(checkIns.find((entry) => Number.parseFloat(entry.weight) > 0)?.weight ?? "") || 0) * 0.453592;
-  const estimatedWeekCalories = latestBodyweightKg ? Math.round(weekSessions.reduce((total, workout) => total + 6 * latestBodyweightKg * ((sessionMinutes(workout) ?? 0) / 60), 0) + weekActivities.reduce((total, activity) => {
-    const met = activity.kind === "run" ? 8 : activity.kind === "bike" ? 6.8 : activity.kind === "walk" ? 3.5 : 2.5;
-    return total + met * latestBodyweightKg * ((Number.parseFloat(activity.duration) || 0) / 60);
-  }, 0)) : null;
   const meaningfulHealthActivities = healthActivities;
   const samsungConnection = healthConnections.find((item) => item.provider === "health_connect" && item.status === "connected");
   const todayHealth = healthContext?.daily.find((day) => day.date === isoDate(new Date()));
@@ -1486,6 +1464,7 @@ function App() {
     return { chapter, unlocked: milestones.filter((milestone) => milestone.unlocked).length, total: milestones.length };
   });
   const currentChapter = chapterProgress.find((chapter) => chapter.unlocked < chapter.total)?.chapter ?? 10;
+  const currentChapterProgress = chapterProgress[currentChapter - 1];
   const selectedChapterMilestones = milestoneResults.filter((milestone) => milestone.chapter === selectedMilestoneChapter);
   const filteredChapterMilestones = selectedChapterMilestones.filter((milestone) => milestoneFilter === "All" || (milestoneFilter === "Completed" ? milestone.unlocked : milestone.category === milestoneFilter));
   const earnedIdentities = unlockedMilestones.filter((milestone) => milestone.identity).map((milestone) => milestone.identity as string);
@@ -3384,7 +3363,7 @@ function App() {
       )}
 
       {screen === "journey" && (
-        <section className="screen destination-screen journey-destination">
+        <section className={`screen destination-screen journey-destination journey-${journeyTab}`}>
           <header className="journey-page-header destination-brand-header destination-brand-journey"><div className="destination-header-copy"><p className="eyebrow destination-eyebrow">THE RECORD</p><h1>Journey</h1><p className="destination-subheading">See how far you’ve come.</p><p className="destination-header-detail">Progress is more than a number. It is the story of choosing to continue.</p></div></header>
           <nav className="journey-tabs" aria-label="Journey views">{(["timeline", "milestones", "insights", "this-day"] as const).map((tab) => <button key={tab} className={journeyTab === tab ? "active" : ""} onClick={() => setJourneyTab(tab)}><span aria-hidden="true">{tab === "timeline" ? <MapIcon size={17} /> : tab === "milestones" ? <Award size={17} /> : tab === "insights" ? <TrendingUp size={17} /> : <CalendarDays size={17} />}</span><b>{tab === "this-day" ? "This Day" : tab[0].toUpperCase() + tab.slice(1)}</b></button>)}</nav>
           {journeyTab === "timeline" && <>
@@ -3398,6 +3377,8 @@ function App() {
           </>}
           {journeyTab === "insights" && <>
             <TrainingAtlas records={atlasRecords} weightUnit={weightUnit} distanceUnit={distanceUnit} onOpenDate={(date) => { setTimelineDate(date); setTimelineFilter("All"); setJourneyTab("timeline"); }} />
+            <button className="journey-analysis-disclosure" aria-expanded={journeyAnalysisOpen} aria-controls="journey-secondary-analysis" onClick={() => setJourneyAnalysisOpen((open) => !open)}><span><TrendingUp size={17} /><span><strong>More analysis</strong><small>Focus, strength, recovery and personal bests</small></span></span><ChevronDown size={17} aria-hidden="true" /></button>
+            <div id="journey-secondary-analysis" className={`journey-secondary-analysis${journeyAnalysisOpen ? " open" : ""}`}>
             <div className="section-heading"><div><p className="eyebrow">FOCUS AREAS</p><h2>Muscle-group volume</h2></div></div>
             <section className="insight-muscles">{fourWeekMuscleDistribution.length ? fourWeekMuscleDistribution.map(([category, sets]) => <div key={category}><span>{category}</span><div><i style={{ width: `${Math.round(sets / fourWeekMuscleDistribution[0][1] * 100)}%` }} /></div><strong>{sets} sets</strong></div>) : <p>Complete workouts to reveal four-week muscle-group distribution.</p>}</section>
             <div className="section-heading"><div><p className="eyebrow">STRENGTH TREND</p><h2>Estimated rep-max direction</h2></div></div>
@@ -3407,9 +3388,10 @@ function App() {
             <section className="recovery-evidence"><p className="eyebrow">RECOVERY CONTEXT</p>{recoveryComparison ? <><strong>{recoveryComparison.count} same-day check-in/workout pairs</strong><p>{recoveryComparison.lowDifficulty !== null ? `Low-energy days average ${recoveryComparison.lowDifficulty.toFixed(1)}/5 workout difficulty. ` : ""}{recoveryComparison.highDifficulty !== null ? `Higher-energy days average ${recoveryComparison.highDifficulty.toFixed(1)}/5. ` : ""}This is an association in your records, not proof that energy caused workout difficulty.</p></> : <><strong>More paired days are needed</strong><p>North needs at least three dates containing both a check-in and a completed workout before comparing recovery context.</p></>}</section>
             <div className="section-heading"><div><p className="eyebrow">PERSONAL BESTS</p><h2>Recent progress</h2></div></div><section className="pr-list">{personalRecords.slice(0, 6).map((record) => <article key={record.id}><span><Trophy size={15} /></span><div><small>PERSONAL BEST · {formatSessionDate(record.date)}</small><strong>{record.exerciseName}</strong><em>Previous {displayWeight(record.previous).toFixed(1)} {weightUnit}</em></div><b>{displayWeight(record.weight).toFixed(1)} <small>{weightUnit}</small></b></article>)}{personalRecords.length === 0 && <p>New load records appear after a movement has a previous result to compare.</p>}</section>
             <div className="section-heading"><div><p className="eyebrow">WHAT NORTH HAS LEARNED</p><h2>Evidence and limits</h2></div></div><section className="learned-list">{visibleLearnedInsights.map((insight) => <button key={insight.id} className={expandedInsightId === insight.id ? "expanded" : ""} onClick={() => setExpandedInsightId((value) => value === insight.id ? null : insight.id)}><span>{insight.icon}</span><div><strong>{insight.title}</strong><small>{insight.summary}</small>{expandedInsightId === insight.id && <p>{insight.evidence}</p>}</div>{expandedInsightId === insight.id ? <ChevronUp size={15} /> : <ChevronDown size={15} />}</button>)}</section>
+            </div>
           </>}
           {journeyTab === "this-day" && <><section className="momentum-panel"><div><span>THIS DAY, ACROSS TIME</span><strong>{thisDayItems.length ? `${thisDayItems.length} ${thisDayItems.length === 1 ? "memory" : "memories"} to revisit` : "A memory will meet you here"}</strong><p>North looks for moments from one week, one month, six months, and one year ago. Nothing is invented when no memory exists.</p></div><CalendarDays size={27} /></section><section className="timeline unified-timeline">{thisDayItems.map((item) => <article className={journeyMomentTone(item)} key={`${item.id}-${item.interval}`}><span>{journeyMomentIcon(item)}</span><div><small>{item.interval} · {formatSessionDate(item.date).toUpperCase()}</small><h3>{item.title}</h3><p>{item.summary}</p></div></article>)}{thisDayItems.length === 0 && <article><span><CalendarDays size={16} /></span><div><small>NO MEMORY AT THESE INTERVALS YET</small><h3>Today is becoming part of the story.</h3><p>When you log a moment one week, month, six months, or year from now, North can bring it back here.</p></div></article>}</section></>}
-          {journeyTab === "milestones" && <><section className="milestone-summary"><div><small>YOUR JOURNEY MARK</small><strong>Chapter {currentChapter}</strong><span>{unlockedMilestones.length}/{milestoneResults.length} achievements unlocked</span><em>Keep knocking off achievements as you go.</em></div><div className="milestone-ring" style={{ "--milestone-progress": `${Math.round(unlockedMilestones.length / milestoneResults.length * 360)}deg` } as CSSProperties}><b>{Math.round(unlockedMilestones.length / milestoneResults.length * 100)}%</b></div></section><section className="chapter-progress" aria-label="Chapter achievement progress">{chapterProgress.map((chapter) => <button key={chapter.chapter} className={`${chapter.chapter === currentChapter ? "current" : ""} ${chapter.chapter === selectedMilestoneChapter ? "selected" : ""}`} onClick={() => setSelectedMilestoneChapter(chapter.chapter)}><small>CH {chapter.chapter}</small><b>{chapter.unlocked}/{chapter.total}</b></button>)}</section><div className="section-heading chapter-heading"><div><p className="eyebrow">CHAPTER {selectedMilestoneChapter}</p><h2>Recognition in progress</h2></div><span>{chapterProgress[selectedMilestoneChapter - 1]?.unlocked}/20</span></div><div className="picker-filters milestone-filters chapter-filters">{["All", "Completed", ...milestoneCategories.filter((category) => category !== "All")].map((category) => <button key={category} className={milestoneFilter === category ? "active" : ""} onClick={() => setMilestoneFilter(category)}>{category}</button>)}</div><section className="milestone-list chapter-milestone-list">{filteredChapterMilestones.map((milestone) => <article key={milestone.id} className={milestone.unlocked ? "unlocked" : ""} data-chapter={milestone.chapter}><span aria-label={milestone.unlocked ? "Achievement unlocked" : `${milestone.progress}% complete`}>{milestone.unlocked ? <Trophy size={17} fill="currentColor" aria-hidden="true" /> : `${milestone.progress}%`}</span><div><strong>{milestone.title.replace(`Chapter ${milestone.chapter}: `, "")}</strong>{!milestone.unlocked && <div className="milestone-progress"><i style={{ width: `${milestone.progress}%` }} /></div>}<small>{milestone.unlocked ? `Unlocked ${formatSessionDate(milestone.achievedAt)}` : `${milestone.value.toLocaleString()} / ${milestone.target.toLocaleString()}`} · {milestone.category}</small></div></article>)}{filteredChapterMilestones.length === 0 && <p>No achievements match this filter in Chapter {selectedMilestoneChapter}.</p>}</section></>}
+          {journeyTab === "milestones" && <><section className="milestone-summary"><div><small>YOUR JOURNEY MARK</small><strong>Chapter {currentChapter}</strong><span>{currentChapterProgress.unlocked} of {currentChapterProgress.total} markers earned</span><em>Every marker is backed by a record North can show you.</em></div><div className="milestone-ring" style={{ "--milestone-progress": `${Math.round(currentChapterProgress.unlocked / currentChapterProgress.total * 360)}deg` } as CSSProperties}><b>{Math.round(currentChapterProgress.unlocked / currentChapterProgress.total * 100)}%</b></div></section><section className="chapter-progress" aria-label="Chapter marker progress">{chapterProgress.map((chapter) => <button key={chapter.chapter} className={`${chapter.chapter === currentChapter ? "current" : ""} ${chapter.chapter === selectedMilestoneChapter ? "selected" : ""}`} onClick={() => setSelectedMilestoneChapter(chapter.chapter)}><small>CH {chapter.chapter}</small><b>{chapter.unlocked}/{chapter.total}</b></button>)}</section><div className="section-heading chapter-heading"><div><p className="eyebrow">CHAPTER {selectedMilestoneChapter}</p><h2>Evidence in progress</h2></div><span>{chapterProgress[selectedMilestoneChapter - 1]?.unlocked}/20</span></div><div className="picker-filters milestone-filters chapter-filters">{["All", "Completed", ...milestoneCategories.filter((category) => category !== "All")].map((category) => <button key={category} className={milestoneFilter === category ? "active" : ""} aria-pressed={milestoneFilter === category} onClick={() => setMilestoneFilter((current) => current === category && category !== "All" ? "All" : category)}>{category}</button>)}</div><section className="milestone-list chapter-milestone-list">{filteredChapterMilestones.map((milestone) => { const expanded = expandedMilestoneId === milestone.id; const toggleMilestone = () => setExpandedMilestoneId((current) => current === milestone.id ? null : milestone.id); return <article key={milestone.id} className={`${milestone.unlocked ? "unlocked " : ""}${expanded ? "expanded" : ""}`} data-chapter={milestone.chapter} role="button" tabIndex={0} aria-expanded={expanded} onClick={toggleMilestone} onContextMenu={(event) => { event.preventDefault(); toggleMilestone(); }} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); toggleMilestone(); } }}><span aria-label={milestone.unlocked ? "Marker earned" : `${milestone.progress}% complete`}>{milestone.unlocked ? <Trophy size={17} fill="currentColor" aria-hidden="true" /> : `${milestone.progress}%`}</span><div><strong>{milestone.title}</strong>{!milestone.unlocked && <div className="milestone-progress"><i style={{ width: `${milestone.progress}%` }} /></div>}<small>{milestone.unlocked ? `Earned ${formatSessionDate(milestone.achievedAt)}` : `${milestone.value.toLocaleString()} / ${milestone.target.toLocaleString()}`} · {milestone.category}</small>{expanded && <div className="milestone-explanation"><p>{milestone.description}</p><span>{milestone.unlocked ? `Completed with ${milestone.value.toLocaleString()} recorded.` : `You have ${milestone.value.toLocaleString()} recorded. ${Math.max(0, milestone.target - milestone.value).toLocaleString()} to go.`}</span></div>}</div></article>; })}{filteredChapterMilestones.length === 0 && <p>No markers match this filter in Chapter {selectedMilestoneChapter}.</p>}</section></>}
         </section>
       )}
 
@@ -3424,9 +3406,9 @@ function App() {
             <img className="direction-run-art" src={selectedWorkoutCardImage} alt="" />
             <span className="direction-run-overlay" aria-hidden="true" />
             <div className="training-hero-copy"><p className="eyebrow">TODAY’S TRAINING</p><h2>{selectedPlanDay.title}</h2><div className="training-muscle-tags">{selectedPlanDay.kind === "strength" ? Array.from(new Set(selectedWorkout.map((item) => exerciseLibrary.find((entry) => entry.name === item.name)?.category).filter(Boolean))).slice(0, 3).map((group) => <span key={group}>{group}</span>) : <span>{selectedPlanDay.kind}</span>}</div><div className="training-hero-metrics"><span><Clock3 size={16} /><strong>{selectedPlanDay.kind === "strength" ? `${plannedMinutes(selectedWorkout)} min` : "Open"}</strong><small>EST. TIME</small></span><span><TrendingUp size={16} /><strong>{selectedPlanDay.kind === "strength" ? plannedIntensity(selectedWorkout) : "Steady"}</strong><small>INTENSITY</small></span><span><Dumbbell size={16} /><strong>{selectedPlanDay.kind === "strength" ? selectedWorkout.flatMap((item) => item.sets).length : "—"}</strong><small>SETS</small></span></div></div>
-            <div className="training-hero-actions">{selectedPlanDay.kind === "rest" ? <button className="primary-button" onClick={() => setTrainingDetailsOpen(true)}><Dumbbell size={17} />Plan a workout<ArrowRight size={16} /></button> : <><button className="primary-button" onClick={beginPlannedDay}><Play size={17} />{hasPreparedDraft && session.planDayId === selectedPlanDay.id ? session.startedAt ? "Resume workout" : "Continue setup" : "Start workout"}</button><button className="secondary-button" onClick={() => setTrainingDetailsOpen((open) => !open)}>{trainingDetailsOpen ? "Close editor" : "Edit workout"}<ArrowRight size={16} /></button></>}</div>
+            <div className={`training-hero-actions${selectedPlanDay.status === "completed" ? " completed" : ""}`}>{selectedPlanDay.status === "completed" ? <><span className="training-complete-state"><Check size={18}/><span><strong>Session complete</strong><small>Recorded in your Journey</small></span></span><button className="secondary-button" onClick={() => { setTimelineDate(selectedPlanDay.date); setJourneyTab("timeline"); setScreen("journey"); }}>Open Journey <ArrowRight size={16}/></button></> : selectedPlanDay.kind === "rest" ? <button className="primary-button" onClick={() => setTrainingDetailsOpen(true)}><Dumbbell size={17} />Plan a workout<ArrowRight size={16} /></button> : <><button className="primary-button" onClick={beginPlannedDay}><Play size={17} />{hasPreparedDraft && session.planDayId === selectedPlanDay.id ? session.startedAt ? "Resume workout" : "Continue setup" : "Start workout"}</button><button className="secondary-button" onClick={() => setTrainingDetailsOpen((open) => !open)}>{trainingDetailsOpen ? "Close editor" : "Edit workout"}<ArrowRight size={16} /></button></>}</div>
           </section>
-          {selectedPlanDay.kind !== "rest" && <button className="training-add-session" onClick={() => { setTrainingDetailsOpen(true); setStackComposerOpen(true); }}><Plus size={16} /> Add session</button>}
+          {selectedPlanDay.kind !== "rest" && selectedPlanDay.status !== "completed" && <button className="training-add-session" onClick={() => { setTrainingDetailsOpen(true); setStackComposerOpen(true); }}><Plus size={16} /> Add session</button>}
           {trainingDetailsOpen && <section className="plan-editor training-details-drawer">
             {selectedPlanDay.kind === "strength" && plannedPickerOpen && <ExercisePickerV2 onAdd={(exercise) => addPlannedExercise(toLegacyExerciseDefinition(exercise))} onView={(exercise) => openExercisePreview(toLegacyExerciseDefinition(exercise))} addedIds={selectedWorkout.map((exercise) => exercise.canonicalExerciseId).filter((id): id is string => Boolean(id))}/>}
             <div className="plan-date"><div><p className="eyebrow">{selectedPlanDay.label.toUpperCase()} · {formatSessionDate(`${selectedPlanDay.date}T12:00:00`).toUpperCase()}</p><h3>{selectedPlanDay.title}</h3></div><span>{selectedPlanDay.status}</span></div>
@@ -3637,7 +3619,7 @@ function App() {
 
       {screen === "nova" && (
         <section className="screen destination-screen nova-screen">
-          <div className="nova-page-heading destination-brand-header destination-brand-nova"><div className="destination-header-copy"><p className="eyebrow destination-eyebrow">PRIVATE COACH</p><h1>Nova</h1><p className="destination-subheading">Think through what comes next.</p><p className="destination-header-detail">Private coaching grounded in your records, goals and approved memory.</p></div><div className="nova-heading-actions destination-header-actions"><button className={`nova-context-trigger${novaHubOpen ? " active" : ""}`} onClick={() => setNovaHubOpen((open) => !open)} aria-label={novaHubOpen ? "Close Nova memory and setup" : "Open Nova memory and setup"} title={novaHubOpen ? "Close Nova memory and setup" : "Nova memory and setup"}><BrainCircuit size={18}/></button>{novaMessages.length > 0 && <button onClick={clearNovaConversation}>Clear chat</button>}</div></div>
+          <div className="nova-page-heading destination-brand-header destination-brand-nova"><div className="destination-header-copy"><p className="eyebrow destination-eyebrow">PRIVATE COACH</p><h1>Nova</h1><p className="destination-subheading">Think through what comes next.</p><p className="destination-header-detail">Private coaching grounded in your records, goals and approved memory.</p></div><div className="nova-heading-actions destination-header-actions"><button className={`nova-context-trigger${novaHubOpen ? " active" : ""}`} onClick={() => setNovaHubOpen((open) => !open)} aria-label={novaHubOpen ? "Close Nova memory and setup" : "Open Nova memory and setup"} title={novaHubOpen ? "Close Nova memory and setup" : "Nova memory and setup"}><BrainCircuit size={18}/></button>{novaMessages.length > 0 && <button className="nova-clear-chat" onClick={clearNovaConversation} aria-label="Clear Nova conversation" title="Clear chat"><Trash2 size={17}/></button>}</div></div>
           <div className="nova-line living" />
           {novaHubOpen && createPortal(<div className="nova-context-backdrop" onClick={(event) => { if (event.target === event.currentTarget) setNovaHubOpen(false); }}><section className="nova-intelligence-hub" role="dialog" aria-modal="true" aria-labelledby="nova-context-title">
             <header><div><p className="eyebrow">NOVA CONTEXT</p><h2 id="nova-context-title">{novaSetupOpen ? "A little context goes a long way." : "What Nova can use."}</h2></div><div className="nova-context-actions"><span className={novaStatus?.available ? "connected" : "setup"}>{novaStatus?.available ? "Nova connected" : "Local setup needed"}</span><button onClick={() => setNovaHubOpen(false)} aria-label="Close Nova context"><X size={17}/></button></div></header>
@@ -3674,11 +3656,12 @@ function App() {
       )}
 
       {screen === "settings" && (
-        <section className="screen destination-screen settings-screen">
-          <button className="back-button" onClick={() => setScreen("you")}><ArrowLeft size={17}/>You</button><p className="eyebrow">ACCOUNT & APP</p><h1>North, your way.</h1><p className="lead">One clear place for your account, appearance, integrations, privacy and app controls.</p>
+        <section className="screen destination-screen settings-screen" data-settings-view={settingsView}>
+          <button className="back-button" onClick={() => settingsView === "index" ? setScreen("you") : setSettingsView("index")}><ArrowLeft size={17}/>{settingsView === "index" ? "You" : "Settings"}</button><p className="eyebrow">ACCOUNT & APP</p><h1>North, your way.</h1><p className="lead">One clear place for your account, appearance, integrations, privacy and app controls.</p>
           {readNorthSession() && <section className="settings-account-hero"><span className="account-avatar-glyph large" aria-hidden="true"><i/><b/></span><div><small>SIGNED IN AS</small><strong>{readNorthSession()?.user.displayName}</strong><p>@{readNorthSession()?.user.username}</p></div>{readNorthSession()?.user.username === "druwbi" && <a href="/admin">Admin</a>}</section>}
           {samsungConnection && <section className="settings-health-sync" aria-label="Samsung Health sync"><span><HeartPulse size={20}/></span><div><small>SAMSUNG HEALTH</small><strong>Connected</strong><p>{samsungConnection.last_sync_at ? `Last synced ${formatSessionDate(samsungConnection.last_sync_at)}` : "Ready for your first sync"}</p></div><button onClick={openHealthSync}><RotateCcw size={16}/>Open North Health to sync</button>{healthStatus && <p role="status">{healthStatus}</p>}</section>}
-          <details className="settings-group"><summary><span><Sun size={18}/><b>Appearance</b><small>{themeOptions.find((theme) => theme.id === themeName)?.name} · {profile.largeText ? "larger text" : "standard text"}</small></span><ChevronDown size={18}/></summary><div className="settings-group-body"><section className="theme-picker" aria-label="Theme palette">{themeOptions.map((theme) => <button key={theme.id} className={`${themeName === theme.id ? "selected " : ""}${theme.mode}`} onClick={() => setThemeName(theme.id)} aria-pressed={themeName === theme.id}><span className={`theme-swatch ${theme.id}`}><i/><i/><i/></span><strong>{theme.name}</strong><small>{theme.mode}</small></button>)}</section></div></details>
+          <nav className="settings-section-menu" aria-label="Settings sections"><button onClick={() => setSettingsView("appearance")}><Sun size={19}/><span><strong>Appearance</strong><small>Theme and display style</small></span><ArrowRight size={16}/></button><button onClick={() => setSettingsView("app")}><Download size={19}/><span><strong>App & updates</strong><small>Install, share and release notes</small></span><ArrowRight size={16}/></button><button onClick={() => setSettingsView("preferences")}><SlidersHorizontal size={19}/><span><strong>Preferences & accessibility</strong><small>Units, language, motion and contrast</small></span><ArrowRight size={16}/></button><button onClick={() => setSettingsView("privacy")}><HeartPulse size={19}/><span><strong>Privacy & services</strong><small>Health access and connected services</small></span><ArrowRight size={16}/></button><button onClick={() => setSettingsView("data")}><Database size={19}/><span><strong>Your data</strong><small>Export, restore or erase this device</small></span><ArrowRight size={16}/></button></nav>
+          <details className="settings-group" open={settingsView === "appearance"}><summary><span><Sun size={18}/><b>Appearance</b><small>{themeOptions.find((theme) => theme.id === themeName)?.name} · {profile.largeText ? "larger text" : "standard text"}</small></span><ChevronDown size={18}/></summary><div className="settings-group-body"><section className="theme-picker" aria-label="Theme palette">{themeOptions.map((theme) => <button key={theme.id} className={`${themeName === theme.id ? "selected " : ""}${theme.mode}`} onClick={() => setThemeName(theme.id)} aria-pressed={themeName === theme.id}><span className={`theme-swatch ${theme.id}`}><i/><i/><i/></span><strong>{theme.name}</strong><small>{theme.mode}</small></button>)}</section></div></details>
           <div className="section-heading"><div><p className="eyebrow">NORTH APP</p><h2>Keep North close</h2></div></div>
           <section className="install-app-card"><span><Download size={20} /></span><div><p className="eyebrow">NORTH ON YOUR PHONE</p><h2>{window.matchMedia("(display-mode: standalone)").matches ? "Installed and ready." : "Install North as an app."}</h2><p>Launch from your home screen in a clean full-screen window. Your account and synchronized plan remain the same.</p>{installStatus && <small role="status">{installStatus}</small>}</div><button onClick={() => void installNorth()}>{window.matchMedia("(display-mode: standalone)").matches ? "Installed" : "Install North"}</button></section>
           <section className="share-north-card"><span><Share2 size={22} /></span><div><p className="eyebrow">BRING SOMEONE WITH YOU</p><h2>Recommend North</h2><p>Send a thoughtful “try this out” link to someone who would value a steadier training practice.</p>{shareStatus && <small role="status">{shareStatus}</small>}</div><button onClick={() => void shareNorth()}><Share2 size={17} /> Share North</button></section>
@@ -3709,7 +3692,8 @@ function App() {
           <section className="you-wellbeing">
             <header><div><p className="eyebrow">CURRENT SIGNALS</p><h2>How you are doing now.</h2></div><button onClick={() => { setDraftCheckIn({ id: "", date: isoDate(new Date()), weight: checkIns[0]?.weight ? displayBodyWeight(checkIns[0].weight).toFixed(1).replace(/\.0$/, "") : "", sleep: "", energy: 3, soreness: 2, note: "" }); setScreen("check-in"); }}><HeartPulse size={15}/> Add check-in</button></header>
             <div className="you-vital-grid"><article><small>BODY WEIGHT</small><strong>{latestBodyWeight === null ? "—" : `${latestBodyWeight.toFixed(1)} ${bodyWeightUnit}`}</strong><span>{bodyWeightChange === null ? "No trend yet" : `${bodyWeightChange > 0 ? "+" : ""}${bodyWeightChange.toFixed(1)} ${bodyWeightUnit} overall`}</span></article><article><small>ENERGY</small><strong>{averageEnergy === null ? "—" : `${averageEnergy.toFixed(1)}/5`}</strong><span>Recent average</span></article><article><small>SLEEP</small><strong>{averageSleep === null ? "—" : `${averageSleep.toFixed(1)}h`}</strong><span>Recent average</span></article><article><small>SORENESS</small><strong>{averageSoreness === null ? "—" : `${averageSoreness.toFixed(1)}/5`}</strong><span>Recent average</span></article></div>
-            <div className="you-trend-grid">
+            <button className="you-trends-disclosure" aria-expanded={youTrendsOpen} aria-controls="you-trend-evidence" onClick={() => setYouTrendsOpen((open) => !open)}><span><TrendingUp size={17}/><span><strong>View trends</strong><small>Weight, energy and soreness over time</small></span></span><ChevronDown size={17} aria-hidden="true"/></button>
+            <div id="you-trend-evidence" className={`you-trend-grid${youTrendsOpen ? " open" : ""}`}>
               <section className="you-trend-panel"><header><strong>Weight trend</strong><small>{weightTrend.length} recorded</small></header>{weightTrend.length ? <div className="you-weight-chart" aria-label={`Body weight trend across ${weightTrend.length} check-ins`}>{weightTrend.map((entry) => <i key={entry.date} style={{ height: `${weightTrendHeight(entry.value)}%` }} title={`${formatSessionDate(`${entry.date}T12:00:00`)}: ${entry.value.toFixed(1)} ${bodyWeightUnit}`}><span /></i>)}</div> : <p>Weight is optional. Add it during a check-in to see direction over time.</p>}</section>
               <section className="you-trend-panel"><header><strong>Recovery signals</strong><small>Last {checkInTrend.length || 0} check-ins</small></header>{checkInTrend.length ? <div className="you-recovery-chart" aria-label={`Energy and soreness across ${checkInTrend.length} check-ins`}>{checkInTrend.map((entry) => <i key={entry.id} title={`${formatSessionDate(`${entry.date}T12:00:00`)}: energy ${entry.energy}/5, soreness ${entry.soreness}/5`}><span style={{ height: `${entry.energy * 20}%` }} /><b style={{ height: `${entry.soreness * 20}%` }} /></i>)}</div> : <p>Check in a few times to see energy and soreness move together.</p>}<footer><span><i/>Energy</span><span><b/>Soreness</span></footer></section>
             </div>
@@ -4174,7 +4158,7 @@ function BottomNav({ screen, journeyTab, expertStudioActive, onNavigate, onSecti
     you: [{ id: "declaration", label: "Your declaration" }, { id: "signals", label: "Current signals" }, { id: "health", label: "Connected health" }, { id: "record", label: "Your record" }, { id: "memory", label: "North memory" }, { id: "account", label: "Account & app" }],
   };
   const [expanded, setExpanded] = useState<Screen | null>(activeScreen);
-  return createPortal(<nav className={`primary-nav${desktopOnly ? " desktop-training-nav" : ""}`} aria-label="Primary navigation"><div className="primary-nav-brand"><button onClick={() => onNavigate("today")} aria-label="North home"><img src="/png/transparent/lockup-horizontal-offwhite.png" alt="" /></button></div>{items.map((item) => { const Icon = item.icon; const itemSections = sections[item.id] ?? []; const open = activeScreen === item.id && expanded === item.id; return <Fragment key={item.id}><button className={`${activeScreen === item.id ? "active" : ""}${item.desktopOnly ? " desktop-only-nav-item" : ""}`} onClick={() => { onNavigate(item.id); setExpanded(activeScreen === item.id && expanded === item.id ? null : item.id); }} aria-expanded={itemSections.length ? open : undefined}><Icon size={21} /><span>{item.label}</span>{itemSections.length > 0 && <ChevronDown className={`nav-disclosure${open ? " open" : ""}`} size={15} aria-hidden="true" />}</button>{open && <div className="nav-submenu" role="group" aria-label={`${item.label} sections`}>{itemSections.map((section) => <button key={section.id} className={(item.id === "journey" && journeyTab === section.id) || (screen === "check-in" && item.id === "today" && section.id === "check-in") || (screen === "progression" && item.id === "training" && section.id === "trophy-room") || (screen === "weekly-review" && item.id === "training" && section.id === "weekly-review") || (expertStudioActive && item.id === "nova-workout-builder" && section.id === "expert-studio") ? "current" : ""} onClick={() => onSectionNavigate(item.id, section.id)}>{section.label}</button>)}</div>}</Fragment>; })}</nav>, document.body);
+  return createPortal(<nav className={`primary-nav${desktopOnly ? " desktop-training-nav" : ""}`} aria-label="Primary navigation"><div className="primary-nav-brand"><button onClick={() => onNavigate("today")} aria-label="North home"><img src="/png/transparent/lockup-horizontal-offwhite.png" alt="" /></button></div>{items.map((item) => { const Icon = item.icon; const itemSections = sections[item.id] ?? []; const open = activeScreen === item.id && expanded === item.id; return <Fragment key={item.id}><button data-nav-destination={item.id} className={`${activeScreen === item.id ? "active" : ""}${item.desktopOnly ? " desktop-only-nav-item" : ""}`} onClick={() => { onNavigate(item.id); setExpanded(activeScreen === item.id && expanded === item.id ? null : item.id); }} aria-expanded={itemSections.length ? open : undefined}><Icon size={21} /><span>{item.label}</span>{itemSections.length > 0 && <ChevronDown className={`nav-disclosure${open ? " open" : ""}`} size={15} aria-hidden="true" />}</button>{open && <div className="nav-submenu" role="group" aria-label={`${item.label} sections`}>{itemSections.map((section) => <button key={section.id} className={(item.id === "journey" && journeyTab === section.id) || (screen === "check-in" && item.id === "today" && section.id === "check-in") || (screen === "progression" && item.id === "training" && section.id === "trophy-room") || (screen === "weekly-review" && item.id === "training" && section.id === "weekly-review") || (expertStudioActive && item.id === "nova-workout-builder" && section.id === "expert-studio") ? "current" : ""} onClick={() => onSectionNavigate(item.id, section.id)}>{section.label}</button>)}</div>}</Fragment>; })}</nav>, document.body);
 }
 
 function Rating({ label, value, onChange }: { label: string; value: number; onChange: (value: number) => void }) {

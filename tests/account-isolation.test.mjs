@@ -64,10 +64,34 @@ test("new-account onboarding starts from clean defaults while synchronization is
   assert.match(appSource, /setUpdateNoticeOpen\(false\)/);
 });
 
+test("account hydration releases local data before remote restoration", () => {
+  assert.match(
+    appSource,
+    /await migrateLegacyStorage\(\);[\s\S]{0,500}setAccountDataReady\(true\);[\s\S]{0,100}await ensureNorthTimezone\(\)/,
+  );
+});
+
 test("a failed protected operation is not blindly retried and duplicated", async () => {
   globalThis.fetch = async () => Response.json({ user: { id: "owner-c", username: "charlie", displayName: "Charlie", timezone: "UTC" }, device: { id: "33333333-3333-4333-8333-333333333333", name: "Test" }, accessToken: "not-expiring-test-token", refreshToken: "cr" });
   await loginNorthAccount("charlie", "password-three");
   let attempts = 0;
   await assert.rejects(() => withFreshAccess(async () => { attempts += 1; throw new Error("server write response was lost"); }), /response was lost/);
   assert.equal(attempts, 1);
+});
+
+test("an unexpectedly unauthorized operation refreshes once and retries", async () => {
+  const refreshedSession = { user: { id: "owner-c", username: "charlie", displayName: "Charlie", timezone: "UTC" }, device: { id: "33333333-3333-4333-8333-333333333333", name: "Test" }, accessToken: "refreshed-access", refreshToken: "refreshed-refresh" };
+  let refreshes = 0;
+  globalThis.fetch = async () => { refreshes += 1; return Response.json(refreshedSession); };
+  const tokens = [];
+  const result = await withFreshAccess(async (token) => {
+    tokens.push(token);
+    if (tokens.length === 1) throw Object.assign(new Error("Unauthorized"), { status: 401 });
+    return "restored";
+  });
+
+  assert.equal(result, "restored");
+  assert.equal(refreshes, 1);
+  assert.deepEqual(tokens, ["not-expiring-test-token", "refreshed-access"]);
+  assert.equal(readNorthSession().accessToken, "refreshed-access");
 });

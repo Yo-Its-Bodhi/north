@@ -21,6 +21,7 @@ test("future sessions cannot be backfilled", () => {
 
 test("the training calendar can backfill dated activities as well as strength workouts", () => {
   const source = readFileSync(new URL("../src/App.tsx", import.meta.url), "utf8");
+  const styles = readFileSync(new URL("../src/destination-reliability.css", import.meta.url), "utf8");
   assert.match(source, /className="training-performance-panel training-calendar-panel"/);
   assert.match(source, /openActivity\("bike", historyCalendarDate\)/);
   assert.match(source, /openActivity\("walk", historyCalendarDate\)/);
@@ -29,11 +30,43 @@ test("the training calendar can backfill dated activities as well as strength wo
   assert.match(source, /historyCalendarActivities\.map/);
   assert.match(source, /setScreen\("training"\);\s*\n  }\s*\n\s*function importCoachWorkout/);
   assert.doesNotMatch(source, /screen === "workout-history"/);
+  const themedCalendar = styles.slice(styles.indexOf(".training-calendar-panel :is(.north-history-calendar"), styles.indexOf(".north-calendar-grid > button span", styles.indexOf(".training-calendar-panel :is(.north-history-calendar")));
+  assert.match(themedCalendar, /var\(--blue\)/);
+  assert.match(themedCalendar, /var\(--surface-solid\)/);
+  assert.match(themedCalendar, /var\(--energy-gradient\)/);
+  assert.match(themedCalendar, /var\(--north-off-white\)/);
+  assert.doesNotMatch(themedCalendar, /#633cff|#7c4dff|#f331b7|rgba\(8,140,255|rgba\(124,77,255/);
+});
+
+test("Aurum Training highlights retain readable contrast", () => {
+  const styles = readFileSync(new URL("../src/destination-reliability.css", import.meta.url), "utf8");
+  const start = styles.indexOf(':root[data-palette="gold"] .member-shell .training-destination');
+  const aurumTraining = styles.slice(start, styles.indexOf(".member-shell .training-hero >", start));
+
+  assert.ok(start >= 0);
+  assert.match(aurumTraining, /--training-action-gradient:[^;]*#85641f/);
+  assert.match(aurumTraining, /\.training-hero-actions \.primary-button/);
+  assert.match(aurumTraining, /\.north-calendar-grid > button\.selected/);
+  assert.doesNotMatch(aurumTraining, /#fff0ad/);
+});
+
+test("Training image cards use theme-aware interaction overlays", () => {
+  const styles = readFileSync(new URL("../src/styles/runtime-07.css", import.meta.url), "utf8");
+  const start = styles.indexOf(".training-destination .workout-builder-option::after");
+  const interactions = styles.slice(start, styles.indexOf(".training-destination .workout-builder-option>svg", start));
+
+  assert.ok(start >= 0);
+  assert.match(interactions, /background:var\(--training-tone\)/);
+  assert.match(interactions, /@media\(hover:hover\) and \(pointer:fine\)/);
+  assert.match(interactions, /:hover::after\{opacity:\.12\}/);
+  assert.match(interactions, /:focus-visible::after[\s\S]*opacity:\.12/);
+  assert.match(interactions, /:active::after[\s\S]*opacity:\.16/);
 });
 
 test("Training Atlas is the primary Journey insights explorer", () => {
   const source = readFileSync(new URL("../src/App.tsx", import.meta.url), "utf8");
   const atlas = readFileSync(new URL("../src/components/TrainingAtlas.tsx", import.meta.url), "utf8");
+  const recap = readFileSync(new URL("../src/components/TrainingRecap.ts", import.meta.url), "utf8");
   const atlasStyles = readFileSync(new URL("../src/components/TrainingAtlas.css", import.meta.url), "utf8");
   const insightsStart = source.indexOf('journeyTab === "insights"');
   const trainingStart = source.indexOf('screen === "training"');
@@ -46,7 +79,8 @@ test("Training Atlas is the primary Journey insights explorer", () => {
   assert.match(atlas, /Export private-safe PNG/);
   assert.match(atlas, /bodyweight, recovery and exact activity dates are always excluded/);
   assert.match(atlasStyles, /--atlas-accent: var\(--blue\)/);
-  assert.match(atlas, /getPropertyValue\("--blue"\)/);
+  assert.match(atlas, /readTrainingRecapTheme/);
+  assert.match(recap, /resolveThemeColor\("--blue"/);
   assert.doesNotMatch(`${atlas}\n${atlasStyles}`, /#087f7b|--atlas-teal/);
   assert.doesNotMatch(source.slice(trainingStart, trainingEnd), /TrainingAtlas/);
   assert.doesNotMatch(source, /id: "load", label: "Weekly load"/);
@@ -86,7 +120,9 @@ test("primary destinations use the shared North-branded header system", () => {
   assert.match(styles, /\.member-shell \.topbar-actions \{ margin-left: auto; \}/);
   assert.match(styles, /@media \(min-width: 1024px\) \{[\s\S]*\.member-shell \.topbar \.brand \{ display: none !important; \}[\s\S]*\.primary-nav-brand \{/);
   assert.match(source, /className=\{`nova-context-trigger[\s\S]*Open Nova memory and setup[\s\S]*<BrainCircuit size=\{18\}/);
+  assert.match(source, /className="nova-clear-chat"[\s\S]*aria-label="Clear Nova conversation"[\s\S]*<Trash2 size=\{17\}/);
   assert.match(styles, /\.destination-brand-nova \.nova-context-trigger \{[\s\S]*position: absolute;[\s\S]*width: 38px;[\s\S]*height: 38px;/);
+  assert.match(styles, /@media \(max-width: 700px\) \{[\s\S]*\.nova-screen \.nova-page-heading \{[\s\S]*box-sizing: border-box !important;[\s\S]*min-height: 148px !important;[\s\S]*\.nova-screen \.conversation-surface \{[\s\S]*scroll-padding-bottom: 16px;[\s\S]*\.nova-screen \.nova-input input \{ min-height: 44px; font-size: 16px !important; \}/);
 });
 
 test("member workspaces use theme-aware desktop depth and a quieter mobile wash", () => {

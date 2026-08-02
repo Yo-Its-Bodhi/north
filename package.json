@@ -11,6 +11,7 @@
     "test": "node --import tsx --test tests/*.test.mjs",
     "test:live": "node tools/live-smoke.mjs",
     "test:browser": "node tools/browser-smoke.mjs",
+    "audit:workout-flow": "node tools/workout-day-flow-audit.mjs",
     "test:visual": "node tools/visual-regression.mjs",
     "test:visual:update": "set UPDATE_VISUALS=1&& node tools/visual-regression.mjs",
     "validate:exercises": "node --import tsx tools/validate-exercise-database.mjs",

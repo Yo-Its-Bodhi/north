@@ -199,12 +199,12 @@
 :root[data-palette="spectrum"] .today-screen .daily-check-in { color: var(--spectrum-pink); }
 :root[data-palette="spectrum"] .today-screen .today-week-pulse { --blue: var(--spectrum-orange); }
 :root[data-palette="spectrum"] .today-screen .today-record { --blue: var(--spectrum-teal); }
-:root[data-palette="spectrum"] .primary-nav > button:nth-of-type(1) { --spectrum-tone: var(--spectrum-orange); }
-:root[data-palette="spectrum"] .primary-nav > button:nth-of-type(2) { --spectrum-tone: var(--spectrum-teal); }
-:root[data-palette="spectrum"] .primary-nav > button:nth-of-type(3) { --spectrum-tone: var(--spectrum-blue); }
-:root[data-palette="spectrum"] .primary-nav > button:nth-of-type(4) { --spectrum-tone: var(--spectrum-green); }
-:root[data-palette="spectrum"] .primary-nav > button:nth-of-type(5) { --spectrum-tone: var(--spectrum-violet); }
-:root[data-palette="spectrum"] .primary-nav > button:nth-of-type(6) { --spectrum-tone: var(--spectrum-pink); }
+:root[data-palette="spectrum"] .primary-nav > button[data-nav-destination="today"] { --spectrum-tone: var(--spectrum-orange); }
+:root[data-palette="spectrum"] .primary-nav > button[data-nav-destination="journey"] { --spectrum-tone: var(--spectrum-teal); }
+:root[data-palette="spectrum"] .primary-nav > button[data-nav-destination="training"] { --spectrum-tone: var(--spectrum-blue); }
+:root[data-palette="spectrum"] .primary-nav > button[data-nav-destination="nova-workout-builder"] { --spectrum-tone: var(--spectrum-green); }
+:root[data-palette="spectrum"] .primary-nav > button[data-nav-destination="nova"] { --spectrum-tone: var(--spectrum-violet); }
+:root[data-palette="spectrum"] .primary-nav > button[data-nav-destination="you"] { --spectrum-tone: var(--spectrum-pink); }
 :root[data-palette="spectrum"] .primary-nav > button.active { box-shadow: inset 3px 0 0 var(--spectrum-tone) !important; }
 :root[data-palette="spectrum"] .primary-nav > button > svg { color: var(--spectrum-tone); }
 
@@ -324,6 +324,49 @@
 .calendar-backfill-activities button strong { font-size: 10px; }
 .training-calendar-panel .training-history-calendar-layout { margin-top: 0; }
 .training-calendar-panel .calendar-backfill { margin-top: 14px; }
+.training-calendar-panel :is(.north-history-calendar, .north-history-day) {
+  border-color: color-mix(in srgb, var(--blue) 30%, var(--line));
+  background: var(--surface-solid);
+  box-shadow: 0 17px 42px color-mix(in srgb, var(--navy) 12%, transparent);
+}
+.training-calendar-panel .north-history-calendar > header {
+  background: linear-gradient(120deg, color-mix(in srgb, var(--blue) 10%, var(--surface-solid)), color-mix(in srgb, var(--blue) 4%, var(--surface-solid)));
+}
+.training-calendar-panel .north-history-calendar > header button {
+  border-color: color-mix(in srgb, var(--blue) 26%, var(--line));
+  color: var(--blue);
+  background: var(--surface-solid);
+}
+.training-calendar-panel .north-calendar-weekdays { background: color-mix(in srgb, var(--blue) 5%, var(--surface-solid)); }
+.training-calendar-panel .north-calendar-grid > button.has-work:not(.selected) {
+  border-color: color-mix(in srgb, var(--blue) 36%, var(--line));
+  background: color-mix(in srgb, var(--blue) 9%, transparent);
+}
+.training-calendar-panel .north-calendar-grid > button.selected {
+  border-color: color-mix(in srgb, var(--blue) 72%, var(--line));
+  color: var(--north-off-white);
+  background: var(--energy-gradient);
+  box-shadow: 0 8px 19px color-mix(in srgb, var(--blue) 32%, transparent);
+}
+.training-calendar-panel .north-history-day > p { color: var(--blue); }
+.training-calendar-panel .north-history-day > button {
+  border-color: color-mix(in srgb, var(--blue) 28%, var(--line));
+  background: color-mix(in srgb, var(--blue) 7%, var(--surface-solid));
+}
+.training-calendar-panel .north-rest-day,
+.training-calendar-panel .north-empty-history {
+  border-color: color-mix(in srgb, var(--blue) 28%, var(--line));
+  background: color-mix(in srgb, var(--blue) 6%, var(--surface-solid));
+}
+.training-calendar-panel :is(.north-rest-day svg, .north-empty-history > svg),
+.training-calendar-panel .calendar-backfill-launch > span {
+  color: var(--north-off-white);
+  background: var(--energy-gradient);
+}
+.training-calendar-panel .calendar-backfill-launch {
+  border-color: color-mix(in srgb, var(--blue) 34%, var(--line));
+  background: color-mix(in srgb, var(--blue) 7%, var(--surface-solid));
+}
 .north-calendar-grid > button span i.bike { background: var(--activity-bike); }
 .north-calendar-grid > button span i.walk { background: var(--activity-walk); }
 .north-calendar-grid > button span i.run { background: var(--activity-run); }
@@ -347,6 +390,14 @@
   .calendar-backfill-activities { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (min-width: 760px) and (max-width: 1023px) {
+  .training-destination > .training-desktop-choices {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+    align-items: start;
+  }
+  .training-desktop-choices > .workout-builder-section,
+  .training-desktop-choices > .quick-log-section { min-width: 0; margin: 0; }
   .training-history-calendar-layout { grid-template-columns: minmax(0, 1fr); }
   .training-history-calendar-layout .north-history-day { position: static; }
 }
@@ -446,8 +497,8 @@
 .global-footer-brand strong,
 .global-footer-brand span { display: block; }
 .global-footer-brand strong { color: var(--ink); font: 800 12px/1 "Manrope", sans-serif; }
-.global-footer-brand span { margin-top: 4px; color: var(--muted); font-size: 9px; line-height: 1.35; }
-.global-footer-copyright { grid-column: 1; color: var(--muted); font-size: 8px; line-height: 1.4; }
+.global-footer-brand span { margin-top: 4px; color: var(--muted); font-size: 10px; line-height: 1.35; }
+.global-footer-copyright { grid-column: 1; color: var(--muted); font-size: 10px; line-height: 1.4; }
 .global-report-footer .test-note-button {
   grid-column: 2;
   grid-row: 1 / 3;
@@ -479,7 +530,8 @@
     max-width: 100% !important;
     height: calc(76px + env(safe-area-inset-bottom)) !important;
     padding: 7px 7px max(7px, env(safe-area-inset-bottom)) !important;
-    border: 1px solid color-mix(in srgb, var(--north-rail-text) 13%, transparent) !important;
+    border: 0 !important;
+    border-top: 1px solid var(--north-divider) !important;
     border-radius: 0 !important;
     overflow: hidden !important;
     background:
@@ -493,13 +545,7 @@
   }
 
   .primary-nav::after {
-    position: absolute;
-    inset: 5px;
-    z-index: -1;
-    border: 1px solid color-mix(in srgb, var(--north-rail-text) 5%, transparent);
-    border-radius: 5px;
-    content: "";
-    pointer-events: none;
+    display: none;
   }
 
   :root .primary-nav > button {
@@ -510,15 +556,15 @@
     gap: 5px !important;
     border: 1px solid transparent !important;
     border-radius: 6px !important;
-    color: color-mix(in srgb, var(--north-rail-text) 60%, transparent) !important;
+    color: color-mix(in srgb, var(--north-rail-text) 82%, transparent) !important;
     font: 750 clamp(9px, 2.65vw, 10px)/1 "Manrope", sans-serif !important;
     transition: color 160ms ease, background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease !important;
   }
-  :root .primary-nav > button:nth-of-type(1) { --mobile-nav-tone: #5ed8ce; }
-  :root .primary-nav > button:nth-of-type(2) { --mobile-nav-tone: #77b7ff; }
-  :root .primary-nav > button:nth-of-type(3) { --mobile-nav-tone: #f0bd68; }
-  :root .primary-nav > button:nth-of-type(5) { --mobile-nav-tone: #d99be8; }
-  :root .primary-nav > button:nth-of-type(6) { --mobile-nav-tone: #80d19b; }
+  :root .primary-nav > button[data-nav-destination="today"] { --mobile-nav-tone: #5ed8ce; }
+  :root .primary-nav > button[data-nav-destination="journey"] { --mobile-nav-tone: #77b7ff; }
+  :root .primary-nav > button[data-nav-destination="training"] { --mobile-nav-tone: #f0bd68; }
+  :root .primary-nav > button[data-nav-destination="nova"] { --mobile-nav-tone: #d99be8; }
+  :root .primary-nav > button[data-nav-destination="you"] { --mobile-nav-tone: #80d19b; }
 
   :root .primary-nav > button::before {
     position: absolute;
@@ -569,7 +615,7 @@
 
   @media (max-width: 430px) {
     .primary-nav { padding-inline: 4px !important; }
-    :root .primary-nav > button { min-width: 0 !important; min-height: 56px !important; padding-inline: 1px !important; gap: 4px !important; font-size: 9px !important; }
+    :root .primary-nav > button { min-width: 0 !important; min-height: 56px !important; padding-inline: 1px !important; gap: 4px !important; font-size: 10px !important; }
     :root .primary-nav > button > svg:first-child { width: 20px; height: 20px; }
   }
 
@@ -609,16 +655,54 @@
   }
   :root .member-shell .you-screen { padding-bottom: 32px !important; }
   .global-report-footer {
-    padding-bottom: calc(22px + env(safe-area-inset-bottom));
-    grid-template-columns: minmax(0, 1fr);
-    gap: 12px;
-    justify-items: center;
-    text-align: center;
+    padding: 12px 0 calc(12px + env(safe-area-inset-bottom));
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 4px 12px;
+    justify-items: stretch;
+    text-align: left;
   }
-  .global-footer-brand { justify-content: center; }
-  .global-footer-copyright,
-  .global-report-footer .test-note-button { grid-column: 1; grid-row: auto; }
-  .global-report-footer .test-note-button { order: -1; width: fit-content; min-height: 36px; padding: 0; }
+  .global-footer-brand { justify-content: flex-start; }
+  .global-footer-brand > div { min-width: 0; }
+  .global-footer-brand span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .global-footer-copyright { grid-column: 1; grid-row: 2; }
+  .global-report-footer .test-note-button { grid-column: 2; grid-row: 1 / 3; width: auto; min-height: 44px; margin: 0; padding: 0 4px; white-space: nowrap; }
+  @media (max-width: 430px) {
+    .global-report-footer .test-note-button { font-size: 0; }
+    .global-report-footer .test-note-button::after { content: "Report issue"; font-size: 10px; }
+  }
+
+  :root .member-shell .journey-destination .timeline-toolbar :is(summary, button),
+  :root .member-shell .training-rhythm-heading :is(.choice-row button, .text-button),
+  :root .member-shell .nova-error button,
+  :root .member-shell .you-screen :is(.you-edit-profile, .you-wellbeing > header button, .you-training-record > header button) {
+    min-height: 44px !important;
+  }
+  :root .member-shell .journey-destination .timeline-toolbar :is(.timeline-sort-control, .timeline-photo-control) {
+    width: 44px;
+    min-width: 44px;
+  }
+  :root .member-shell :is(
+    .header-weather-date,
+    .destination-eyebrow,
+    .anatomy-caption,
+    .week-pulse-orbit small,
+    .week-pulse-milestone > span,
+    .today-record-item small,
+    .journey-tabs b,
+    .journey-stats span,
+    .timeline small,
+    .training-hero-metrics small,
+    .north-history-calendar header small,
+    .north-calendar-weekdays span,
+    .calendar-backfill-launch p,
+    .personal-record-grid span,
+    .memory-controls label small,
+    .memory-observation summary small,
+    .memory-observation-detail label > span,
+    .memory-observation-detail > button
+  ) {
+    font-size: 10px !important;
+  }
 
   /* Keep destination identity compact and consistent below the desktop rail. */
   :root .member-shell :is(
@@ -1372,7 +1456,7 @@
   .member-shell .journey-destination .journey-tabs { height: 58px; margin-bottom: 24px !important; }
   .member-shell .journey-destination .journey-tabs button { min-height: 56px !important; padding: 5px 2px 4px !important; flex-direction: column !important; justify-content: center !important; gap: 3px !important; text-align: center !important; }
   .member-shell .journey-destination .journey-tabs button > span { width: 17px; height: 17px; }
-  .member-shell .journey-destination .journey-tabs button > b { display: block; font-size: 7px !important; line-height: 1.1 !important; white-space: nowrap; }
+  .member-shell .journey-destination .journey-tabs button > b { display: block; font-size: 10px !important; line-height: 1.1 !important; white-space: nowrap; }
   .member-shell .journey-destination .journey-stats { grid-template-columns: repeat(6, minmax(0, 1fr)); margin-bottom: 24px; }
   .member-shell .journey-destination .journey-stats > div { grid-column: span 2; min-height: 76px; padding: 9px 4px; border-right: 1px solid var(--north-divider) !important; border-bottom: 1px solid var(--north-divider) !important; }
   .member-shell .journey-destination .journey-stats > div:nth-child(3) { border-right: 0 !important; }
@@ -1477,6 +1561,7 @@
 .you-vital-grid strong { display: block; margin: 7px 0 4px; color: var(--ink); font: 800 24px/1.1 "DM Sans", sans-serif; }
 
 .you-trend-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--north-space-4); margin-top: var(--north-space-4); }
+.you-trends-disclosure { display: none; }
 .you-trend-panel { min-width: 0; padding: 18px; border: 1px solid var(--north-divider); border-radius: var(--north-radius-workspace); background: var(--surface-solid); }
 .you-trend-panel > header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .you-trend-panel > header strong { font-size: 13px; }
@@ -1835,7 +1920,7 @@
   min-height: 360px;
   margin: 16px 0 28px;
   padding: 22px;
-  border: 1px solid color-mix(in srgb, var(--blue) 34%, var(--line)) !important;
+  border: 0 !important;
   border-radius: var(--north-radius-modal);
   color: var(--training-hero-ink) !important;
   background:
@@ -1847,6 +1932,22 @@
 }
 .member-shell .training-destination > .training-hero::before {
   display: none;
+}
+.member-shell .training-destination :is(
+  .workout-builder-option,
+  .quick-log-section .activity-shortcuts button
+) { border: 0 !important; }
+:root[data-palette="gold"] .member-shell .training-destination {
+  --training-action-gradient: linear-gradient(115deg, #4a350c, #795817 42%, #85641f 58%, #664811 78%, #80611f);
+}
+:root[data-palette="gold"] .member-shell .training-destination :is(
+  .training-rhythm-strip button.selected,
+  .training-hero-actions .primary-button,
+  .north-calendar-grid > button.selected,
+  .north-rest-day > svg,
+  .calendar-backfill-launch > span
+) {
+  background: var(--training-action-gradient) !important;
 }
 .member-shell .training-hero > :not(.direction-run-art):not(.direction-run-overlay) { position: relative; z-index: 2; }
 .member-shell .training-hero :is(.eyebrow, h2) { color: var(--training-hero-ink) !important; }
@@ -1904,6 +2005,13 @@
   color: var(--ink);
   background: color-mix(in srgb, var(--surface-solid) 72%, transparent);
 }
+.member-shell .training-hero .training-hero-actions.completed { grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
+.member-shell .training-complete-state { min-width: 0; display: flex; align-items: center; gap: 10px; color: var(--surface-solid); }
+.member-shell .training-complete-state > svg { width: 34px; height: 34px; padding: 8px; flex: 0 0 34px; border-radius: 50%; color: var(--navy); background: var(--surface-solid); }
+.member-shell .training-complete-state strong,
+.member-shell .training-complete-state small { display: block; }
+.member-shell .training-complete-state strong { font-size: 13px; }
+.member-shell .training-complete-state small { margin-top: 3px; color: color-mix(in srgb, var(--surface-solid) 76%, transparent); font-size: 9px; }
 
 @media (max-width: 520px) {
   .member-shell .training-destination > .training-hero { grid-template-columns: minmax(0, 1fr) 118px; grid-template-rows: auto auto; min-height: 312px; padding: 20px; gap: 8px; }
@@ -1911,6 +2019,7 @@
   .member-shell .training-hero .training-body-state .anatomy-map.compact { height: auto; padding: 7px; display: block; }
   .member-shell .training-hero .training-body-state .holo-body-frame { width: 72px; }
   .member-shell .training-hero .training-hero-actions { grid-column: 1 / -1; grid-row: 2; grid-template-columns: 1.25fr 1fr; gap: 9px; }
+  .member-shell .training-hero .training-hero-actions.completed { grid-template-columns: minmax(0, 1fr) auto; }
   .member-shell .training-hero .training-hero-metrics { grid-column: 1 / -1; }
 }
 
@@ -2163,7 +2272,7 @@
 .member-shell .today-muscle-focus {
   min-width: 0;
   height: 220px;
-  margin-top: var(--north-space-4);
+  margin: var(--north-space-4) 0;
 }
 .member-shell .today-muscle-focus .anatomy-map.compact {
   width: 100%;
@@ -2209,7 +2318,7 @@
     grid-column: 2;
     grid-row: 3;
     height: 220px;
-    margin-top: 14px;
+    margin: 14px 0 0;
   }
   .member-shell .today-health-context {
     grid-column: 2;
@@ -2268,6 +2377,52 @@
   transform: rotate(8deg);
   -webkit-mask: url("/svg/footprint-stamp-black.svg") center / contain no-repeat;
   mask: url("/svg/footprint-stamp-black.svg") center / contain no-repeat;
+}
+:root .member-shell .journey-milestones .milestone-summary::after { display: none; }
+:root .member-shell .journey-this-day .momentum-panel {
+  min-height: 148px;
+  padding: 18px 20px;
+  border: 1px solid var(--north-divider);
+  border-radius: var(--north-radius-workspace);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 52px;
+  align-items: center;
+  gap: 16px;
+  color: var(--ink);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--journey-accent) 9%, var(--surface-solid)), var(--surface-solid) 70%) !important;
+  box-shadow: var(--north-shadow-panel) !important;
+}
+:root .member-shell .journey-this-day .momentum-panel::after { display: none; }
+:root .member-shell .journey-this-day .momentum-panel > div { min-width: 0; }
+:root .member-shell .journey-this-day .momentum-panel span {
+  margin-bottom: 7px;
+  color: var(--journey-accent);
+  opacity: 1;
+  font-size: 9px;
+  font-weight: 900;
+}
+:root .member-shell .journey-this-day .momentum-panel strong {
+  max-width: 470px;
+  color: var(--ink);
+  font-size: 28px;
+}
+:root .member-shell .journey-this-day .momentum-panel p {
+  max-width: 600px;
+  margin-top: 8px;
+  color: var(--muted);
+  opacity: 1;
+  font-size: 11px;
+  line-height: 1.5;
+}
+:root .member-shell .journey-this-day .momentum-panel > svg {
+  width: 52px;
+  height: 52px;
+  padding: 13px;
+  border: 1px solid color-mix(in srgb, var(--journey-accent) 24%, var(--north-divider));
+  border-radius: 50%;
+  color: var(--journey-accent);
+  background: var(--surface-solid) !important;
+  box-shadow: none !important;
 }
 :root .member-shell .destination-brand-header > * { position: relative; z-index: 1; }
 :root .member-shell .destination-brand-header .destination-header-copy { min-width: 0; }
@@ -2440,6 +2595,108 @@
   :root .member-shell .destination-brand-you .you-edit-profile { min-height: 34px; }
 }
 
+@media (max-width: 700px) {
+  :root .member-shell .nova-screen .nova-page-heading {
+    box-sizing: border-box !important;
+    min-height: 148px !important;
+    margin: -24px -10px 22px !important;
+    padding: 20px 18px !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    gap: 12px !important;
+    align-items: start !important;
+  }
+  :root .member-shell .nova-screen .nova-page-heading::after {
+    top: -54px;
+    right: 46px;
+    width: 132px;
+    height: 190px;
+  }
+  :root .member-shell .nova-screen .nova-page-heading h1 {
+    margin: 0 !important;
+    font-size: 42px !important;
+    line-height: .88 !important;
+  }
+  :root .member-shell .nova-screen .nova-page-heading .destination-header-copy { width: auto; }
+  :root .member-shell .nova-screen .nova-page-heading .destination-eyebrow { margin-bottom: 7px !important; }
+  :root .member-shell .nova-screen .nova-page-heading .destination-subheading {
+    margin-top: 7px !important;
+    font-size: 13px !important;
+    line-height: 1.25 !important;
+  }
+  :root .member-shell .nova-screen .nova-page-heading .destination-header-detail { display: none !important; }
+  :root .member-shell .nova-screen .nova-heading-actions {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    margin: 0 !important;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    gap: 6px !important;
+    justify-content: flex-end !important;
+  }
+  :root .member-shell .nova-screen .nova-heading-actions > button,
+  :root .member-shell .nova-screen .destination-brand-nova .nova-context-trigger {
+    position: static !important;
+    width: 44px !important;
+    min-width: 44px !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    padding: 0 !important;
+    display: grid !important;
+    place-items: center !important;
+    border-radius: 8px !important;
+  }
+  :root .member-shell .nova-screen > .nova-line { margin-bottom: 4px !important; }
+  :root .member-shell .nova-screen .conversation-surface {
+    padding-top: 8px !important;
+    scroll-padding-bottom: 16px;
+  }
+  :root .member-shell .nova-screen :is(.nova-message, .user-message) {
+    max-width: 100% !important;
+    padding: 14px 15px !important;
+    border-radius: 10px !important;
+  }
+  :root .member-shell .nova-screen :is(.nova-message, .user-message) p {
+    margin-top: 5px !important;
+    font-size: 13px !important;
+    line-height: 1.42 !important;
+  }
+  :root .member-shell .nova-screen .nova-input {
+    min-height: 56px !important;
+    padding: 5px 5px 5px 14px !important;
+  }
+  :root .member-shell .nova-screen .nova-input input { min-height: 44px; font-size: 16px !important; }
+  :root .member-shell .nova-screen .nova-input button { width: 44px; height: 44px; }
+
+  :root .member-shell .journey-analysis-disclosure {
+    width: 100%;
+    min-height: 64px;
+    margin: 16px 0 4px;
+    padding: 10px 12px;
+    border: 1px solid var(--north-divider);
+    border-radius: var(--north-radius-control);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    color: var(--ink);
+    background: var(--surface-solid);
+    text-align: left;
+    cursor: pointer;
+  }
+  :root .member-shell .journey-analysis-disclosure > span { min-width: 0; display: flex; align-items: center; gap: 10px; }
+  :root .member-shell .journey-analysis-disclosure > span > svg { flex: 0 0 auto; color: var(--blue); }
+  :root .member-shell .journey-analysis-disclosure strong,
+  :root .member-shell .journey-analysis-disclosure small { display: block; }
+  :root .member-shell .journey-analysis-disclosure strong { font-size: 13px; }
+  :root .member-shell .journey-analysis-disclosure small { margin-top: 3px; color: var(--muted); font-size: 10px; line-height: 1.3; }
+  :root .member-shell .journey-analysis-disclosure > svg { flex: 0 0 auto; transition: transform 160ms ease; }
+  :root .member-shell .journey-analysis-disclosure[aria-expanded="true"] > svg { transform: rotate(180deg); }
+  :root .member-shell .journey-secondary-analysis { display: none; }
+  :root .member-shell .journey-secondary-analysis.open { display: block; }
+}
+
+.journey-analysis-disclosure { display: none; }
+
 @media (max-width: 350px) {
   :root .member-shell .destination-brand-header {
     width: calc(100% + 28px) !important;
@@ -2505,7 +2762,64 @@
     flex: 0 0 auto;
     font-size: 11px;
   }
+  :root .member-shell .you-trends-disclosure {
+    width: 100%;
+    min-height: 58px;
+    margin-top: 14px;
+    padding: 8px 0;
+    border: 0;
+    border-bottom: 1px solid var(--north-divider);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: var(--ink);
+    background: transparent;
+    text-align: left;
+  }
+  :root .member-shell .you-trends-disclosure > span { display: flex; align-items: center; gap: 11px; }
+  :root .member-shell .you-trends-disclosure > span > svg { color: var(--blue); }
+  :root .member-shell .you-trends-disclosure strong,
+  :root .member-shell .you-trends-disclosure small { display: block; }
+  :root .member-shell .you-trends-disclosure small { margin-top: 3px; color: var(--muted); font-size: 10px; }
+  :root .member-shell .you-trends-disclosure > svg { color: var(--muted); transition: transform .18s ease; }
+  :root .member-shell .you-trends-disclosure[aria-expanded="true"] > svg { transform: rotate(180deg); }
+  :root .member-shell .you-trend-grid { display: none; }
+  :root .member-shell .you-trend-grid.open { display: grid; }
+
+  :root .member-shell .settings-section-menu { display: grid; }
+  :root .member-shell .settings-screen[data-settings-view="index"] > :is(.settings-group, .section-heading, .install-app-card, .share-north-card, .whats-new-card, .preference-panel, .privacy-panel, .data-controls, .data-status) { display: none; }
+  :root .member-shell .settings-screen:not([data-settings-view="index"]) > :is(.settings-account-hero, .settings-section-menu) { display: none; }
+  :root .member-shell .settings-screen[data-settings-view="appearance"] > :not(.back-button, .eyebrow, h1, .lead, .settings-group) { display: none; }
+  :root .member-shell .settings-screen[data-settings-view="app"] > :not(.back-button, .eyebrow, h1, .lead, .section-heading, .install-app-card, .share-north-card, .whats-new-card) { display: none; }
+  :root .member-shell .settings-screen[data-settings-view="app"] > .section-heading:not(:has(+ .install-app-card)) { display: none; }
+  :root .member-shell .settings-screen[data-settings-view="preferences"] > :not(.back-button, .eyebrow, h1, .lead, .section-heading, .preference-panel) { display: none; }
+  :root .member-shell .settings-screen[data-settings-view="preferences"] > .section-heading:not(:has(+ .preference-panel)) { display: none; }
+  :root .member-shell .settings-screen[data-settings-view="privacy"] > :not(.back-button, .eyebrow, h1, .lead, .section-heading, .privacy-panel, .settings-health-sync, .data-status) { display: none; }
+  :root .member-shell .settings-screen[data-settings-view="privacy"] > .section-heading:not(:has(+ .privacy-panel)) { display: none; }
+  :root .member-shell .settings-screen[data-settings-view="data"] > :not(.back-button, .eyebrow, h1, .lead, .section-heading, .data-controls, .data-status) { display: none; }
+  :root .member-shell .settings-screen[data-settings-view="data"] > .section-heading:not(:has(+ .data-controls)) { display: none; }
 }
+
+.settings-section-menu { display: none; }
+.settings-section-menu button {
+  width: 100%;
+  min-height: 68px;
+  padding: 12px 0;
+  border: 0;
+  border-bottom: 1px solid var(--north-divider);
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) 18px;
+  gap: 12px;
+  align-items: center;
+  color: var(--ink);
+  background: transparent;
+  text-align: left;
+}
+.settings-section-menu button > svg:first-child { color: var(--blue); }
+.settings-section-menu button > svg:last-child { color: var(--muted); }
+.settings-section-menu strong,
+.settings-section-menu small { display: block; }
+.settings-section-menu small { margin-top: 4px; color: var(--muted); font-size: 10px; }
 
 /* Give the shared workspace quiet depth without competing with its tools. */
 :root[data-palette] .member-shell {

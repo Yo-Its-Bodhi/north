@@ -23,7 +23,9 @@ async function waitForServer() {
 
 const account = { user: { id: "browser-test-user", username: "browser_test", displayName: "Browser Test", timezone: "America/Toronto" }, accessToken: "test", refreshToken: "test" };
 const results = [];
+const checkFilter = process.env.NORTH_BROWSER_CHECK?.toLowerCase();
 async function check(name, operation) {
+  if (checkFilter && !name.toLowerCase().includes(checkFilter)) return;
   const started = performance.now();
   await operation();
   results.push({ name, milliseconds: Math.round(performance.now() - started) });
@@ -33,12 +35,12 @@ try {
   await waitForServer();
   await mkdir("artifacts/visual", { recursive: true });
   const browser = await chromium.launch({ executablePath: chrome, headless: true });
-  const context = await browser.newContext({ viewport: { width: 430, height: 932 }, reducedMotion: "reduce" });
+  const context = await browser.newContext({ viewport: { width: 430, height: 932 }, reducedMotion: "reduce", serviceWorkers: "block" });
   await context.addInitScript(({ account }) => {
     localStorage.setItem("north-account-session-v1", JSON.stringify(account));
     localStorage.setItem(`north-onboarding-complete:${account.user.id}`, new Date().toISOString());
     localStorage.setItem(`north-product-tour-v1:${account.user.id}`, new Date().toISOString());
-    localStorage.setItem("north-release-notes-dismissed", "north-0.4-nova-intelligence-hub");
+    localStorage.setItem("north-release-notes-dismissed", "north-0.6-the-whole-picture");
     localStorage.setItem("north-profile-v1", JSON.stringify({ name: "Browser Test", direction: "Build strength and consistency", trainingDays: 3, units: "imperial", language: "English", tone: "Encouraging and direct", notifications: false, memoryEnabled: true, reducedMotion: true, largeText: false, highContrast: false, connectedServices: [], dismissedInsights: [], memoryCorrections: {} }));
   }, { account });
   await context.route("**/v1/**", async (route) => {
@@ -71,7 +73,7 @@ try {
 
   await check("primary destinations are reachable and free of horizontal overflow", async () => {
     await page.goto(base);
-    await page.getByRole("heading", { name: "Browser Test" }).waitFor();
+    await page.locator(".today-screen").waitFor();
     for (const destination of ["Today", "Journey", "Training", "Nova", "You"]) {
       await page.getByRole("button", { name: destination, exact: true }).last().click();
       await page.waitForTimeout(80);
@@ -88,6 +90,282 @@ try {
     }
   });
 
+  await check("mobile shell geometry and typography stay stable across every palette", async () => {
+    const palettes = [
+      ["off-white", "morning"], ["rosewater", "morning"], ["cloud", "morning"], ["sage", "morning"],
+      ["teal", "night"], ["carbon", "night"], ["midnight", "night"], ["plum", "night"], ["pine", "night"],
+      ["fuchsia", "night"], ["gold", "night"], ["solstice", "morning"], ["lavender", "morning"], ["spectrum", "morning"],
+    ];
+    await page.getByRole("button", { name: "Journey", exact: true }).last().click();
+    for (const [palette, mode] of palettes) {
+      const metrics = await page.evaluate(({ palette, mode }) => {
+        document.documentElement.dataset.palette = palette;
+        document.documentElement.dataset.theme = mode;
+        const box = (selector) => document.querySelector(selector)?.getBoundingClientRect();
+        const header = box(".destination-brand-header");
+        const nav = box(".primary-nav");
+        const topbar = box(".topbar");
+        const title = getComputedStyle(document.querySelector(".destination-brand-header h1"));
+        const buttons = [...document.querySelectorAll(".primary-nav > button")];
+        const visibleButtons = buttons.filter((button) => getComputedStyle(button).display !== "none");
+        const canvas = document.createElement("canvas");
+        canvas.width = 1;
+        canvas.height = 1;
+        const context = canvas.getContext("2d", { willReadFrequently: true });
+        const parse = (value, background = [255, 255, 255]) => {
+          context.clearRect(0, 0, 1, 1);
+          context.fillStyle = value;
+          context.fillRect(0, 0, 1, 1);
+          const [red, green, blue, alphaByte] = context.getImageData(0, 0, 1, 1).data;
+          const alpha = alphaByte / 255;
+          return [red, green, blue].map((channel, index) => channel * alpha + background[index] * (1 - alpha));
+        };
+        const luminance = (rgb) => {
+          const values = rgb.map((value) => { const channel = value / 255; return channel <= .03928 ? channel / 12.92 : ((channel + .055) / 1.055) ** 2.4; });
+          return .2126 * values[0] + .7152 * values[1] + .0722 * values[2];
+        };
+        const surfaceProbe = document.createElement("span");
+        surfaceProbe.style.backgroundColor = "var(--north-rail-surface)";
+        document.body.append(surfaceProbe);
+        const surfaceColor = parse(getComputedStyle(surfaceProbe).backgroundColor);
+        const surfaceLuminance = luminance(surfaceColor);
+        surfaceProbe.remove();
+        const labelContrast = visibleButtons.map((button) => {
+          const textLuminance = luminance(parse(getComputedStyle(button).color, surfaceColor));
+          return (Math.max(surfaceLuminance, textLuminance) + .05) / (Math.min(surfaceLuminance, textLuminance) + .05);
+        });
+        return {
+          destinations: buttons.map((button) => button.getAttribute("data-nav-destination")),
+          visibleDestinations: visibleButtons.map((button) => button.getAttribute("data-nav-destination")),
+          minimumTargetHeight: Math.min(...visibleButtons.map((button) => button.getBoundingClientRect().height)),
+          minimumLabelSize: Math.min(...visibleButtons.map((button) => Number.parseFloat(getComputedStyle(button).fontSize))),
+          minimumLabelContrast: Math.min(...labelContrast),
+          topbarHeight: topbar?.height,
+          headerHeight: header?.height,
+          titleSize: title.fontSize,
+          navHeight: nav?.height,
+          navBottom: nav?.bottom,
+          overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+        };
+      }, { palette, mode });
+      assert.deepEqual(metrics.destinations, ["today", "journey", "training", "nova-workout-builder", "nova", "you"], `${palette} nav identity drifted`);
+      assert.deepEqual(metrics.visibleDestinations, ["today", "journey", "training", "nova", "you"], `${palette} mobile nav composition drifted`);
+      assert.equal(metrics.topbarHeight, 78, `${palette} topbar height drifted`);
+      assert.equal(metrics.headerHeight, 148, `${palette} destination header height drifted`);
+      assert.equal(metrics.titleSize, "42px", `${palette} destination title size drifted`);
+      assert.equal(metrics.navHeight, 76, `${palette} dock height drifted`);
+      assert.equal(metrics.navBottom, 932, `${palette} dock detached from the viewport`);
+      assert.ok(metrics.minimumTargetHeight >= 56, `${palette} dock target is ${metrics.minimumTargetHeight}px high`);
+      assert.ok(metrics.minimumLabelSize >= 10, `${palette} dock label is ${metrics.minimumLabelSize}px`);
+      assert.ok(metrics.minimumLabelContrast >= 4.5, `${palette} dock label contrast is ${metrics.minimumLabelContrast.toFixed(2)}:1`);
+      assert.ok(metrics.overflow <= 1, `${palette} shell overflows by ${metrics.overflow}px`);
+    }
+  });
+
+  await check("universal mobile footer stays compact and clears the dock", async () => {
+    await page.goto(base);
+    await page.locator(".today-screen").waitFor();
+    for (const width of [320, 430, 768]) {
+      await page.setViewportSize({ width, height: width === 768 ? 1024 : 932 });
+      await page.evaluate(async () => {
+        for (let frame = 0; frame < 5; frame += 1) {
+          window.scrollTo(0, document.documentElement.scrollHeight);
+          await new Promise((resolve) => requestAnimationFrame(resolve));
+        }
+      });
+      const geometry = await page.evaluate(() => {
+        const footer = document.querySelector(".global-report-footer").getBoundingClientRect();
+        const report = document.querySelector(".global-report-footer .test-note-button").getBoundingClientRect();
+        const nav = document.querySelector(".primary-nav").getBoundingClientRect();
+        const brand = document.querySelector(".global-footer-brand").getBoundingClientRect();
+        const copyright = document.querySelector(".global-footer-copyright").getBoundingClientRect();
+        const compactText = [".global-footer-brand span", ".global-footer-copyright"].map((selector) => Number.parseFloat(getComputedStyle(document.querySelector(selector)).fontSize));
+        return { footerHeight: footer.height, footerBottom: footer.bottom, reportWidth: report.width, reportHeight: report.height, minimumTextSize: Math.min(...compactText), navTop: nav.top, brandVisible: brand.width > 0 && brand.height > 0, copyrightVisible: copyright.width > 0 && copyright.height > 0, overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth };
+      });
+      assert.ok(geometry.footerHeight <= 80, `Footer is ${geometry.footerHeight}px tall at ${width}px`);
+      assert.ok(geometry.reportWidth >= 44 && geometry.reportHeight >= 44, `Footer report target is ${geometry.reportWidth}x${geometry.reportHeight}px at ${width}px`);
+      assert.ok(geometry.minimumTextSize >= 10, `Footer text is ${geometry.minimumTextSize}px at ${width}px`);
+      assert.equal(geometry.brandVisible && geometry.copyrightVisible, true, `Footer identity is missing at ${width}px`);
+      assert.ok(geometry.footerBottom <= geometry.navTop, `Footer overlaps the dock at ${width}px (${geometry.footerBottom} > ${geometry.navTop})`);
+      assert.ok(geometry.overflow <= 1, `Footer overflows by ${geometry.overflow}px at ${width}px`);
+      await page.screenshot({ path: `artifacts/visual/mobile-footer-${width}.png`, fullPage: true });
+    }
+    await page.setViewportSize({ width: 430, height: 932 });
+  });
+
+  await check("primary mobile actions meet the touch target floor", async () => {
+    await page.setViewportSize({ width: 320, height: 932 });
+    await page.goto(base);
+    await page.locator(".today-screen").waitFor();
+    const destinations = [
+      ["Journey", ".timeline-toolbar summary, .timeline-toolbar-menu button"],
+      ["Training", ".training-rhythm-heading .choice-row button, .training-rhythm-heading > .text-button"],
+      ["Nova", ".nova-error button"],
+      ["You", ".you-edit-profile, .you-wellbeing > header button, .you-training-record > header button"],
+    ];
+    for (const [destination, selector] of destinations) {
+      await page.getByRole("button", { name: destination, exact: true }).last().click();
+      await page.waitForTimeout(80);
+      const targets = await page.locator(selector).evaluateAll((elements) => elements.filter((element) => {
+        const style = getComputedStyle(element);
+        const box = element.getBoundingClientRect();
+        return style.display !== "none" && style.visibility !== "hidden" && box.width > 0 && box.height > 0;
+      }).map((element) => {
+        const box = element.getBoundingClientRect();
+        return { label: element.getAttribute("aria-label") || element.textContent?.trim() || element.tagName, width: box.width, height: box.height };
+      }));
+      for (const target of targets) assert.ok(target.height >= 44, `${destination} ${target.label} target is ${target.width}x${target.height}px`);
+      if (destination === "Journey") {
+        const sort = await page.locator(".timeline-sort-control").evaluate((element) => element.getBoundingClientRect().width);
+        assert.ok(sort >= 44, `Journey sort target is ${sort}px wide`);
+      }
+    }
+    await page.setViewportSize({ width: 430, height: 932 });
+  });
+
+  await check("primary mobile destinations keep meaningful text legible", async () => {
+    await page.setViewportSize({ width: 320, height: 932 });
+    await page.goto(base);
+    await page.locator(".today-screen").waitFor();
+    for (const destination of ["Today", "Journey", "Training", "Nova", "You"]) {
+      await page.getByRole("button", { name: destination, exact: true }).last().click();
+      await page.waitForTimeout(80);
+      const undersized = await page.locator("main *").evaluateAll((elements) => elements.filter((element) => {
+        const style = getComputedStyle(element);
+        const box = element.getBoundingClientRect();
+        const text = element.textContent?.trim() ?? "";
+        const hasDirectText = [...element.childNodes].some((node) => node.nodeType === Node.TEXT_NODE && node.textContent?.trim());
+        return hasDirectText && style.display !== "none" && style.visibility !== "hidden" && box.width > 0 && box.height > 0 && Number.parseFloat(style.fontSize) < 10 && !element.closest(".global-report-footer") && !["●", "·", "—"].includes(text);
+      }).map((element) => ({ text: element.textContent?.trim().replace(/\s+/g, " ").slice(0, 60), size: getComputedStyle(element).fontSize })));
+      assert.deepEqual(undersized, [], `${destination} has undersized meaningful text: ${JSON.stringify(undersized)}`);
+    }
+    await page.setViewportSize({ width: 430, height: 932 });
+  });
+
+  await check("Nova keeps its mobile conversation and composer within the usable viewport", async () => {
+    await page.getByRole("button", { name: "Nova", exact: true }).last().click();
+    await page.locator(".nova-screen").waitFor();
+    const geometry = await page.evaluate(() => {
+      const box = (selector) => document.querySelector(selector)?.getBoundingClientRect();
+      const header = box(".nova-page-heading");
+      const transcript = document.querySelector(".conversation-surface");
+      const message = document.querySelector(".nova-message p");
+      const input = box(".nova-input input");
+      const send = box(".nova-input button");
+      const composer = box(".nova-input");
+      const navigation = box(".primary-nav");
+      return {
+        headerHeight: header?.height ?? 0,
+        messageFontSize: message ? Number.parseFloat(getComputedStyle(message).fontSize) : 0,
+        transcriptOverflow: transcript ? getComputedStyle(transcript).overflowY : "",
+        inputHeight: input?.height ?? 0,
+        sendWidth: send?.width ?? 0,
+        sendHeight: send?.height ?? 0,
+        composerBottom: composer?.bottom ?? Infinity,
+        navigationTop: navigation?.top ?? 0,
+        horizontalOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      };
+    });
+    assert.ok(geometry.headerHeight > 0 && geometry.headerHeight <= 100, `Nova mobile header is ${geometry.headerHeight}px tall`);
+    assert.ok(geometry.messageFontSize > 0 && geometry.messageFontSize <= 14, `Nova message copy is ${geometry.messageFontSize}px`);
+    assert.equal(geometry.transcriptOverflow, "auto");
+    assert.ok(geometry.inputHeight >= 44, `Nova input is only ${geometry.inputHeight}px tall`);
+    assert.ok(geometry.sendWidth >= 44 && geometry.sendHeight >= 44, `Nova send target is ${geometry.sendWidth}x${geometry.sendHeight}px`);
+    assert.ok(geometry.composerBottom <= geometry.navigationTop, "Nova composer overlaps the mobile navigation");
+    assert.ok(geometry.horizontalOverflow <= 1, `Nova overflows horizontally by ${geometry.horizontalOverflow}px`);
+  });
+
+  await check("Journey progressively discloses secondary analysis on mobile only", async () => {
+    await page.setViewportSize({ width: 430, height: 932 });
+    await page.getByRole("button", { name: "Journey", exact: true }).last().click();
+    await page.getByRole("button", { name: "Insights", exact: true }).click();
+    const atlasDisclosure = page.getByRole("button", { name: /Explore chart and evidence/ });
+    const atlasDetail = page.locator("#atlas-detail-content");
+    const disclosure = page.getByRole("button", { name: /More analysis/ });
+    const secondaryAnalysis = page.locator("#journey-secondary-analysis");
+    await atlasDisclosure.waitFor();
+    assert.equal(await atlasDisclosure.getAttribute("aria-expanded"), "false");
+    assert.equal(await atlasDetail.isVisible(), false, "Atlas detail should start collapsed on mobile");
+    await atlasDisclosure.click();
+    assert.equal(await atlasDetail.isVisible(), true, "Atlas chart and evidence should open on request");
+    await atlasDisclosure.click();
+    assert.equal(await atlasDetail.isVisible(), false, "Atlas chart and evidence should close again");
+    await disclosure.waitFor();
+    assert.equal(await disclosure.getAttribute("aria-expanded"), "false");
+    assert.equal(await secondaryAnalysis.isVisible(), false, "Journey secondary analysis should start collapsed on mobile");
+    await disclosure.click();
+    assert.equal(await disclosure.getAttribute("aria-expanded"), "true");
+    assert.equal(await secondaryAnalysis.isVisible(), true, "Journey secondary analysis should open on request");
+
+    await page.setViewportSize({ width: 1440, height: 1000 });
+    assert.equal(await atlasDisclosure.isVisible(), false, "Atlas disclosure should remain mobile-only");
+    assert.equal(await atlasDetail.isVisible(), true, "Atlas chart and evidence should remain visible on desktop");
+    assert.equal(await disclosure.isVisible(), false, "Journey disclosure should remain mobile-only");
+    assert.equal(await secondaryAnalysis.isVisible(), true, "Journey analysis should remain fully visible on desktop");
+    await page.setViewportSize({ width: 430, height: 932 });
+  });
+
+  await check("Training composes build and quick-log tools for tablet without compressing mobile", async () => {
+    await page.goto(base);
+    await page.locator(".today-screen").waitFor();
+    await page.getByRole("button", { name: "Training", exact: true }).last().click();
+    const choices = page.locator(".training-desktop-choices");
+    for (const [width, expectedDisplay] of [[759, "block"], [760, "grid"], [1023, "grid"]]) {
+      await page.setViewportSize({ width, height: 1024 });
+      const geometry = await choices.evaluate((element) => {
+        const style = getComputedStyle(element);
+        const children = [...element.children].map((child) => {
+          const box = child.getBoundingClientRect();
+          return { x: box.x, y: box.y, width: box.width, scrollWidth: child.scrollWidth, clientWidth: child.clientWidth };
+        });
+        return { display: style.display, columns: style.gridTemplateColumns.split(" ").length, children };
+      });
+      assert.equal(geometry.display, expectedDisplay, `Training tools use ${geometry.display} at ${width}px`);
+      assert.equal(geometry.columns, expectedDisplay === "grid" ? 2 : 1, `Training tools use ${geometry.columns} columns at ${width}px`);
+      assert.equal(geometry.children.every((child) => child.scrollWidth <= child.clientWidth), true, `Training tools clip at ${width}px`);
+      assert.equal(Math.abs(geometry.children[0].y - geometry.children[1].y) <= 1, expectedDisplay === "grid", `Training tool order drifts at ${width}px`);
+      assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1), true, `Training overflows at ${width}px`);
+    }
+    await page.setViewportSize({ width: 430, height: 932 });
+  });
+
+  await check("You and Settings disclose secondary mobile content without changing desktop", async () => {
+    await page.setViewportSize({ width: 430, height: 932 });
+    await page.goto(base);
+    await page.locator(".today-screen").waitFor();
+    await page.getByRole("button", { name: "You", exact: true }).last().click();
+    const trendsDisclosure = page.getByRole("button", { name: /View trends/ });
+    const trends = page.locator("#you-trend-evidence");
+    assert.equal(await trendsDisclosure.isVisible(), true, "You trend disclosure should be visible on mobile");
+    assert.equal(await trends.isVisible(), false, "You trend evidence should start collapsed on mobile");
+    await trendsDisclosure.click();
+    assert.equal(await trends.isVisible(), true, "You trend evidence should open on request");
+
+    await page.getByRole("button", { name: "Open account and app settings" }).click();
+    const settingsMenu = page.getByRole("navigation", { name: "Settings sections" });
+    assert.equal(await settingsMenu.isVisible(), true, "Settings should open on its mobile section index");
+    assert.ok((await page.locator(".settings-screen").evaluate((element) => element.getBoundingClientRect().height)) < 1400, "Settings index should remain compact");
+    await page.screenshot({ path: "artifacts/visual/mobile-settings-index.png", fullPage: true });
+    for (const [name, visibleSelector] of [["Appearance", ".theme-picker"], ["App & updates", ".install-app-card"], ["Preferences & accessibility", ".preference-panel"], ["Privacy & services", ".privacy-panel"], ["Your data", ".data-controls"]]) {
+      await settingsMenu.getByRole("button", { name: new RegExp(`^${name}`) }).click();
+      assert.equal(await page.locator(visibleSelector).first().isVisible(), true, `${name} content should be visible`);
+      assert.equal(await settingsMenu.isVisible(), false, `${name} should replace the Settings index`);
+      await page.getByRole("button", { name: "Settings", exact: true }).click();
+      assert.equal(await settingsMenu.isVisible(), true, `${name} Back should return to the Settings index`);
+    }
+    await page.getByRole("button", { name: "You", exact: true }).first().click();
+    assert.equal(await page.locator(".you-screen").isVisible(), true, "Settings index Back should return to You");
+
+    await page.setViewportSize({ width: 1440, height: 1000 });
+    assert.equal(await trendsDisclosure.isVisible(), false, "You trend disclosure should remain mobile-only");
+    assert.equal(await trends.isVisible(), true, "You trends should remain visible on desktop");
+    await page.getByRole("button", { name: "Open account and app settings" }).click();
+    assert.equal(await settingsMenu.isVisible(), false, "Settings section index should remain mobile-only");
+    assert.equal(await page.locator(".install-app-card").isVisible(), true, "Desktop Settings should retain its full document layout");
+    assert.equal(await page.locator(".privacy-panel").isVisible(), true, "Desktop privacy controls should remain visible");
+    await page.setViewportSize({ width: 430, height: 932 });
+  });
+
   await check("connected Samsung context appears only on its intended product surfaces", async () => {
     for (const viewport of [{ width: 430, height: 932 }, { width: 1440, height: 1000 }]) {
       await page.setViewportSize(viewport);
@@ -98,6 +376,7 @@ try {
       await page.getByRole("button", { name: "You", exact: true }).last().click();
       assert.match(await page.locator(".you-health-hub").innerText(), /Purposeful sessions only/);
       await page.getByRole("button", { name: "Open account and app settings" }).click();
+      if (viewport.width <= 700) await page.getByRole("navigation", { name: "Settings sections" }).getByRole("button", { name: /^Privacy & services/ }).click();
       assert.equal(await page.locator(".health-permission-controls").count(), 1);
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1), true, `Health settings overflow at ${viewport.width}px`);
     }
@@ -278,6 +557,15 @@ try {
     await page.getByText("Upper body strength", { exact: true }).last().waitFor();
     await page.getByText("Bike ride", { exact: true }).waitFor();
     await page.getByText("Completed", { exact: true }).last().waitFor();
+    await page.getByRole("button", { name: /Add a session/ }).click();
+    await page.getByText("Session complete", { exact: true }).waitFor();
+    assert.equal(await page.getByRole("button", { name: /Start workout|Edit workout|Add session/ }).count(), 0, "Completed Training should not compete with start, edit, or add actions");
+    assert.equal(await page.getByRole("button", { name: "Open Journey", exact: true }).count(), 1, "Completed Training should offer one clear follow-up");
+    await page.screenshot({ path: "artifacts/visual/mobile-training-complete.png", fullPage: true });
+    await page.getByRole("button", { name: "Open Journey", exact: true }).click();
+    await page.getByRole("button", { name: "Milestones", exact: true }).click();
+    assert.equal(await page.locator(".chapter-milestone-list strong").evaluateAll((titles) => titles.some((title) => /^Chapter\s+\d+:/i.test(title.textContent ?? ""))), false, "Milestone titles should not repeat their chapter navigation label");
+    await page.screenshot({ path: "artifacts/visual/mobile-milestones.png", fullPage: true });
   });
 
   await check("keyboard focus reaches primary navigation and all visible controls have names", async () => {

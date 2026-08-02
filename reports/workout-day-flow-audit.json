@@ -1,0 +1,4171 @@
+{
+  "generatedAt": "2026-08-02T04:35:45.031Z",
+  "flow": [
+    "Opened Training",
+    "Selected next week's first strength day",
+    "Renamed the day and edited its first prescription",
+    "Added 45-degree back extension",
+    "Saved the edited day workout",
+    "Opened workout preparation with the edited plan",
+    "Adjusted and saved workout setup",
+    "Started the active workout",
+    "Completed the first set and opened the rest timer"
+  ],
+  "steps": [
+    {
+      "name": "training landing",
+      "width": 320,
+      "viewport": {
+        "width": 320,
+        "height": 932
+      },
+      "horizontalOverflow": 0,
+      "documentHeight": 2916,
+      "targetViolations": [
+        {
+          "label": "Previous month",
+          "tag": "BUTTON",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "label": "Next month",
+          "tag": "BUTTON",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "label": "27",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "28",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "29",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "30",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "31",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "1",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "2",
+          "tag": "BUTTON",
+          "width": 37.8,
+          "height": 37.8
+        },
+        {
+          "label": "3",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "4",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "5",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "6",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "7",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "8",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "9",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "10",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "11",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "12",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "13",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "14",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "15",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "16",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "17",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "18",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "19",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "20",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "21",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "22",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "23",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "24",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "25",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "26",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "27",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "28",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "29",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "30",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "31",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "1",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "2",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "3",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "4",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "5",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "6",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        }
+      ],
+      "textViolations": [],
+      "keyAction": {
+        "width": 133.875,
+        "height": 46,
+        "bottom": 714.203125
+      },
+      "navigationTop": 856,
+      "keyActionOverlapsDock": false
+    },
+    {
+      "name": "training landing",
+      "width": 430,
+      "viewport": {
+        "width": 430,
+        "height": 932
+      },
+      "horizontalOverflow": 0,
+      "documentHeight": 2586,
+      "targetViolations": [
+        {
+          "label": "Previous month",
+          "tag": "BUTTON",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "label": "Next month",
+          "tag": "BUTTON",
+          "width": 40,
+          "height": 40
+        }
+      ],
+      "textViolations": [],
+      "keyAction": {
+        "width": 199.4375,
+        "height": 46,
+        "bottom": 708
+      },
+      "navigationTop": 856,
+      "keyActionOverlapsDock": false
+    },
+    {
+      "name": "day editor opened",
+      "width": 320,
+      "viewport": {
+        "width": 320,
+        "height": 932
+      },
+      "horizontalOverflow": 0,
+      "documentHeight": 4962,
+      "targetViolations": [
+        {
+          "label": "strength",
+          "tag": "BUTTON",
+          "width": 77.9,
+          "height": 36
+        },
+        {
+          "label": "bike",
+          "tag": "BUTTON",
+          "width": 48.3,
+          "height": 36
+        },
+        {
+          "label": "walk",
+          "tag": "BUTTON",
+          "width": 52.7,
+          "height": 36
+        },
+        {
+          "label": "run",
+          "tag": "BUTTON",
+          "width": 46.4,
+          "height": 36
+        },
+        {
+          "label": "recovery",
+          "tag": "BUTTON",
+          "width": 81.8,
+          "height": 36
+        },
+        {
+          "label": "rest",
+          "tag": "BUTTON",
+          "width": 50.1,
+          "height": 36
+        },
+        {
+          "label": "Edit this workout",
+          "tag": "BUTTON",
+          "width": 224,
+          "height": 39
+        },
+        {
+          "label": "Remove Incline dumbbell press",
+          "tag": "BUTTON",
+          "width": 30,
+          "height": 30
+        },
+        {
+          "label": "Remove Lat pulldown",
+          "tag": "BUTTON",
+          "width": 30,
+          "height": 30
+        },
+        {
+          "label": "Remove Seated shoulder press",
+          "tag": "BUTTON",
+          "width": 30,
+          "height": 30
+        },
+        {
+          "label": "Remove Chest-supported row",
+          "tag": "BUTTON",
+          "width": 30,
+          "height": 30
+        },
+        {
+          "label": "Add session",
+          "tag": "BUTTON",
+          "width": 98.1,
+          "height": 40
+        },
+        {
+          "label": "Earlier",
+          "tag": "BUTTON",
+          "width": 87.8,
+          "height": 35
+        },
+        {
+          "label": "Later",
+          "tag": "BUTTON",
+          "width": 87.9,
+          "height": 35
+        },
+        {
+          "label": "Skip",
+          "tag": "BUTTON",
+          "width": 70.3,
+          "height": 35
+        },
+        {
+          "label": "Previous month",
+          "tag": "BUTTON",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "label": "Next month",
+          "tag": "BUTTON",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "label": "27",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "28",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "29",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "30",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "31",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "1",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "2",
+          "tag": "BUTTON",
+          "width": 37.8,
+          "height": 37.8
+        },
+        {
+          "label": "3",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "4",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "5",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "6",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "7",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "8",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "9",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "10",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "11",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "12",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "13",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "14",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "15",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "16",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "17",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "18",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "19",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "20",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "21",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "22",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "23",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "24",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "25",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "26",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "27",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "28",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "29",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "30",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "31",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "1",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "2",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "3",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "4",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "5",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "6",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        }
+      ],
+      "textViolations": [
+        {
+          "label": "planned",
+          "size": "8px"
+        },
+        {
+          "label": "Browse by area, goal or time",
+          "size": "9px"
+        },
+        {
+          "label": "Saved, favourite and custom",
+          "size": "9px"
+        },
+        {
+          "label": "Session",
+          "size": "8px"
+        },
+        {
+          "label": "Plan note",
+          "size": "8px"
+        },
+        {
+          "label": "Sets",
+          "size": "8px"
+        },
+        {
+          "label": "Reps, time, or distance",
+          "size": "8px"
+        },
+        {
+          "label": "Rest (sec)",
+          "size": "8px"
+        },
+        {
+          "label": "Sets",
+          "size": "8px"
+        },
+        {
+          "label": "Reps, time, or distance",
+          "size": "8px"
+        },
+        {
+          "label": "Rest (sec)",
+          "size": "8px"
+        },
+        {
+          "label": "Sets",
+          "size": "8px"
+        },
+        {
+          "label": "Reps, time, or distance",
+          "size": "8px"
+        },
+        {
+          "label": "Rest (sec)",
+          "size": "8px"
+        },
+        {
+          "label": "Sets",
+          "size": "8px"
+        },
+        {
+          "label": "Reps, time, or distance",
+          "size": "8px"
+        },
+        {
+          "label": "Rest (sec)",
+          "size": "8px"
+        },
+        {
+          "label": "MAIN FOCUS",
+          "size": "8px"
+        },
+        {
+          "label": "strength",
+          "size": "9px"
+        },
+        {
+          "label": "Saved to your North account",
+          "size": "9px"
+        }
+      ],
+      "keyAction": {
+        "width": 258,
+        "height": 46,
+        "bottom": 2764.84375
+      },
+      "navigationTop": 856,
+      "keyActionOverlapsDock": false
+    },
+    {
+      "name": "day editor opened",
+      "width": 430,
+      "viewport": {
+        "width": 430,
+        "height": 932
+      },
+      "horizontalOverflow": 0,
+      "documentHeight": 4526,
+      "targetViolations": [
+        {
+          "label": "strength",
+          "tag": "BUTTON",
+          "width": 77.9,
+          "height": 36
+        },
+        {
+          "label": "bike",
+          "tag": "BUTTON",
+          "width": 48.3,
+          "height": 36
+        },
+        {
+          "label": "walk",
+          "tag": "BUTTON",
+          "width": 52.7,
+          "height": 36
+        },
+        {
+          "label": "run",
+          "tag": "BUTTON",
+          "width": 46.4,
+          "height": 36
+        },
+        {
+          "label": "recovery",
+          "tag": "BUTTON",
+          "width": 81.8,
+          "height": 36
+        },
+        {
+          "label": "rest",
+          "tag": "BUTTON",
+          "width": 50.1,
+          "height": 36
+        },
+        {
+          "label": "Edit this workout",
+          "tag": "BUTTON",
+          "width": 342,
+          "height": 39
+        },
+        {
+          "label": "Remove Incline dumbbell press",
+          "tag": "BUTTON",
+          "width": 30,
+          "height": 30
+        },
+        {
+          "label": "Remove Lat pulldown",
+          "tag": "BUTTON",
+          "width": 30,
+          "height": 30
+        },
+        {
+          "label": "Remove Seated shoulder press",
+          "tag": "BUTTON",
+          "width": 30,
+          "height": 30
+        },
+        {
+          "label": "Remove Chest-supported row",
+          "tag": "BUTTON",
+          "width": 30,
+          "height": 30
+        },
+        {
+          "label": "Add session",
+          "tag": "BUTTON",
+          "width": 127,
+          "height": 40
+        },
+        {
+          "label": "Earlier",
+          "tag": "BUTTON",
+          "width": 130,
+          "height": 35
+        },
+        {
+          "label": "Later",
+          "tag": "BUTTON",
+          "width": 130,
+          "height": 35
+        },
+        {
+          "label": "Skip",
+          "tag": "BUTTON",
+          "width": 104,
+          "height": 35
+        },
+        {
+          "label": "Previous month",
+          "tag": "BUTTON",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "label": "Next month",
+          "tag": "BUTTON",
+          "width": 40,
+          "height": 40
+        }
+      ],
+      "textViolations": [
+        {
+          "label": "planned",
+          "size": "8px"
+        },
+        {
+          "label": "Browse by area, goal or time",
+          "size": "9px"
+        },
+        {
+          "label": "Saved, favourite and custom",
+          "size": "9px"
+        },
+        {
+          "label": "Session",
+          "size": "8px"
+        },
+        {
+          "label": "Plan note",
+          "size": "8px"
+        },
+        {
+          "label": "Sets",
+          "size": "8px"
+        },
+        {
+          "label": "Reps, time, or distance",
+          "size": "8px"
+        },
+        {
+          "label": "Rest (sec)",
+          "size": "8px"
+        },
+        {
+          "label": "Sets",
+          "size": "8px"
+        },
+        {
+          "label": "Reps, time, or distance",
+          "size": "8px"
+        },
+        {
+          "label": "Rest (sec)",
+          "size": "8px"
+        },
+        {
+          "label": "Sets",
+          "size": "8px"
+        },
+        {
+          "label": "Reps, time, or distance",
+          "size": "8px"
+        },
+        {
+          "label": "Rest (sec)",
+          "size": "8px"
+        },
+        {
+          "label": "Sets",
+          "size": "8px"
+        },
+        {
+          "label": "Reps, time, or distance",
+          "size": "8px"
+        },
+        {
+          "label": "Rest (sec)",
+          "size": "8px"
+        },
+        {
+          "label": "MAIN FOCUS",
+          "size": "8px"
+        },
+        {
+          "label": "strength",
+          "size": "9px"
+        },
+        {
+          "label": "Saved to your North account",
+          "size": "9px"
+        }
+      ],
+      "keyAction": {
+        "width": 376,
+        "height": 46,
+        "bottom": 2652
+      },
+      "navigationTop": 856,
+      "keyActionOverlapsDock": false
+    },
+    {
+      "name": "day editor changed",
+      "width": 320,
+      "viewport": {
+        "width": 320,
+        "height": 932
+      },
+      "horizontalOverflow": 0,
+      "documentHeight": 5158,
+      "targetViolations": [
+        {
+          "label": "strength",
+          "tag": "BUTTON",
+          "width": 77.9,
+          "height": 36
+        },
+        {
+          "label": "bike",
+          "tag": "BUTTON",
+          "width": 48.3,
+          "height": 36
+        },
+        {
+          "label": "walk",
+          "tag": "BUTTON",
+          "width": 52.7,
+          "height": 36
+        },
+        {
+          "label": "run",
+          "tag": "BUTTON",
+          "width": 46.4,
+          "height": 36
+        },
+        {
+          "label": "recovery",
+          "tag": "BUTTON",
+          "width": 81.8,
+          "height": 36
+        },
+        {
+          "label": "rest",
+          "tag": "BUTTON",
+          "width": 50.1,
+          "height": 36
+        },
+        {
+          "label": "Edit this workout",
+          "tag": "BUTTON",
+          "width": 224,
+          "height": 39
+        },
+        {
+          "label": "Remove Incline dumbbell press",
+          "tag": "BUTTON",
+          "width": 30,
+          "height": 30
+        },
+        {
+          "label": "Remove Lat pulldown",
+          "tag": "BUTTON",
+          "width": 30,
+          "height": 30
+        },
+        {
+          "label": "Remove Seated shoulder press",
+          "tag": "BUTTON",
+          "width": 30,
+          "height": 30
+        },
+        {
+          "label": "Remove Chest-supported row",
+          "tag": "BUTTON",
+          "width": 30,
+          "height": 30
+        },
+        {
+          "label": "Remove 45-degree back extension",
+          "tag": "BUTTON",
+          "width": 30,
+          "height": 30
+        },
+        {
+          "label": "Add session",
+          "tag": "BUTTON",
+          "width": 98.1,
+          "height": 40
+        },
+        {
+          "label": "Earlier",
+          "tag": "BUTTON",
+          "width": 87.8,
+          "height": 35
+        },
+        {
+          "label": "Later",
+          "tag": "BUTTON",
+          "width": 87.9,
+          "height": 35
+        },
+        {
+          "label": "Skip",
+          "tag": "BUTTON",
+          "width": 70.3,
+          "height": 35
+        },
+        {
+          "label": "Previous month",
+          "tag": "BUTTON",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "label": "Next month",
+          "tag": "BUTTON",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "label": "27",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "28",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "29",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "30",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "31",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "1",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "2",
+          "tag": "BUTTON",
+          "width": 37.8,
+          "height": 37.8
+        },
+        {
+          "label": "3",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "4",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "5",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "6",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "7",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "8",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "9",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "10",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "11",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "12",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "13",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "14",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "15",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "16",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "17",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "18",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "19",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "20",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "21",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "22",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "23",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "24",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "25",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "26",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "27",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "28",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "29",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "30",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "31",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "1",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "2",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "3",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "4",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "5",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "label": "6",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        }
+      ],
+      "textViolations": [
+        {
+          "label": "planned",
+          "size": "8px"
+        },
+        {
+          "label": "Browse by area, goal or time",
+          "size": "9px"
+        },
+        {
+          "label": "Saved, favourite and custom",
+          "size": "9px"
+        },
+        {
+          "label": "Session",
+          "size": "8px"
+        },
+        {
+          "label": "Plan note",
+          "size": "8px"
+        },
+        {
+          "label": "Sets",
+          "size": "8px"
+        },
+        {
+          "label": "Reps, time, or distance",
+          "size": "8px"
+        },
+        {
+          "label": "Rest (sec)",
+          "size": "8px"
+        },
+        {
+          "label": "Sets",
+          "size": "8px"
+        },
+        {
+          "label": "Reps, time, or distance",
+          "size": "8px"
+        },
+        {
+          "label": "Rest (sec)",
+          "size": "8px"
+        },
+        {
+          "label": "Sets",
+          "size": "8px"
+        },
+        {
+          "label": "Reps, time, or distance",
+          "size": "8px"
+        },
+        {
+          "label": "Rest (sec)",
+          "size": "8px"
+        },
+        {
+          "label": "Sets",
+          "size": "8px"
+        },
+        {
+          "label": "Reps, time, or distance",
+          "size": "8px"
+        },
+        {
+          "label": "Rest (sec)",
+          "size": "8px"
+        },
+        {
+          "label": "Sets",
+          "size": "8px"
+        },
+        {
+          "label": "Reps, time, or distance",
+          "size": "8px"
+        },
+        {
+          "label": "Rest (sec)",
+          "size": "8px"
+        },
+        {
+          "label": "MAIN FOCUS",
+          "size": "8px"
+        },
+        {
+          "label": "strength",
+          "size": "9px"
+        },
+        {
+          "label": "Saved on this device · syncing",
+          "size": "9px"
+        }
+      ],
+      "keyAction": {
+        "width": 179.296875,
+        "height": 46,
+        "bottom": 2876.703125
+      },
+      "navigationTop": 856,
+      "keyActionOverlapsDock": false
+    },
+    {
+      "name": "day editor changed",
+      "width": 430,
+      "viewport": {
+        "width": 430,
+        "height": 932
+      },
+      "horizontalOverflow": 0,
+      "documentHeight": 4712,
+      "targetViolations": [
+        {
+          "label": "strength",
+          "tag": "BUTTON",
+          "width": 77.9,
+          "height": 36
+        },
+        {
+          "label": "bike",
+          "tag": "BUTTON",
+          "width": 48.3,
+          "height": 36
+        },
+        {
+          "label": "walk",
+          "tag": "BUTTON",
+          "width": 52.7,
+          "height": 36
+        },
+        {
+          "label": "run",
+          "tag": "BUTTON",
+          "width": 46.4,
+          "height": 36
+        },
+        {
+          "label": "recovery",
+          "tag": "BUTTON",
+          "width": 81.8,
+          "height": 36
+        },
+        {
+          "label": "rest",
+          "tag": "BUTTON",
+          "width": 50.1,
+          "height": 36
+        },
+        {
+          "label": "Edit this workout",
+          "tag": "BUTTON",
+          "width": 342,
+          "height": 39
+        },
+        {
+          "label": "Remove Incline dumbbell press",
+          "tag": "BUTTON",
+          "width": 30,
+          "height": 30
+        },
+        {
+          "label": "Remove Lat pulldown",
+          "tag": "BUTTON",
+          "width": 30,
+          "height": 30
+        },
+        {
+          "label": "Remove Seated shoulder press",
+          "tag": "BUTTON",
+          "width": 30,
+          "height": 30
+        },
+        {
+          "label": "Remove Chest-supported row",
+          "tag": "BUTTON",
+          "width": 30,
+          "height": 30
+        },
+        {
+          "label": "Remove 45-degree back extension",
+          "tag": "BUTTON",
+          "width": 30,
+          "height": 30
+        },
+        {
+          "label": "Add session",
+          "tag": "BUTTON",
+          "width": 127,
+          "height": 40
+        },
+        {
+          "label": "Earlier",
+          "tag": "BUTTON",
+          "width": 130,
+          "height": 35
+        },
+        {
+          "label": "Later",
+          "tag": "BUTTON",
+          "width": 130,
+          "height": 35
+        },
+        {
+          "label": "Skip",
+          "tag": "BUTTON",
+          "width": 104,
+          "height": 35
+        },
+        {
+          "label": "Previous month",
+          "tag": "BUTTON",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "label": "Next month",
+          "tag": "BUTTON",
+          "width": 40,
+          "height": 40
+        }
+      ],
+      "textViolations": [
+        {
+          "label": "planned",
+          "size": "8px"
+        },
+        {
+          "label": "Browse by area, goal or time",
+          "size": "9px"
+        },
+        {
+          "label": "Saved, favourite and custom",
+          "size": "9px"
+        },
+        {
+          "label": "Session",
+          "size": "8px"
+        },
+        {
+          "label": "Plan note",
+          "size": "8px"
+        },
+        {
+          "label": "Sets",
+          "size": "8px"
+        },
+        {
+          "label": "Reps, time, or distance",
+          "size": "8px"
+        },
+        {
+          "label": "Rest (sec)",
+          "size": "8px"
+        },
+        {
+          "label": "Sets",
+          "size": "8px"
+        },
+        {
+          "label": "Reps, time, or distance",
+          "size": "8px"
+        },
+        {
+          "label": "Rest (sec)",
+          "size": "8px"
+        },
+        {
+          "label": "Sets",
+          "size": "8px"
+        },
+        {
+          "label": "Reps, time, or distance",
+          "size": "8px"
+        },
+        {
+          "label": "Rest (sec)",
+          "size": "8px"
+        },
+        {
+          "label": "Sets",
+          "size": "8px"
+        },
+        {
+          "label": "Reps, time, or distance",
+          "size": "8px"
+        },
+        {
+          "label": "Rest (sec)",
+          "size": "8px"
+        },
+        {
+          "label": "Sets",
+          "size": "8px"
+        },
+        {
+          "label": "Reps, time, or distance",
+          "size": "8px"
+        },
+        {
+          "label": "Rest (sec)",
+          "size": "8px"
+        },
+        {
+          "label": "MAIN FOCUS",
+          "size": "8px"
+        },
+        {
+          "label": "strength",
+          "size": "9px"
+        },
+        {
+          "label": "Saved on this device · syncing",
+          "size": "9px"
+        }
+      ],
+      "keyAction": {
+        "width": 179.296875,
+        "height": 46,
+        "bottom": 2777
+      },
+      "navigationTop": 856,
+      "keyActionOverlapsDock": false
+    },
+    {
+      "name": "workout preparation",
+      "width": 320,
+      "viewport": {
+        "width": 320,
+        "height": 932
+      },
+      "horizontalOverflow": 0,
+      "documentHeight": 1982,
+      "targetViolations": [
+        {
+          "label": "View exercise",
+          "tag": "BUTTON",
+          "width": 76.7,
+          "height": 34
+        },
+        {
+          "label": "Adjust",
+          "tag": "BUTTON",
+          "width": 44.6,
+          "height": 34
+        },
+        {
+          "label": "Remove Incline dumbbell press",
+          "tag": "BUTTON",
+          "width": 34,
+          "height": 34
+        },
+        {
+          "label": "Move Incline dumbbell press down",
+          "tag": "BUTTON",
+          "width": 34,
+          "height": 34
+        },
+        {
+          "label": "View exercise",
+          "tag": "BUTTON",
+          "width": 76.7,
+          "height": 34
+        },
+        {
+          "label": "Adjust",
+          "tag": "BUTTON",
+          "width": 44.6,
+          "height": 34
+        },
+        {
+          "label": "Remove Lat pulldown",
+          "tag": "BUTTON",
+          "width": 34,
+          "height": 34
+        },
+        {
+          "label": "Move Lat pulldown up",
+          "tag": "BUTTON",
+          "width": 34,
+          "height": 34
+        },
+        {
+          "label": "Move Lat pulldown down",
+          "tag": "BUTTON",
+          "width": 34,
+          "height": 34
+        },
+        {
+          "label": "View exercise",
+          "tag": "BUTTON",
+          "width": 76.7,
+          "height": 34
+        },
+        {
+          "label": "Adjust",
+          "tag": "BUTTON",
+          "width": 44.6,
+          "height": 34
+        },
+        {
+          "label": "Remove Seated shoulder press",
+          "tag": "BUTTON",
+          "width": 34,
+          "height": 34
+        },
+        {
+          "label": "Move Seated shoulder press up",
+          "tag": "BUTTON",
+          "width": 34,
+          "height": 34
+        },
+        {
+          "label": "Move Seated shoulder press down",
+          "tag": "BUTTON",
+          "width": 34,
+          "height": 34
+        },
+        {
+          "label": "View exercise",
+          "tag": "BUTTON",
+          "width": 76.7,
+          "height": 34
+        },
+        {
+          "label": "Adjust",
+          "tag": "BUTTON",
+          "width": 44.6,
+          "height": 34
+        },
+        {
+          "label": "Remove Chest-supported row",
+          "tag": "BUTTON",
+          "width": 34,
+          "height": 34
+        },
+        {
+          "label": "Move Chest-supported row up",
+          "tag": "BUTTON",
+          "width": 34,
+          "height": 34
+        },
+        {
+          "label": "Move Chest-supported row down",
+          "tag": "BUTTON",
+          "width": 34,
+          "height": 34
+        },
+        {
+          "label": "View exercise",
+          "tag": "BUTTON",
+          "width": 76.7,
+          "height": 34
+        },
+        {
+          "label": "Adjust",
+          "tag": "BUTTON",
+          "width": 44.6,
+          "height": 34
+        },
+        {
+          "label": "Remove 45-degree back extension",
+          "tag": "BUTTON",
+          "width": 34,
+          "height": 34
+        },
+        {
+          "label": "Move 45-degree back extension up",
+          "tag": "BUTTON",
+          "width": 34,
+          "height": 34
+        }
+      ],
+      "textViolations": [
+        {
+          "label": "Chest",
+          "size": "7px"
+        },
+        {
+          "label": "Dumbbell",
+          "size": "7px"
+        },
+        {
+          "label": "Horizontal push",
+          "size": "7px"
+        },
+        {
+          "label": "Last recorded: 45.0 lb · 10, 9, 8",
+          "size": "9px"
+        },
+        {
+          "label": "0/4",
+          "size": "8px"
+        },
+        {
+          "label": "View exercise",
+          "size": "9px"
+        },
+        {
+          "label": "Adjust",
+          "size": "9px"
+        },
+        {
+          "label": "Back",
+          "size": "7px"
+        },
+        {
+          "label": "Cable",
+          "size": "7px"
+        },
+        {
+          "label": "Pull",
+          "size": "7px"
+        },
+        {
+          "label": "Last recorded: 125.0 lb · 10, 10, 9",
+          "size": "9px"
+        },
+        {
+          "label": "0/3",
+          "size": "8px"
+        },
+        {
+          "label": "View exercise",
+          "size": "9px"
+        },
+        {
+          "label": "Adjust",
+          "size": "9px"
+        },
+        {
+          "label": "Custom",
+          "size": "7px"
+        },
+        {
+          "label": "Your setup",
+          "size": "7px"
+        },
+        {
+          "label": "Movement",
+          "size": "7px"
+        },
+        {
+          "label": "Last recorded: 35.0 lb · 10, 9, 8",
+          "size": "9px"
+        },
+        {
+          "label": "0/3",
+          "size": "8px"
+        },
+        {
+          "label": "View exercise",
+          "size": "9px"
+        },
+        {
+          "label": "Adjust",
+          "size": "9px"
+        },
+        {
+          "label": "Custom",
+          "size": "7px"
+        },
+        {
+          "label": "Your setup",
+          "size": "7px"
+        },
+        {
+          "label": "Movement",
+          "size": "7px"
+        },
+        {
+          "label": "Last recorded: 60.0 lb · 12, 11, 10",
+          "size": "9px"
+        },
+        {
+          "label": "0/3",
+          "size": "8px"
+        },
+        {
+          "label": "View exercise",
+          "size": "9px"
+        },
+        {
+          "label": "Adjust",
+          "size": "9px"
+        },
+        {
+          "label": "Hamstrings",
+          "size": "7px"
+        },
+        {
+          "label": "Bench",
+          "size": "7px"
+        },
+        {
+          "label": "Hip hinge",
+          "size": "7px"
+        },
+        {
+          "label": "Last recorded: No history yet",
+          "size": "9px"
+        },
+        {
+          "label": "0/3",
+          "size": "8px"
+        },
+        {
+          "label": "View exercise",
+          "size": "9px"
+        },
+        {
+          "label": "Adjust",
+          "size": "9px"
+        }
+      ],
+      "keyAction": {
+        "width": 274,
+        "height": 46,
+        "bottom": 1756.8125
+      },
+      "navigationTop": 856,
+      "keyActionOverlapsDock": false
+    },
+    {
+      "name": "workout preparation",
+      "width": 430,
+      "viewport": {
+        "width": 430,
+        "height": 932
+      },
+      "horizontalOverflow": 0,
+      "documentHeight": 1826,
+      "targetViolations": [
+        {
+          "label": "View exercise",
+          "tag": "BUTTON",
+          "width": 76.7,
+          "height": 34
+        },
+        {
+          "label": "Adjust",
+          "tag": "BUTTON",
+          "width": 44.6,
+          "height": 34
+        },
+        {
+          "label": "Remove Incline dumbbell press",
+          "tag": "BUTTON",
+          "width": 34,
+          "height": 34
+        },
+        {
+          "label": "Move Incline dumbbell press down",
+          "tag": "BUTTON",
+          "width": 34,
+          "height": 34
+        },
+        {
+          "label": "View exercise",
+          "tag": "BUTTON",
+          "width": 76.7,
+          "height": 34
+        },
+        {
+          "label": "Adjust",
+          "tag": "BUTTON",
+          "width": 44.6,
+          "height": 34
+        },
+        {
+          "label": "Remove Lat pulldown",
+          "tag": "BUTTON",
+          "width": 34,
+          "height": 34
+        },
+        {
+          "label": "Move Lat pulldown up",
+          "tag": "BUTTON",
+          "width": 34,
+          "height": 34
+        },
+        {
+          "label": "Move Lat pulldown down",
+          "tag": "BUTTON",
+          "width": 34,
+          "height": 34
+        },
+        {
+          "label": "View exercise",
+          "tag": "BUTTON",
+          "width": 76.7,
+          "height": 34
+        },
+        {
+          "label": "Adjust",
+          "tag": "BUTTON",
+          "width": 44.6,
+          "height": 34
+        },
+        {
+          "label": "Remove Seated shoulder press",
+          "tag": "BUTTON",
+          "width": 34,
+          "height": 34
+        },
+        {
+          "label": "Move Seated shoulder press up",
+          "tag": "BUTTON",
+          "width": 34,
+          "height": 34
+        },
+        {
+          "label": "Move Seated shoulder press down",
+          "tag": "BUTTON",
+          "width": 34,
+          "height": 34
+        },
+        {
+          "label": "View exercise",
+          "tag": "BUTTON",
+          "width": 76.7,
+          "height": 34
+        },
+        {
+          "label": "Adjust",
+          "tag": "BUTTON",
+          "width": 44.6,
+          "height": 34
+        },
+        {
+          "label": "Remove Chest-supported row",
+          "tag": "BUTTON",
+          "width": 34,
+          "height": 34
+        },
+        {
+          "label": "Move Chest-supported row up",
+          "tag": "BUTTON",
+          "width": 34,
+          "height": 34
+        },
+        {
+          "label": "Move Chest-supported row down",
+          "tag": "BUTTON",
+          "width": 34,
+          "height": 34
+        },
+        {
+          "label": "View exercise",
+          "tag": "BUTTON",
+          "width": 76.7,
+          "height": 34
+        },
+        {
+          "label": "Adjust",
+          "tag": "BUTTON",
+          "width": 44.6,
+          "height": 34
+        },
+        {
+          "label": "Remove 45-degree back extension",
+          "tag": "BUTTON",
+          "width": 34,
+          "height": 34
+        },
+        {
+          "label": "Move 45-degree back extension up",
+          "tag": "BUTTON",
+          "width": 34,
+          "height": 34
+        }
+      ],
+      "textViolations": [
+        {
+          "label": "Chest",
+          "size": "7px"
+        },
+        {
+          "label": "Dumbbell",
+          "size": "7px"
+        },
+        {
+          "label": "Horizontal push",
+          "size": "7px"
+        },
+        {
+          "label": "Last recorded: 45.0 lb · 10, 9, 8",
+          "size": "9px"
+        },
+        {
+          "label": "0/4",
+          "size": "8px"
+        },
+        {
+          "label": "View exercise",
+          "size": "9px"
+        },
+        {
+          "label": "Adjust",
+          "size": "9px"
+        },
+        {
+          "label": "Back",
+          "size": "7px"
+        },
+        {
+          "label": "Cable",
+          "size": "7px"
+        },
+        {
+          "label": "Pull",
+          "size": "7px"
+        },
+        {
+          "label": "Last recorded: 125.0 lb · 10, 10, 9",
+          "size": "9px"
+        },
+        {
+          "label": "0/3",
+          "size": "8px"
+        },
+        {
+          "label": "View exercise",
+          "size": "9px"
+        },
+        {
+          "label": "Adjust",
+          "size": "9px"
+        },
+        {
+          "label": "Custom",
+          "size": "7px"
+        },
+        {
+          "label": "Your setup",
+          "size": "7px"
+        },
+        {
+          "label": "Movement",
+          "size": "7px"
+        },
+        {
+          "label": "Last recorded: 35.0 lb · 10, 9, 8",
+          "size": "9px"
+        },
+        {
+          "label": "0/3",
+          "size": "8px"
+        },
+        {
+          "label": "View exercise",
+          "size": "9px"
+        },
+        {
+          "label": "Adjust",
+          "size": "9px"
+        },
+        {
+          "label": "Custom",
+          "size": "7px"
+        },
+        {
+          "label": "Your setup",
+          "size": "7px"
+        },
+        {
+          "label": "Movement",
+          "size": "7px"
+        },
+        {
+          "label": "Last recorded: 60.0 lb · 12, 11, 10",
+          "size": "9px"
+        },
+        {
+          "label": "0/3",
+          "size": "8px"
+        },
+        {
+          "label": "View exercise",
+          "size": "9px"
+        },
+        {
+          "label": "Adjust",
+          "size": "9px"
+        },
+        {
+          "label": "Hamstrings",
+          "size": "7px"
+        },
+        {
+          "label": "Bench",
+          "size": "7px"
+        },
+        {
+          "label": "Hip hinge",
+          "size": "7px"
+        },
+        {
+          "label": "Last recorded: No history yet",
+          "size": "9px"
+        },
+        {
+          "label": "0/3",
+          "size": "8px"
+        },
+        {
+          "label": "View exercise",
+          "size": "9px"
+        },
+        {
+          "label": "Adjust",
+          "size": "9px"
+        }
+      ],
+      "keyAction": {
+        "width": 392,
+        "height": 46,
+        "bottom": 1600.515625
+      },
+      "navigationTop": 856,
+      "keyActionOverlapsDock": false
+    },
+    {
+      "name": "workout setup adjusted",
+      "width": 320,
+      "viewport": {
+        "width": 320,
+        "height": 932
+      },
+      "horizontalOverflow": 0,
+      "documentHeight": 2194,
+      "targetViolations": [
+        {
+          "label": "View exercise",
+          "tag": "BUTTON",
+          "width": 76.7,
+          "height": 34
+        },
+        {
+          "label": "Close adjustments",
+          "tag": "BUTTON",
+          "width": 98.7,
+          "height": 34
+        },
+        {
+          "label": "Remove Incline dumbbell press",
+          "tag": "BUTTON",
+          "width": 34,
+          "height": 34
+        },
+        {
+          "label": "Move Incline dumbbell press down",
+          "tag": "BUTTON",
+          "width": 34,
+          "height": 34
+        },
+        {
+          "label": "Choose a similar movement…Spoto press — Uses a similar movement pattern and prim",
+          "tag": "SELECT",
+          "width": 260,
+          "height": 40
+        },
+        {
+          "label": "View exercise",
+          "tag": "BUTTON",
+          "width": 76.7,
+          "height": 34
+        },
+        {
+          "label": "Adjust",
+          "tag": "BUTTON",
+          "width": 44.6,
+          "height": 34
+        },
+        {
+          "label": "Remove Lat pulldown",
+          "tag": "BUTTON",
+          "width": 34,
+          "height": 34
+        },
+        {
+          "label": "Move Lat pulldown up",
+          "tag": "BUTTON",
+          "width": 34,
+          "height": 34
+        },
+        {
+          "label": "Move Lat pulldown down",
+          "tag": "BUTTON",
+          "width": 34,
+          "height": 34
+        },
+        {
+          "label": "View exercise",
+          "tag": "BUTTON",
+          "width": 76.7,
+          "height": 34
+        },
+        {
+          "label": "Adjust",
+          "tag": "BUTTON",
+          "width": 44.6,
+          "height": 34
+        },
+        {
+          "label": "Remove Seated shoulder press",
+          "tag": "BUTTON",
+          "width": 34,
+          "height": 34
+        },
+        {
+          "label": "Move Seated shoulder press up",
+          "tag": "BUTTON",
+          "width": 34,
+          "height": 34
+        },
+        {
+          "label": "Move Seated shoulder press down",
+          "tag": "BUTTON",
+          "width": 34,
+          "height": 34
+        },
+        {
+          "label": "View exercise",
+          "tag": "BUTTON",
+          "width": 76.7,
+          "height": 34
+        },
+        {
+          "label": "Adjust",
+          "tag": "BUTTON",
+          "width": 44.6,
+          "height": 34
+        },
+        {
+          "label": "Remove Chest-supported row",
+          "tag": "BUTTON",
+          "width": 34,
+          "height": 34
+        },
+        {
+          "label": "Move Chest-supported row up",
+          "tag": "BUTTON",
+          "width": 34,
+          "height": 34
+        },
+        {
+          "label": "Move Chest-supported row down",
+          "tag": "BUTTON",
+          "width": 34,
+          "height": 34
+        },
+        {
+          "label": "View exercise",
+          "tag": "BUTTON",
+          "width": 76.7,
+          "height": 34
+        },
+        {
+          "label": "Adjust",
+          "tag": "BUTTON",
+          "width": 44.6,
+          "height": 34
+        },
+        {
+          "label": "Remove 45-degree back extension",
+          "tag": "BUTTON",
+          "width": 34,
+          "height": 34
+        },
+        {
+          "label": "Move 45-degree back extension up",
+          "tag": "BUTTON",
+          "width": 34,
+          "height": 34
+        }
+      ],
+      "textViolations": [
+        {
+          "label": "Chest",
+          "size": "7px"
+        },
+        {
+          "label": "Dumbbell",
+          "size": "7px"
+        },
+        {
+          "label": "Horizontal push",
+          "size": "7px"
+        },
+        {
+          "label": "Last recorded: 45.0 lb · 10, 9, 8",
+          "size": "9px"
+        },
+        {
+          "label": "0/4",
+          "size": "8px"
+        },
+        {
+          "label": "View exercise",
+          "size": "9px"
+        },
+        {
+          "label": "Close adjustments",
+          "size": "9px"
+        },
+        {
+          "label": "Sets",
+          "size": "9px"
+        },
+        {
+          "label": "Planned load",
+          "size": "9px"
+        },
+        {
+          "label": "Target",
+          "size": "9px"
+        },
+        {
+          "label": "Rest",
+          "size": "9px"
+        },
+        {
+          "label": "Substitute movement",
+          "size": "9px"
+        },
+        {
+          "label": "Back",
+          "size": "7px"
+        },
+        {
+          "label": "Cable",
+          "size": "7px"
+        },
+        {
+          "label": "Pull",
+          "size": "7px"
+        },
+        {
+          "label": "Last recorded: 125.0 lb · 10, 10, 9",
+          "size": "9px"
+        },
+        {
+          "label": "0/3",
+          "size": "8px"
+        },
+        {
+          "label": "View exercise",
+          "size": "9px"
+        },
+        {
+          "label": "Adjust",
+          "size": "9px"
+        },
+        {
+          "label": "Custom",
+          "size": "7px"
+        },
+        {
+          "label": "Your setup",
+          "size": "7px"
+        },
+        {
+          "label": "Movement",
+          "size": "7px"
+        },
+        {
+          "label": "Last recorded: 35.0 lb · 10, 9, 8",
+          "size": "9px"
+        },
+        {
+          "label": "0/3",
+          "size": "8px"
+        },
+        {
+          "label": "View exercise",
+          "size": "9px"
+        },
+        {
+          "label": "Adjust",
+          "size": "9px"
+        },
+        {
+          "label": "Custom",
+          "size": "7px"
+        },
+        {
+          "label": "Your setup",
+          "size": "7px"
+        },
+        {
+          "label": "Movement",
+          "size": "7px"
+        },
+        {
+          "label": "Last recorded: 60.0 lb · 12, 11, 10",
+          "size": "9px"
+        },
+        {
+          "label": "0/3",
+          "size": "8px"
+        },
+        {
+          "label": "View exercise",
+          "size": "9px"
+        },
+        {
+          "label": "Adjust",
+          "size": "9px"
+        },
+        {
+          "label": "Hamstrings",
+          "size": "7px"
+        },
+        {
+          "label": "Bench",
+          "size": "7px"
+        },
+        {
+          "label": "Hip hinge",
+          "size": "7px"
+        },
+        {
+          "label": "Last recorded: No history yet",
+          "size": "9px"
+        },
+        {
+          "label": "0/3",
+          "size": "8px"
+        },
+        {
+          "label": "View exercise",
+          "size": "9px"
+        },
+        {
+          "label": "Adjust",
+          "size": "9px"
+        }
+      ],
+      "keyAction": {
+        "width": 274,
+        "height": 46,
+        "bottom": 1925.8125
+      },
+      "navigationTop": 856,
+      "keyActionOverlapsDock": false
+    },
+    {
+      "name": "workout setup adjusted",
+      "width": 430,
+      "viewport": {
+        "width": 430,
+        "height": 932
+      },
+      "horizontalOverflow": 0,
+      "documentHeight": 2038,
+      "targetViolations": [
+        {
+          "label": "View exercise",
+          "tag": "BUTTON",
+          "width": 76.7,
+          "height": 34
+        },
+        {
+          "label": "Close adjustments",
+          "tag": "BUTTON",
+          "width": 98.7,
+          "height": 34
+        },
+        {
+          "label": "Remove Incline dumbbell press",
+          "tag": "BUTTON",
+          "width": 34,
+          "height": 34
+        },
+        {
+          "label": "Move Incline dumbbell press down",
+          "tag": "BUTTON",
+          "width": 34,
+          "height": 34
+        },
+        {
+          "label": "Choose a similar movement…Spoto press — Uses a similar movement pattern and prim",
+          "tag": "SELECT",
+          "width": 378,
+          "height": 40
+        },
+        {
+          "label": "View exercise",
+          "tag": "BUTTON",
+          "width": 76.7,
+          "height": 34
+        },
+        {
+          "label": "Adjust",
+          "tag": "BUTTON",
+          "width": 44.6,
+          "height": 34
+        },
+        {
+          "label": "Remove Lat pulldown",
+          "tag": "BUTTON",
+          "width": 34,
+          "height": 34
+        },
+        {
+          "label": "Move Lat pulldown up",
+          "tag": "BUTTON",
+          "width": 34,
+          "height": 34
+        },
+        {
+          "label": "Move Lat pulldown down",
+          "tag": "BUTTON",
+          "width": 34,
+          "height": 34
+        },
+        {
+          "label": "View exercise",
+          "tag": "BUTTON",
+          "width": 76.7,
+          "height": 34
+        },
+        {
+          "label": "Adjust",
+          "tag": "BUTTON",
+          "width": 44.6,
+          "height": 34
+        },
+        {
+          "label": "Remove Seated shoulder press",
+          "tag": "BUTTON",
+          "width": 34,
+          "height": 34
+        },
+        {
+          "label": "Move Seated shoulder press up",
+          "tag": "BUTTON",
+          "width": 34,
+          "height": 34
+        },
+        {
+          "label": "Move Seated shoulder press down",
+          "tag": "BUTTON",
+          "width": 34,
+          "height": 34
+        },
+        {
+          "label": "View exercise",
+          "tag": "BUTTON",
+          "width": 76.7,
+          "height": 34
+        },
+        {
+          "label": "Adjust",
+          "tag": "BUTTON",
+          "width": 44.6,
+          "height": 34
+        },
+        {
+          "label": "Remove Chest-supported row",
+          "tag": "BUTTON",
+          "width": 34,
+          "height": 34
+        },
+        {
+          "label": "Move Chest-supported row up",
+          "tag": "BUTTON",
+          "width": 34,
+          "height": 34
+        },
+        {
+          "label": "Move Chest-supported row down",
+          "tag": "BUTTON",
+          "width": 34,
+          "height": 34
+        },
+        {
+          "label": "View exercise",
+          "tag": "BUTTON",
+          "width": 76.7,
+          "height": 34
+        },
+        {
+          "label": "Adjust",
+          "tag": "BUTTON",
+          "width": 44.6,
+          "height": 34
+        },
+        {
+          "label": "Remove 45-degree back extension",
+          "tag": "BUTTON",
+          "width": 34,
+          "height": 34
+        },
+        {
+          "label": "Move 45-degree back extension up",
+          "tag": "BUTTON",
+          "width": 34,
+          "height": 34
+        }
+      ],
+      "textViolations": [
+        {
+          "label": "Chest",
+          "size": "7px"
+        },
+        {
+          "label": "Dumbbell",
+          "size": "7px"
+        },
+        {
+          "label": "Horizontal push",
+          "size": "7px"
+        },
+        {
+          "label": "Last recorded: 45.0 lb · 10, 9, 8",
+          "size": "9px"
+        },
+        {
+          "label": "0/4",
+          "size": "8px"
+        },
+        {
+          "label": "View exercise",
+          "size": "9px"
+        },
+        {
+          "label": "Close adjustments",
+          "size": "9px"
+        },
+        {
+          "label": "Sets",
+          "size": "9px"
+        },
+        {
+          "label": "Planned load",
+          "size": "9px"
+        },
+        {
+          "label": "Target",
+          "size": "9px"
+        },
+        {
+          "label": "Rest",
+          "size": "9px"
+        },
+        {
+          "label": "Substitute movement",
+          "size": "9px"
+        },
+        {
+          "label": "Back",
+          "size": "7px"
+        },
+        {
+          "label": "Cable",
+          "size": "7px"
+        },
+        {
+          "label": "Pull",
+          "size": "7px"
+        },
+        {
+          "label": "Last recorded: 125.0 lb · 10, 10, 9",
+          "size": "9px"
+        },
+        {
+          "label": "0/3",
+          "size": "8px"
+        },
+        {
+          "label": "View exercise",
+          "size": "9px"
+        },
+        {
+          "label": "Adjust",
+          "size": "9px"
+        },
+        {
+          "label": "Custom",
+          "size": "7px"
+        },
+        {
+          "label": "Your setup",
+          "size": "7px"
+        },
+        {
+          "label": "Movement",
+          "size": "7px"
+        },
+        {
+          "label": "Last recorded: 35.0 lb · 10, 9, 8",
+          "size": "9px"
+        },
+        {
+          "label": "0/3",
+          "size": "8px"
+        },
+        {
+          "label": "View exercise",
+          "size": "9px"
+        },
+        {
+          "label": "Adjust",
+          "size": "9px"
+        },
+        {
+          "label": "Custom",
+          "size": "7px"
+        },
+        {
+          "label": "Your setup",
+          "size": "7px"
+        },
+        {
+          "label": "Movement",
+          "size": "7px"
+        },
+        {
+          "label": "Last recorded: 60.0 lb · 12, 11, 10",
+          "size": "9px"
+        },
+        {
+          "label": "0/3",
+          "size": "8px"
+        },
+        {
+          "label": "View exercise",
+          "size": "9px"
+        },
+        {
+          "label": "Adjust",
+          "size": "9px"
+        },
+        {
+          "label": "Hamstrings",
+          "size": "7px"
+        },
+        {
+          "label": "Bench",
+          "size": "7px"
+        },
+        {
+          "label": "Hip hinge",
+          "size": "7px"
+        },
+        {
+          "label": "Last recorded: No history yet",
+          "size": "9px"
+        },
+        {
+          "label": "0/3",
+          "size": "8px"
+        },
+        {
+          "label": "View exercise",
+          "size": "9px"
+        },
+        {
+          "label": "Adjust",
+          "size": "9px"
+        }
+      ],
+      "keyAction": {
+        "width": 392,
+        "height": 46,
+        "bottom": 1769.515625
+      },
+      "navigationTop": 856,
+      "keyActionOverlapsDock": false
+    },
+    {
+      "name": "active workout start",
+      "width": 320,
+      "viewport": {
+        "width": 320,
+        "height": 932
+      },
+      "horizontalOverflow": 0,
+      "documentHeight": 1530,
+      "targetViolations": [
+        {
+          "label": "Pause",
+          "tag": "BUTTON",
+          "width": 79.8,
+          "height": 40
+        },
+        {
+          "label": "Cancel workout",
+          "tag": "BUTTON",
+          "width": 146.4,
+          "height": 40
+        },
+        {
+          "label": "Reduce set 1 weight",
+          "tag": "BUTTON",
+          "width": 23,
+          "height": 40
+        },
+        {
+          "label": "Increase set 1 weight",
+          "tag": "BUTTON",
+          "width": 23,
+          "height": 40
+        },
+        {
+          "label": "Reduce set 1 repetitions",
+          "tag": "BUTTON",
+          "width": 23,
+          "height": 40
+        },
+        {
+          "label": "Increase set 1 repetitions",
+          "tag": "BUTTON",
+          "width": 23,
+          "height": 40
+        },
+        {
+          "label": "Complete set 1",
+          "tag": "BUTTON",
+          "width": 32,
+          "height": 32
+        },
+        {
+          "label": "Reduce set 2 weight",
+          "tag": "BUTTON",
+          "width": 23,
+          "height": 40
+        },
+        {
+          "label": "Increase set 2 weight",
+          "tag": "BUTTON",
+          "width": 23,
+          "height": 40
+        },
+        {
+          "label": "Reduce set 2 repetitions",
+          "tag": "BUTTON",
+          "width": 23,
+          "height": 40
+        },
+        {
+          "label": "Increase set 2 repetitions",
+          "tag": "BUTTON",
+          "width": 23,
+          "height": 40
+        },
+        {
+          "label": "Complete set 2",
+          "tag": "BUTTON",
+          "width": 32,
+          "height": 32
+        },
+        {
+          "label": "Reduce set 3 weight",
+          "tag": "BUTTON",
+          "width": 23,
+          "height": 40
+        },
+        {
+          "label": "Increase set 3 weight",
+          "tag": "BUTTON",
+          "width": 23,
+          "height": 40
+        },
+        {
+          "label": "Reduce set 3 repetitions",
+          "tag": "BUTTON",
+          "width": 23,
+          "height": 40
+        },
+        {
+          "label": "Increase set 3 repetitions",
+          "tag": "BUTTON",
+          "width": 23,
+          "height": 40
+        },
+        {
+          "label": "Complete set 3",
+          "tag": "BUTTON",
+          "width": 32,
+          "height": 32
+        },
+        {
+          "label": "Reduce set 4 weight",
+          "tag": "BUTTON",
+          "width": 23,
+          "height": 40
+        },
+        {
+          "label": "Increase set 4 weight",
+          "tag": "BUTTON",
+          "width": 23,
+          "height": 40
+        },
+        {
+          "label": "Reduce set 4 repetitions",
+          "tag": "BUTTON",
+          "width": 23,
+          "height": 40
+        },
+        {
+          "label": "Increase set 4 repetitions",
+          "tag": "BUTTON",
+          "width": 23,
+          "height": 40
+        },
+        {
+          "label": "Complete set 4",
+          "tag": "BUTTON",
+          "width": 32,
+          "height": 32
+        },
+        {
+          "label": "Add set",
+          "tag": "BUTTON",
+          "width": 142,
+          "height": 42
+        },
+        {
+          "label": "Remove last",
+          "tag": "BUTTON",
+          "width": 142,
+          "height": 42
+        },
+        {
+          "label": "Expand routine checklist",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        }
+      ],
+      "textViolations": [
+        {
+          "label": "EXERCISE 1 OF 5",
+          "size": "9px"
+        },
+        {
+          "label": "SET",
+          "size": "9px"
+        },
+        {
+          "label": "WEIGHT",
+          "size": "9px"
+        },
+        {
+          "label": "REPS",
+          "size": "9px"
+        },
+        {
+          "label": "DONE",
+          "size": "9px"
+        },
+        {
+          "label": "lb",
+          "size": "8px"
+        },
+        {
+          "label": "Set 1 last time: No previous set",
+          "size": "9px"
+        },
+        {
+          "label": "No previous set",
+          "size": "9px"
+        },
+        {
+          "label": "lb",
+          "size": "8px"
+        },
+        {
+          "label": "Set 2 last time: No previous set",
+          "size": "9px"
+        },
+        {
+          "label": "No previous set",
+          "size": "9px"
+        },
+        {
+          "label": "lb",
+          "size": "8px"
+        },
+        {
+          "label": "Set 3 last time: No previous set",
+          "size": "9px"
+        },
+        {
+          "label": "No previous set",
+          "size": "9px"
+        },
+        {
+          "label": "lb",
+          "size": "8px"
+        },
+        {
+          "label": "Set 4 last time: No previous set",
+          "size": "9px"
+        },
+        {
+          "label": "No previous set",
+          "size": "9px"
+        },
+        {
+          "label": "MOVEMENT PROFILE",
+          "size": "8px"
+        },
+        {
+          "label": "Chest · 0/4 sets",
+          "size": "9px"
+        },
+        {
+          "label": "Set 1 of 4",
+          "size": "9px"
+        }
+      ],
+      "keyAction": {
+        "width": 204,
+        "height": 54,
+        "bottom": 798
+      },
+      "navigationTop": null,
+      "keyActionOverlapsDock": false
+    },
+    {
+      "name": "active workout start",
+      "width": 430,
+      "viewport": {
+        "width": 430,
+        "height": 932
+      },
+      "horizontalOverflow": 0,
+      "documentHeight": 1449,
+      "targetViolations": [
+        {
+          "label": "Pause",
+          "tag": "BUTTON",
+          "width": 79.8,
+          "height": 40
+        },
+        {
+          "label": "Cancel workout",
+          "tag": "BUTTON",
+          "width": 146.4,
+          "height": 40
+        },
+        {
+          "label": "Reduce set 1 weight",
+          "tag": "BUTTON",
+          "width": 23,
+          "height": 40
+        },
+        {
+          "label": "Increase set 1 weight",
+          "tag": "BUTTON",
+          "width": 23,
+          "height": 40
+        },
+        {
+          "label": "Reduce set 1 repetitions",
+          "tag": "BUTTON",
+          "width": 23,
+          "height": 40
+        },
+        {
+          "label": "Increase set 1 repetitions",
+          "tag": "BUTTON",
+          "width": 23,
+          "height": 40
+        },
+        {
+          "label": "Complete set 1",
+          "tag": "BUTTON",
+          "width": 32,
+          "height": 32
+        },
+        {
+          "label": "Reduce set 2 weight",
+          "tag": "BUTTON",
+          "width": 23,
+          "height": 40
+        },
+        {
+          "label": "Increase set 2 weight",
+          "tag": "BUTTON",
+          "width": 23,
+          "height": 40
+        },
+        {
+          "label": "Reduce set 2 repetitions",
+          "tag": "BUTTON",
+          "width": 23,
+          "height": 40
+        },
+        {
+          "label": "Increase set 2 repetitions",
+          "tag": "BUTTON",
+          "width": 23,
+          "height": 40
+        },
+        {
+          "label": "Complete set 2",
+          "tag": "BUTTON",
+          "width": 32,
+          "height": 32
+        },
+        {
+          "label": "Reduce set 3 weight",
+          "tag": "BUTTON",
+          "width": 23,
+          "height": 40
+        },
+        {
+          "label": "Increase set 3 weight",
+          "tag": "BUTTON",
+          "width": 23,
+          "height": 40
+        },
+        {
+          "label": "Reduce set 3 repetitions",
+          "tag": "BUTTON",
+          "width": 23,
+          "height": 40
+        },
+        {
+          "label": "Increase set 3 repetitions",
+          "tag": "BUTTON",
+          "width": 23,
+          "height": 40
+        },
+        {
+          "label": "Complete set 3",
+          "tag": "BUTTON",
+          "width": 32,
+          "height": 32
+        },
+        {
+          "label": "Reduce set 4 weight",
+          "tag": "BUTTON",
+          "width": 23,
+          "height": 40
+        },
+        {
+          "label": "Increase set 4 weight",
+          "tag": "BUTTON",
+          "width": 23,
+          "height": 40
+        },
+        {
+          "label": "Reduce set 4 repetitions",
+          "tag": "BUTTON",
+          "width": 23,
+          "height": 40
+        },
+        {
+          "label": "Increase set 4 repetitions",
+          "tag": "BUTTON",
+          "width": 23,
+          "height": 40
+        },
+        {
+          "label": "Complete set 4",
+          "tag": "BUTTON",
+          "width": 32,
+          "height": 32
+        },
+        {
+          "label": "Add set",
+          "tag": "BUTTON",
+          "width": 201,
+          "height": 42
+        },
+        {
+          "label": "Remove last",
+          "tag": "BUTTON",
+          "width": 201,
+          "height": 42
+        },
+        {
+          "label": "Expand routine checklist",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        }
+      ],
+      "textViolations": [
+        {
+          "label": "EXERCISE 1 OF 5",
+          "size": "9px"
+        },
+        {
+          "label": "SET",
+          "size": "9px"
+        },
+        {
+          "label": "WEIGHT",
+          "size": "9px"
+        },
+        {
+          "label": "REPS",
+          "size": "9px"
+        },
+        {
+          "label": "DONE",
+          "size": "9px"
+        },
+        {
+          "label": "lb",
+          "size": "8px"
+        },
+        {
+          "label": "Set 1 last time: No previous set",
+          "size": "9px"
+        },
+        {
+          "label": "No previous set",
+          "size": "9px"
+        },
+        {
+          "label": "lb",
+          "size": "8px"
+        },
+        {
+          "label": "Set 2 last time: No previous set",
+          "size": "9px"
+        },
+        {
+          "label": "No previous set",
+          "size": "9px"
+        },
+        {
+          "label": "lb",
+          "size": "8px"
+        },
+        {
+          "label": "Set 3 last time: No previous set",
+          "size": "9px"
+        },
+        {
+          "label": "No previous set",
+          "size": "9px"
+        },
+        {
+          "label": "lb",
+          "size": "8px"
+        },
+        {
+          "label": "Set 4 last time: No previous set",
+          "size": "9px"
+        },
+        {
+          "label": "No previous set",
+          "size": "9px"
+        },
+        {
+          "label": "MOVEMENT PROFILE",
+          "size": "8px"
+        },
+        {
+          "label": "Chest · 0/4 sets",
+          "size": "9px"
+        },
+        {
+          "label": "Set 1 of 4",
+          "size": "9px"
+        }
+      ],
+      "keyAction": {
+        "width": 314,
+        "height": 54,
+        "bottom": 798
+      },
+      "navigationTop": null,
+      "keyActionOverlapsDock": false
+    },
+    {
+      "name": "first set completed",
+      "width": 320,
+      "viewport": {
+        "width": 320,
+        "height": 932
+      },
+      "horizontalOverflow": 0,
+      "documentHeight": 1578,
+      "targetViolations": [
+        {
+          "label": "Rest timer: 1 minutes 45 seconds remaining. Open controls",
+          "tag": "BUTTON",
+          "width": 85.5,
+          "height": 42
+        },
+        {
+          "label": "Pause",
+          "tag": "BUTTON",
+          "width": 79.8,
+          "height": 40
+        },
+        {
+          "label": "Cancel workout",
+          "tag": "BUTTON",
+          "width": 146.4,
+          "height": 40
+        },
+        {
+          "label": "Remove 15 seconds from rest",
+          "tag": "BUTTON",
+          "width": 51.5,
+          "height": 34
+        },
+        {
+          "label": "Pause rest timer",
+          "tag": "BUTTON",
+          "width": 51.5,
+          "height": 34
+        },
+        {
+          "label": "Add 15 seconds to rest",
+          "tag": "BUTTON",
+          "width": 51.5,
+          "height": 34
+        },
+        {
+          "label": "Skip",
+          "tag": "BUTTON",
+          "width": 51.5,
+          "height": 34
+        },
+        {
+          "label": "Reduce set 1 weight",
+          "tag": "BUTTON",
+          "width": 22.7,
+          "height": 39.4
+        },
+        {
+          "label": "Increase set 1 weight",
+          "tag": "BUTTON",
+          "width": 22.7,
+          "height": 39.4
+        },
+        {
+          "label": "Reduce set 1 repetitions",
+          "tag": "BUTTON",
+          "width": 22.7,
+          "height": 39.4
+        },
+        {
+          "label": "Increase set 1 repetitions",
+          "tag": "BUTTON",
+          "width": 22.7,
+          "height": 39.4
+        },
+        {
+          "label": "Complete set 1",
+          "tag": "BUTTON",
+          "width": 31.5,
+          "height": 31.5
+        },
+        {
+          "label": "Reduce set 2 weight",
+          "tag": "BUTTON",
+          "width": 23,
+          "height": 40
+        },
+        {
+          "label": "Increase set 2 weight",
+          "tag": "BUTTON",
+          "width": 23,
+          "height": 40
+        },
+        {
+          "label": "Reduce set 2 repetitions",
+          "tag": "BUTTON",
+          "width": 23,
+          "height": 40
+        },
+        {
+          "label": "Increase set 2 repetitions",
+          "tag": "BUTTON",
+          "width": 23,
+          "height": 40
+        },
+        {
+          "label": "Complete set 2",
+          "tag": "BUTTON",
+          "width": 32,
+          "height": 32
+        },
+        {
+          "label": "Reduce set 3 weight",
+          "tag": "BUTTON",
+          "width": 23,
+          "height": 40
+        },
+        {
+          "label": "Increase set 3 weight",
+          "tag": "BUTTON",
+          "width": 23,
+          "height": 40
+        },
+        {
+          "label": "Reduce set 3 repetitions",
+          "tag": "BUTTON",
+          "width": 23,
+          "height": 40
+        },
+        {
+          "label": "Increase set 3 repetitions",
+          "tag": "BUTTON",
+          "width": 23,
+          "height": 40
+        },
+        {
+          "label": "Complete set 3",
+          "tag": "BUTTON",
+          "width": 32,
+          "height": 32
+        },
+        {
+          "label": "Reduce set 4 weight",
+          "tag": "BUTTON",
+          "width": 23,
+          "height": 40
+        },
+        {
+          "label": "Increase set 4 weight",
+          "tag": "BUTTON",
+          "width": 23,
+          "height": 40
+        },
+        {
+          "label": "Reduce set 4 repetitions",
+          "tag": "BUTTON",
+          "width": 23,
+          "height": 40
+        },
+        {
+          "label": "Increase set 4 repetitions",
+          "tag": "BUTTON",
+          "width": 23,
+          "height": 40
+        },
+        {
+          "label": "Complete set 4",
+          "tag": "BUTTON",
+          "width": 32,
+          "height": 32
+        },
+        {
+          "label": "Add set",
+          "tag": "BUTTON",
+          "width": 142,
+          "height": 42
+        },
+        {
+          "label": "Remove last",
+          "tag": "BUTTON",
+          "width": 142,
+          "height": 42
+        },
+        {
+          "label": "Expand routine checklist",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        }
+      ],
+      "textViolations": [
+        {
+          "label": "REST",
+          "size": "7px"
+        },
+        {
+          "label": "EXERCISE 1 OF 5",
+          "size": "9px"
+        },
+        {
+          "label": "REST",
+          "size": "9px"
+        },
+        {
+          "label": "SET",
+          "size": "9px"
+        },
+        {
+          "label": "WEIGHT",
+          "size": "9px"
+        },
+        {
+          "label": "REPS",
+          "size": "9px"
+        },
+        {
+          "label": "DONE",
+          "size": "9px"
+        },
+        {
+          "label": "lb",
+          "size": "8px"
+        },
+        {
+          "label": "Set 1 last time: No previous set",
+          "size": "9px"
+        },
+        {
+          "label": "No previous set",
+          "size": "9px"
+        },
+        {
+          "label": "lb",
+          "size": "8px"
+        },
+        {
+          "label": "Set 2 last time: No previous set",
+          "size": "9px"
+        },
+        {
+          "label": "No previous set",
+          "size": "9px"
+        },
+        {
+          "label": "lb",
+          "size": "8px"
+        },
+        {
+          "label": "Set 3 last time: No previous set",
+          "size": "9px"
+        },
+        {
+          "label": "No previous set",
+          "size": "9px"
+        },
+        {
+          "label": "lb",
+          "size": "8px"
+        },
+        {
+          "label": "Set 4 last time: No previous set",
+          "size": "9px"
+        },
+        {
+          "label": "No previous set",
+          "size": "9px"
+        },
+        {
+          "label": "MOVEMENT PROFILE",
+          "size": "8px"
+        },
+        {
+          "label": "Chest · 1/4 sets",
+          "size": "9px"
+        },
+        {
+          "label": "Set 2 of 4",
+          "size": "9px"
+        }
+      ],
+      "keyAction": {
+        "width": 204,
+        "height": 54,
+        "bottom": 798
+      },
+      "navigationTop": null,
+      "keyActionOverlapsDock": false
+    },
+    {
+      "name": "first set completed",
+      "width": 430,
+      "viewport": {
+        "width": 430,
+        "height": 932
+      },
+      "horizontalOverflow": 0,
+      "documentHeight": 1497,
+      "targetViolations": [
+        {
+          "label": "Rest timer: 1 minutes 45 seconds remaining. Open controls",
+          "tag": "BUTTON",
+          "width": 85.5,
+          "height": 42
+        },
+        {
+          "label": "Pause",
+          "tag": "BUTTON",
+          "width": 79.8,
+          "height": 40
+        },
+        {
+          "label": "Cancel workout",
+          "tag": "BUTTON",
+          "width": 146.4,
+          "height": 40
+        },
+        {
+          "label": "Remove 15 seconds from rest",
+          "tag": "BUTTON",
+          "width": 81,
+          "height": 34
+        },
+        {
+          "label": "Pause rest timer",
+          "tag": "BUTTON",
+          "width": 81,
+          "height": 34
+        },
+        {
+          "label": "Add 15 seconds to rest",
+          "tag": "BUTTON",
+          "width": 81,
+          "height": 34
+        },
+        {
+          "label": "Skip",
+          "tag": "BUTTON",
+          "width": 81,
+          "height": 34
+        },
+        {
+          "label": "Reduce set 1 weight",
+          "tag": "BUTTON",
+          "width": 22.7,
+          "height": 39.4
+        },
+        {
+          "label": "Increase set 1 weight",
+          "tag": "BUTTON",
+          "width": 22.7,
+          "height": 39.4
+        },
+        {
+          "label": "Reduce set 1 repetitions",
+          "tag": "BUTTON",
+          "width": 22.7,
+          "height": 39.4
+        },
+        {
+          "label": "Increase set 1 repetitions",
+          "tag": "BUTTON",
+          "width": 22.7,
+          "height": 39.4
+        },
+        {
+          "label": "Complete set 1",
+          "tag": "BUTTON",
+          "width": 31.5,
+          "height": 31.5
+        },
+        {
+          "label": "Reduce set 2 weight",
+          "tag": "BUTTON",
+          "width": 23,
+          "height": 40
+        },
+        {
+          "label": "Increase set 2 weight",
+          "tag": "BUTTON",
+          "width": 23,
+          "height": 40
+        },
+        {
+          "label": "Reduce set 2 repetitions",
+          "tag": "BUTTON",
+          "width": 23,
+          "height": 40
+        },
+        {
+          "label": "Increase set 2 repetitions",
+          "tag": "BUTTON",
+          "width": 23,
+          "height": 40
+        },
+        {
+          "label": "Complete set 2",
+          "tag": "BUTTON",
+          "width": 32,
+          "height": 32
+        },
+        {
+          "label": "Reduce set 3 weight",
+          "tag": "BUTTON",
+          "width": 23,
+          "height": 40
+        },
+        {
+          "label": "Increase set 3 weight",
+          "tag": "BUTTON",
+          "width": 23,
+          "height": 40
+        },
+        {
+          "label": "Reduce set 3 repetitions",
+          "tag": "BUTTON",
+          "width": 23,
+          "height": 40
+        },
+        {
+          "label": "Increase set 3 repetitions",
+          "tag": "BUTTON",
+          "width": 23,
+          "height": 40
+        },
+        {
+          "label": "Complete set 3",
+          "tag": "BUTTON",
+          "width": 32,
+          "height": 32
+        },
+        {
+          "label": "Reduce set 4 weight",
+          "tag": "BUTTON",
+          "width": 23,
+          "height": 40
+        },
+        {
+          "label": "Increase set 4 weight",
+          "tag": "BUTTON",
+          "width": 23,
+          "height": 40
+        },
+        {
+          "label": "Reduce set 4 repetitions",
+          "tag": "BUTTON",
+          "width": 23,
+          "height": 40
+        },
+        {
+          "label": "Increase set 4 repetitions",
+          "tag": "BUTTON",
+          "width": 23,
+          "height": 40
+        },
+        {
+          "label": "Complete set 4",
+          "tag": "BUTTON",
+          "width": 32,
+          "height": 32
+        },
+        {
+          "label": "Add set",
+          "tag": "BUTTON",
+          "width": 201,
+          "height": 42
+        },
+        {
+          "label": "Remove last",
+          "tag": "BUTTON",
+          "width": 201,
+          "height": 42
+        },
+        {
+          "label": "Expand routine checklist",
+          "tag": "BUTTON",
+          "width": 36,
+          "height": 36
+        }
+      ],
+      "textViolations": [
+        {
+          "label": "REST",
+          "size": "7px"
+        },
+        {
+          "label": "EXERCISE 1 OF 5",
+          "size": "9px"
+        },
+        {
+          "label": "REST",
+          "size": "9px"
+        },
+        {
+          "label": "SET",
+          "size": "9px"
+        },
+        {
+          "label": "WEIGHT",
+          "size": "9px"
+        },
+        {
+          "label": "REPS",
+          "size": "9px"
+        },
+        {
+          "label": "DONE",
+          "size": "9px"
+        },
+        {
+          "label": "lb",
+          "size": "8px"
+        },
+        {
+          "label": "Set 1 last time: No previous set",
+          "size": "9px"
+        },
+        {
+          "label": "No previous set",
+          "size": "9px"
+        },
+        {
+          "label": "lb",
+          "size": "8px"
+        },
+        {
+          "label": "Set 2 last time: No previous set",
+          "size": "9px"
+        },
+        {
+          "label": "No previous set",
+          "size": "9px"
+        },
+        {
+          "label": "lb",
+          "size": "8px"
+        },
+        {
+          "label": "Set 3 last time: No previous set",
+          "size": "9px"
+        },
+        {
+          "label": "No previous set",
+          "size": "9px"
+        },
+        {
+          "label": "lb",
+          "size": "8px"
+        },
+        {
+          "label": "Set 4 last time: No previous set",
+          "size": "9px"
+        },
+        {
+          "label": "No previous set",
+          "size": "9px"
+        },
+        {
+          "label": "MOVEMENT PROFILE",
+          "size": "8px"
+        },
+        {
+          "label": "Chest · 1/4 sets",
+          "size": "9px"
+        },
+        {
+          "label": "Set 2 of 4",
+          "size": "9px"
+        }
+      ],
+      "keyAction": {
+        "width": 314,
+        "height": 54,
+        "bottom": 798
+      },
+      "navigationTop": null,
+      "keyActionOverlapsDock": false
+    }
+  ],
+  "consoleErrors": [],
+  "pageErrors": [],
+  "addedExercise": "45-degree back extension",
+  "activeState": {
+    "title": "Incline dumbbell press",
+    "completedSets": 1,
+    "restTimerVisible": true,
+    "activeSessionStored": true
+  },
+  "summary": {
+    "flowCompleted": true,
+    "screenshots": 14,
+    "zeroHorizontalOverflow": true,
+    "noKeyActionDockOverlap": true,
+    "targetViolationsByStep": [
+      {
+        "name": "training landing",
+        "width": 320,
+        "count": 44
+      },
+      {
+        "name": "training landing",
+        "width": 430,
+        "count": 2
+      },
+      {
+        "name": "day editor opened",
+        "width": 320,
+        "count": 59
+      },
+      {
+        "name": "day editor opened",
+        "width": 430,
+        "count": 17
+      },
+      {
+        "name": "day editor changed",
+        "width": 320,
+        "count": 60
+      },
+      {
+        "name": "day editor changed",
+        "width": 430,
+        "count": 18
+      },
+      {
+        "name": "workout preparation",
+        "width": 320,
+        "count": 23
+      },
+      {
+        "name": "workout preparation",
+        "width": 430,
+        "count": 23
+      },
+      {
+        "name": "workout setup adjusted",
+        "width": 320,
+        "count": 24
+      },
+      {
+        "name": "workout setup adjusted",
+        "width": 430,
+        "count": 24
+      },
+      {
+        "name": "active workout start",
+        "width": 320,
+        "count": 25
+      },
+      {
+        "name": "active workout start",
+        "width": 430,
+        "count": 25
+      },
+      {
+        "name": "first set completed",
+        "width": 320,
+        "count": 30
+      },
+      {
+        "name": "first set completed",
+        "width": 430,
+        "count": 30
+      }
+    ],
+    "textViolationsByStep": [
+      {
+        "name": "training landing",
+        "width": 320,
+        "count": 0
+      },
+      {
+        "name": "training landing",
+        "width": 430,
+        "count": 0
+      },
+      {
+        "name": "day editor opened",
+        "width": 320,
+        "count": 20
+      },
+      {
+        "name": "day editor opened",
+        "width": 430,
+        "count": 20
+      },
+      {
+        "name": "day editor changed",
+        "width": 320,
+        "count": 23
+      },
+      {
+        "name": "day editor changed",
+        "width": 430,
+        "count": 23
+      },
+      {
+        "name": "workout preparation",
+        "width": 320,
+        "count": 35
+      },
+      {
+        "name": "workout preparation",
+        "width": 430,
+        "count": 35
+      },
+      {
+        "name": "workout setup adjusted",
+        "width": 320,
+        "count": 40
+      },
+      {
+        "name": "workout setup adjusted",
+        "width": 430,
+        "count": 40
+      },
+      {
+        "name": "active workout start",
+        "width": 320,
+        "count": 20
+      },
+      {
+        "name": "active workout start",
+        "width": 430,
+        "count": 20
+      },
+      {
+        "name": "first set completed",
+        "width": 320,
+        "count": 22
+      },
+      {
+        "name": "first set completed",
+        "width": 430,
+        "count": 22
+      }
+    ]
+  }
+}

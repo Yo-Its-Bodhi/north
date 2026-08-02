@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import { ChevronLeft, ChevronRight, Download, Footprints, Share2, Trophy, X } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight, Download, Footprints, Share2, Trophy, X } from "lucide-react";
+import { readTrainingRecapTheme, renderTrainingRecap } from "./TrainingRecap";
 import "./TrainingAtlas.css";
 
 export type AtlasRecord = {
@@ -27,7 +28,6 @@ const metrics: Array<{ id: Metric; label: string }> = [
   { id: "sessions", label: "Sessions" }, { id: "minutes", label: "Minutes" }, { id: "reps", label: "Reps" },
   { id: "volume", label: "Volume" }, { id: "distance", label: "Distance" },
 ];
-const formatSize: Record<RecapFormat, [number, number]> = { square: [1080, 1080], story: [1080, 1920], landscape: [1600, 900] };
 const day = 86_400_000;
 
 function startOfWeek(value: Date) { const date = new Date(value); date.setHours(0, 0, 0, 0); date.setDate(date.getDate() - ((date.getDay() + 6) % 7)); return date; }
@@ -102,16 +102,19 @@ export default function TrainingAtlas({ records, weightUnit, distanceUnit, onOpe
   const [metric, setMetric] = useState<Metric>("sessions");
   const [offset, setOffset] = useState(0);
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
+  const [detailOpen, setDetailOpen] = useState(false);
   const [recapOpen, setRecapOpen] = useState(false);
   const [recapFormat, setRecapFormat] = useState<RecapFormat>("square");
   const [recapStats, setRecapStats] = useState<Metric[]>(["sessions", "minutes", "volume"]);
   const bounds = useMemo(() => periodBounds(range, offset, records), [range, offset, records]);
-  const periodRecords = useMemo(() => records.filter((record) => record.date >= iso(bounds.start) && record.date <= iso(bounds.end)), [records, bounds]);
-  const previousStart = new Date(bounds.start.getTime() - (bounds.end.getTime() - bounds.start.getTime() + day));
-  const previousRecords = records.filter((record) => record.date >= iso(previousStart) && record.date < iso(bounds.start));
+  const boundsStartTime = bounds.start.getTime();
+  const boundsEndTime = bounds.end.getTime();
+  const previousStartTime = boundsStartTime - (boundsEndTime - boundsStartTime + day);
+  const periodRecords = useMemo(() => records.filter((record) => record.date >= iso(new Date(boundsStartTime)) && record.date <= iso(new Date(boundsEndTime))), [records, boundsStartTime, boundsEndTime]);
+  const previousRecords = useMemo(() => records.filter((record) => record.date >= iso(new Date(previousStartTime)) && record.date < iso(new Date(boundsStartTime))), [records, previousStartTime, boundsStartTime]);
   const totals = total(periodRecords); const previousTotals = total(previousRecords);
-  const buckets = useMemo(() => makeBuckets(range, bounds.start, bounds.end, periodRecords), [range, bounds, periodRecords]);
-  const previousBuckets = useMemo(() => makeBuckets(range, previousStart, addDays(bounds.start, -1), previousRecords), [range, previousStart, bounds.start, previousRecords]);
+  const buckets = useMemo(() => makeBuckets(range, new Date(boundsStartTime), new Date(boundsEndTime), periodRecords), [range, boundsStartTime, boundsEndTime, periodRecords]);
+  const previousBuckets = useMemo(() => makeBuckets(range, new Date(previousStartTime), new Date(boundsStartTime - day), previousRecords), [range, previousStartTime, boundsStartTime, previousRecords]);
   const maxValue = Math.max(1, ...buckets.map((bucket) => bucket[metric]), ...previousBuckets.map((bucket) => bucket[metric]));
   const selected = buckets.find((bucket) => bucket.key === selectedKey) ?? null;
   const currentValue = totals[metric]; const priorValue = previousTotals[metric];
@@ -137,19 +140,26 @@ export default function TrainingAtlas({ records, weightUnit, distanceUnit, onOpe
 
   function changeRange(next: Range) { setRange(next); setOffset(0); setSelectedKey(null); }
   function toggleRecapStat(stat: Metric) { setRecapStats((current) => current.includes(stat) ? current.filter((item) => item !== stat) : current.length < 3 ? [...current, stat] : current); }
-  function exportRecap() {
-    const [width, height] = formatSize[recapFormat]; const canvas = document.createElement("canvas"); canvas.width = width; canvas.height = height;
-    const context = canvas.getContext("2d"); if (!context) return;
-    const accent = getComputedStyle(document.documentElement).getPropertyValue("--blue").trim() || "#2563eb";
-    context.fillStyle = "#f7faf9"; context.fillRect(0, 0, width, height); context.fillStyle = accent; context.fillRect(0, 0, width, Math.round(height * .12));
-    context.globalAlpha = .08; context.fillStyle = accent; context.beginPath(); context.arc(width * .84, height * .28, width * .28, 0, Math.PI * 2); context.fill(); context.globalAlpha = 1;
-    const inset = width * .08; context.fillStyle = "#ffffff"; context.font = `800 ${width * .032}px sans-serif`; context.fillText("NORTH / TRAINING ATLAS", inset, height * .075);
-    context.fillStyle = accent; context.font = `800 ${width * .026}px sans-serif`; context.fillText(bounds.label.toUpperCase(), inset, height * .2);
-    context.fillStyle = "#17343b"; context.font = `700 ${width * .064}px sans-serif`; context.fillText(personalHigh ? "A personal-high period." : `${totals.sessions} sessions recorded.`, inset, height * .29);
-    recapStats.forEach((stat, index) => { const y = height * (.4 + index * .1); context.fillStyle = "#5d7478"; context.font = `700 ${width * .022}px sans-serif`; context.fillText(metrics.find((item) => item.id === stat)!.label.toUpperCase(), inset, y); context.fillStyle = "#17343b"; context.font = `800 ${width * .045}px sans-serif`; context.fillText(formatValue(stat, totals[stat], weightUnit, distanceUnit), inset + width * .25, y); });
-    const chartTop = height * .72; buckets.forEach((bucket, index) => { const barWidth = width * .65 / buckets.length; const barHeight = Math.max(5, bucket[metric] / maxValue * height * .13); context.fillStyle = accent; context.fillRect(inset + index * barWidth, chartTop - barHeight, barWidth * .58, barHeight); });
-    context.globalAlpha = .14; context.fillStyle = accent; context.font = `900 ${width * .18}px sans-serif`; context.fillText("N", width * .73, height * .88); context.globalAlpha = 1;
-    context.fillStyle = "#17343b"; context.font = `700 ${width * .022}px sans-serif`; context.fillText("north.bodhix.io", inset, height * .93);
+  function openRecap() {
+    setRecapOpen(true);
+    window.setTimeout(() => {
+      const composer = document.querySelector<HTMLElement>(".atlas-recap");
+      composer?.scrollIntoView({ block: "center" });
+      composer?.querySelector<HTMLButtonElement>('button[aria-label="Close recap composer"]')?.focus({ preventScroll: true });
+    }, 0);
+  }
+  async function exportRecap() {
+    await document.fonts.ready;
+    const canvas = await renderTrainingRecap({
+      format: recapFormat,
+      periodLabel: bounds.label,
+      headline: personalHigh ? "A personal-high period." : `${totals.sessions} sessions recorded.`,
+      metricLabel: metrics.find((item) => item.id === metric)!.label,
+      metricTotal: formatValue(metric, totals[metric], weightUnit, distanceUnit),
+      stats: recapStats.map((stat) => ({ label: metrics.find((item) => item.id === stat)!.label, value: formatValue(stat, totals[stat], weightUnit, distanceUnit) })),
+      buckets: buckets.map((bucket) => ({ label: bucket.label, value: bucket[metric] })),
+      theme: readTrainingRecapTheme(),
+    });
     canvas.toBlob((blob) => {
       if (!blob) return;
       const url = URL.createObjectURL(blob);
@@ -164,7 +174,7 @@ export default function TrainingAtlas({ records, weightUnit, distanceUnit, onOpe
   }
 
   return <section className="training-atlas" aria-labelledby="training-atlas-title">
-    <header className="atlas-heading"><div><p className="eyebrow">TRAINING ATLAS</p><h2 id="training-atlas-title">Understand the shape of your work.</h2><p>Explore what changed, then choose what is worth carrying forward.</p></div><button className="atlas-recap-launch" onClick={() => setRecapOpen(true)}><Share2 size={16}/> Create recap</button></header>
+    <header className="atlas-heading"><div><p className="eyebrow">TRAINING ATLAS</p><h2 id="training-atlas-title">Understand the shape of your work.</h2><p>Explore what changed, then choose what is worth carrying forward.</p></div><button className="atlas-recap-launch" aria-expanded={recapOpen} onClick={openRecap}><Share2 size={16}/> Create recap</button></header>
     <div className="atlas-range" aria-label="Atlas period">{ranges.map((item) => <button key={item.id} className={range === item.id ? "active" : ""} onClick={() => changeRange(item.id)}>{item.label}</button>)}</div>
     <div className="atlas-period"><button aria-label="Previous period" disabled={range === "all"} onClick={() => { setOffset((value) => value - 1); setSelectedKey(null); }}><ChevronLeft/></button><strong>{bounds.label}</strong><button aria-label="Next period" disabled={range === "all" || offset >= 0} onClick={() => { setOffset((value) => value + 1); setSelectedKey(null); }}><ChevronRight/></button></div>
     <section className="atlas-snapshot" aria-label="Period snapshot">
@@ -172,6 +182,8 @@ export default function TrainingAtlas({ records, weightUnit, distanceUnit, onOpe
       <article><small>Current streak</small><strong>{weekStreak ? `${weekStreak} wk` : "—"}</strong><span>{weekStreak ? "consecutive active weeks" : "No active week yet"}</span></article>
       <article className={personalHigh ? "personal-high" : ""}><small>Personal high</small><strong>{personalHigh ? <><Trophy size={17}/> This period</> : "Building"}</strong><span>{personalHigh ? `Highest ${metric}` : "More periods add context"}</span></article>
     </section>
+    <button className="atlas-detail-disclosure" aria-expanded={detailOpen} aria-controls="atlas-detail-content" onClick={() => setDetailOpen((open) => !open)}><span><strong>Explore chart and evidence</strong><small>Compare metrics, periods and activity composition</small></span><ChevronDown size={17} aria-hidden="true" /></button>
+    <div id="atlas-detail-content" className={`atlas-detail-content${detailOpen ? " open" : ""}`}>
     <div className="atlas-metrics" aria-label="Chart metric">{metrics.map((item) => <button key={item.id} className={metric === item.id ? "active" : ""} onClick={() => { setMetric(item.id); setSelectedKey(null); }}>{item.label}</button>)}</div>
     <section className="atlas-chart" aria-label={`${bounds.label} ${metric} chart`}>
       {buckets.map((bucket, index) => { const details = `${bucket.label}: ${bucket.sessions} session${bucket.sessions === 1 ? "" : "s"}, ${bucket.minutes} minutes, ${bucket.reps} reps, ${formatValue("volume", bucket.volume, weightUnit, distanceUnit)} volume, ${formatValue("distance", bucket.distance, weightUnit, distanceUnit)}`; return <button key={bucket.key} className={selectedKey === bucket.key ? "selected" : ""} title={details} aria-label={`${details}. Open activities.`} onClick={() => setSelectedKey((value) => value === bucket.key ? null : bucket.key)}><span className="atlas-bars"><i className="comparison" style={{ height: `${Math.max(2, previousBuckets[index]?.[metric] / maxValue * 100)}%` }}/><i className="current" style={{ height: `${Math.max(3, bucket[metric] / maxValue * 100)}%` }}/>{bucket[metric] > 0 && bucket[metric] >= chartPersonalHigh && <Footprints className="atlas-best" size={13}/>}</span><small>{bucket.label}</small></button>; })}
@@ -182,6 +194,7 @@ export default function TrainingAtlas({ records, weightUnit, distanceUnit, onOpe
       <div className="atlas-observations"><p className="eyebrow">WHAT CHANGED</p><h3>Evidence from this period</h3>{insights.length ? insights.map((insight) => <p key={insight}>{insight}</p>) : <p>North needs repeated activity across periods before it describes a change.</p>}</div>
       <div className="atlas-composition"><p className="eyebrow">ACTIVITY COMPOSITION</p><h3>How the period was made</h3>{compositionTotal ? <div><span className="atlas-donut" role="img" style={{ background: `conic-gradient(${donut})` }} aria-label={`Activity composition: ${composition.map((item) => `${item.kind} ${item.value}`).join(", ")}`}/><ul>{composition.map((item, index) => <li key={item.kind}><i style={{ background: colors[index] }}/><span>{item.kind}</span><strong>{Math.round(item.value / compositionTotal * 100)}%</strong></li>)}</ul></div> : <p>No activity composition is available for this period.</p>}</div>
     </section>
+    </div>
     {recapOpen && <section className="atlas-recap" aria-label="North recap composer"><header><div><p className="eyebrow">NORTH RECAP</p><h3>Share the work, not the private context.</h3></div><button aria-label="Close recap composer" onClick={() => setRecapOpen(false)}><X/></button></header><p>Account identity, bodyweight, recovery and exact activity dates are always excluded.</p><div className="atlas-format" aria-label="Recap format">{(["square", "story", "landscape"] as RecapFormat[]).map((format) => <button key={format} className={recapFormat === format ? "active" : ""} onClick={() => setRecapFormat(format)}>{format === "square" ? "1:1 Square" : format === "story" ? "9:16 Story" : "16:9 Landscape"}</button>)}</div><fieldset><legend>Choose up to three statistics</legend>{metrics.map((item) => <label key={item.id}><input type="checkbox" checked={recapStats.includes(item.id)} disabled={!recapStats.includes(item.id) && recapStats.length >= 3} onChange={() => toggleRecapStat(item.id)}/><span>{item.label}<small>{formatValue(item.id, totals[item.id], weightUnit, distanceUnit)}</small></span></label>)}</fieldset><button className="atlas-export" disabled={!recapStats.length} onClick={exportRecap}><Download size={17}/> Export private-safe PNG</button></section>}
   </section>;
 }

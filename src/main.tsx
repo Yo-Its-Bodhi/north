@@ -1,4 +1,4 @@
-import { Component, createElement, StrictMode, useEffect, useState, type ErrorInfo, type ReactNode } from "react";
+import { Component, createElement, StrictMode, useEffect, type ErrorInfo, type ReactNode } from "react";
 import { createRoot } from "react-dom/client";
 import "@fontsource/dm-sans/latin-400.css";
 import "@fontsource/dm-sans/latin-500.css";
@@ -28,14 +28,11 @@ import "./product-tour.css";
 export function NorthRoot() {
   const admin = location.pathname.startsWith("/admin");
   const musclePreview = import.meta.env.DEV && location.pathname.startsWith("/dev/muscle-map");
-  const [ready, setReady] = useState(admin || musclePreview);
   useEffect(() => {
     if (admin || musclePreview) return;
-    let active = true;
-    void hydratePublishedCatalogue().finally(() => { if (active) setReady(true); });
-    return () => { active = false; };
+    void hydratePublishedCatalogue();
   }, [admin, musclePreview]);
-  return <BootIntro ready={ready}>{ready ? createElement(musclePreview ? MuscleMapPreview : admin ? Admin : App) : null}</BootIntro>;
+  return <BootIntro>{createElement(musclePreview ? MuscleMapPreview : admin ? Admin : App)}</BootIntro>;
 }
 
 class NorthErrorBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {

@@ -39,7 +39,7 @@ const achievementTracks: AchievementTrack[] = [
 
 export const milestoneDefinitions: MilestoneDefinition[] = achievementTracks.flatMap((track) => track.targets.map((target, index) => ({
   id: `${track.track}-chapter-${index + 1}`,
-  title: `Chapter ${index + 1}: ${track.title}`,
+  title: track.title,
   description: track.description.replace("{target}", target.toLocaleString()),
   category: track.category,
   metric: track.metric,

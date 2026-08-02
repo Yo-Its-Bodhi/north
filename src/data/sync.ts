@@ -33,9 +33,10 @@ export async function syncNorth(apiBase: string, accessToken: string): Promise<S
         failed += 1;
         break;
       } else {
-        throw new Error(`Sync returned ${response.status}`);
+        throw Object.assign(new Error(`Sync returned ${response.status}`), { status: response.status });
       }
     } catch (error) {
+      if (error instanceof Error && (error as Error & { status?: number }).status === 401) throw error;
       await northRepository.retry(mutation, error instanceof Error ? error.message : "Unknown sync error");
       failed += 1;
     }
@@ -64,9 +65,22 @@ const storageKeys: Record<string, string> = {
   "progression-transaction": "north-progression-transaction-v1",
 };
 
-export async function pullNorth(apiBase: string, accessToken: string, since = "1970-01-01T00:00:00.000Z", preferAccount = false): Promise<PullResult> {
-  const response = await fetch(`${apiBase.replace(/\/$/, "")}/v1/sync/documents?since=${encodeURIComponent(since)}`, { headers: { Authorization: `Bearer ${accessToken}`, ...northDeviceHeaders() } });
-  if (!response.ok) throw new Error(`Restore returned ${response.status}`);
+export async function pullNorth(apiBase: string, accessToken: string, since = "1970-01-01T00:00:00.000Z", preferAccount = false, timeoutMs = 10_000): Promise<PullResult> {
+  const controller = new AbortController();
+  const timeout = globalThis.setTimeout(() => controller.abort(), timeoutMs);
+  let response: Response;
+  try {
+    response = await fetch(`${apiBase.replace(/\/$/, "")}/v1/sync/documents?since=${encodeURIComponent(since)}`, {
+      headers: { Authorization: `Bearer ${accessToken}`, ...northDeviceHeaders() },
+      signal: controller.signal,
+    });
+  } catch (error) {
+    if (controller.signal.aborted) throw new Error("Account restore timed out. North is using the data saved on this device.", { cause: error });
+    throw error;
+  } finally {
+    globalThis.clearTimeout(timeout);
+  }
+  if (!response.ok) throw Object.assign(new Error(`Restore returned ${response.status}`), { status: response.status });
   const result = await response.json() as { documents: NorthDocument[]; serverTime: string };
   const pendingDocumentKeys = new Set((await northRepository.pendingMutations()).map((mutation) => mutation.documentKey));
   let restored = 0;

@@ -132,17 +132,24 @@
 .journey-destination .chapter-progress button.current{border-color:color-mix(in srgb,var(--journey-accent) 42%,var(--line));color:var(--journey-accent);background:color-mix(in srgb,var(--journey-accent) 8%,var(--surface-solid))}
 .journey-destination .chapter-progress button.selected,.journey-destination .chapter-progress button.selected.current{border-color:var(--journey-accent);color:var(--surface-solid);background:var(--journey-accent);box-shadow:0 5px 12px color-mix(in srgb,var(--journey-accent) 24%,transparent)}
 .journey-destination .milestone-filters button.active{border-color:var(--journey-accent);color:var(--surface-solid);background:var(--journey-accent)}
+.journey-destination .chapter-filters{justify-content:flex-start;overscroll-behavior-inline:contain;scroll-snap-type:x proximity;touch-action:pan-x}
+.journey-destination .chapter-filters button{flex:0 0 auto;scroll-snap-align:start}
 .journey-destination .chapter-heading{display:flex;align-items:end;justify-content:space-between;margin:0 0 var(--north-space-3)!important}
 .journey-destination .chapter-heading h2{font-size:28px;line-height:1}
 .journey-destination .chapter-heading>span{color:var(--muted);font-size:11px;font-weight:800}
 .journey-destination .chapter-milestone-list{display:grid;gap:0;margin:0;border-top:1px solid var(--north-divider)}
 .journey-destination .chapter-milestone-list article{min-height:82px;margin:0;padding:16px 0;display:grid;grid-template-columns:48px minmax(0,1fr);gap:14px;border:0;border-bottom:1px solid var(--north-divider);border-radius:0;background:transparent;box-shadow:none}
+.journey-destination .chapter-milestone-list article[role="button"]{cursor:pointer;outline:none}
+.journey-destination .chapter-milestone-list article[role="button"]:focus-visible{background:var(--north-surface-scan-strong);box-shadow:0 0 0 2px var(--journey-accent)}
 .journey-destination .chapter-milestone-list article>span{width:42px;height:42px;border:1px solid var(--north-active-divider);border-radius:50%;display:grid;place-items:center;color:var(--blue);background:color-mix(in srgb,var(--blue) 8%,transparent);font:800 11px/1 "DM Sans",sans-serif}
 .journey-destination .chapter-milestone-list article.unlocked>span{border-color:transparent;background:var(--blue);box-shadow:none}
 .journey-destination .chapter-milestone-list article strong{display:block;font:800 20px/1 "Barlow Condensed",sans-serif;letter-spacing:0;text-transform:uppercase}
 .journey-destination .chapter-milestone-list article small{display:block;margin-top:8px;color:var(--muted);font-size:10px;line-height:1.35}
 .journey-destination .chapter-milestone-list .milestone-progress{height:3px;margin:10px 0 0;border-radius:0;background:color-mix(in srgb,var(--line) 88%,transparent)}
 .journey-destination .chapter-milestone-list .milestone-progress i{border-radius:0;background:var(--blue)!important}
+.journey-destination .milestone-explanation{margin-top:11px;padding:11px 12px;border-left:2px solid var(--journey-accent);background:color-mix(in srgb,var(--journey-accent) 7%,transparent)}
+.journey-destination .milestone-explanation p{margin:0;color:var(--ink);font-size:12px;line-height:1.45}
+.journey-destination .milestone-explanation span{display:block;margin-top:5px;color:var(--muted);font-size:10px;line-height:1.4}
 /* Insights read as a small evidence desk, not an all-data report. */
 .journey-destination .four-week-chart{margin-bottom:20px}
 .journey-destination .insight-next-step{border:1px solid var(--north-active-divider);background:color-mix(in srgb,var(--blue) 5%,var(--surface-solid))}
