@@ -1749,18 +1749,21 @@
 
 .workout-screen .cue { margin: 12px 0; padding: 14px; border: 1px solid color-mix(in srgb, var(--blue) 24%, var(--north-divider)); border-radius: var(--north-radius-workspace); background: color-mix(in srgb, var(--blue) 6%, var(--surface-solid)); }
 .workout-screen .sets-table { margin-top: 14px; display: grid; gap: 0; overflow: hidden; border: 1px solid var(--north-divider); border-radius: var(--north-radius-workspace); background: var(--surface-solid); }
-.workout-screen .set-row { min-width: 0; min-height: 64px; padding: 8px 12px; display: grid; grid-template-columns: 34px minmax(130px, 1.35fr) minmax(112px, 1fr) 44px; gap: 8px; align-items: center; border: 0; border-bottom: 1px solid var(--north-divider); border-radius: 0; background: transparent; box-shadow: none; }
+.workout-screen .set-row { min-width: 0; min-height: 64px; padding: 8px 12px; display: grid; grid-template-columns: 34px minmax(130px, 1.35fr) minmax(112px, 1fr) 44px; gap: 8px; align-items: center; border: 0; border-bottom: 1px solid var(--north-divider); border-radius: 0; background: color-mix(in srgb, var(--surface-solid) 97%, var(--blue) 3%); box-shadow: none; }
+.workout-screen .set-row:not(.set-head):hover,
+.workout-screen .set-row:not(.set-head):focus-within { background: color-mix(in srgb, var(--blue) 7%, var(--surface-solid)); }
 .workout-screen .set-head { min-height: 36px; color: var(--muted); background: var(--surface); font-size: 9px; font-weight: 800; letter-spacing: .08em; }
 .workout-screen .set-row > strong { text-align: center; }
-.set-value-control { min-width: 0; display: grid; grid-template-columns: 30px minmax(0, 1fr) 30px; align-items: center; overflow: hidden; border: 1px solid var(--north-divider); border-radius: var(--north-radius-control); background: var(--surface); }
-.set-value-control > button { width: 100%; height: 42px; padding: 0; border: 0; color: var(--blue); background: color-mix(in srgb, var(--blue) 6%, var(--surface-solid)); font-size: 17px; font-weight: 800; appearance: none; cursor: pointer; }
+.set-value-control { min-width: 0; display: grid; grid-template-columns: 30px minmax(0, 1fr) 30px; align-items: center; overflow: hidden; border: 1px solid color-mix(in srgb, var(--blue) 24%, var(--north-divider)); border-radius: var(--north-radius-control); background: var(--surface-solid); box-shadow: inset 0 1px 0 color-mix(in srgb, white 38%, transparent), 0 3px 9px color-mix(in srgb, var(--navy) 9%, transparent); }
+.set-value-control > button { width: 100%; height: 42px; padding: 0; border: 0; color: var(--blue); background: color-mix(in srgb, var(--blue) 10%, var(--surface-solid)); font-size: 17px; font-weight: 800; appearance: none; cursor: pointer; }
+.set-value-control > button:active { background: color-mix(in srgb, var(--blue) 20%, var(--surface-solid)); }
 .set-value-control input { width: 100%; min-width: 0; height: 42px !important; padding: 0 3px; border: 0 !important; border-radius: 0 !important; color: var(--ink); background: transparent !important; font-size: 15px; font-weight: 800; text-align: center; appearance: textfield; }
 .set-value-control input::-webkit-inner-spin-button,
 .set-value-control input::-webkit-outer-spin-button { margin: 0; appearance: none; }
 .set-value-control label { min-width: 0; position: relative; }
 .set-value-control label small { position: absolute; right: 3px; top: 15px; color: var(--muted); font-size: 8px; pointer-events: none; }
 .set-value-control.weight input { padding-right: 17px; }
-.set-check { width: 36px; height: 36px; margin: auto; padding: 0; border: 2px solid var(--north-divider); border-radius: 50%; display: grid; place-items: center; color: var(--surface-solid); background: transparent; appearance: none; cursor: pointer; }
+.set-check { width: 36px; height: 36px; margin: auto; padding: 0; border: 2px solid color-mix(in srgb, var(--blue) 38%, var(--north-divider)); border-radius: 50%; display: grid; place-items: center; color: var(--surface-solid); background: color-mix(in srgb, var(--blue) 5%, var(--surface-solid)); box-shadow: 0 3px 9px color-mix(in srgb, var(--navy) 10%, transparent); appearance: none; cursor: pointer; }
 .set-complete { background: color-mix(in srgb, var(--blue) 9%, var(--surface-solid)) !important; }
 .set-complete .set-check { border-color: var(--blue); color: var(--north-complete-foreground); background: var(--blue); box-shadow: 0 0 0 3px color-mix(in srgb, var(--blue) 18%, transparent), 0 7px 15px color-mix(in srgb, var(--blue) 20%, transparent); }
 .set-history-hint { display: block; margin: 0; padding: 7px 12px 9px 54px; border-bottom: 1px solid var(--north-divider); color: var(--muted); font-size: 9px !important; }
@@ -1812,15 +1815,16 @@
     position: fixed;
     z-index: 94;
     right: 0;
-    bottom: calc(76px + env(safe-area-inset-bottom));
+    bottom: 0;
     left: 0;
     width: min(100%, 480px);
     margin: 0 auto;
-    padding: 0 10px;
+    padding: 0 10px max(8px, env(safe-area-inset-bottom));
     display: flex;
     flex-direction: column;
     background: color-mix(in srgb, var(--surface-solid) 96%, transparent);
-    box-shadow: 0 -10px 30px color-mix(in srgb, var(--navy) 16%, transparent);
+    border-top: 1px solid color-mix(in srgb, var(--blue) 18%, var(--north-divider));
+    box-shadow: 0 -14px 38px color-mix(in srgb, var(--navy) 24%, transparent);
     backdrop-filter: blur(18px);
   }
   .workout-source-switcher { grid-template-columns: repeat(3, minmax(0, 1fr)); }

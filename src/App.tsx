@@ -545,13 +545,13 @@ function createWeekPlan(mondayDate: string): PlanDay[] {
 
 function initialWeekPlan(): PlanDay[] {
   const thisMonday = weekStartFor(isoDate(new Date()));
-  return [...createWeekPlan(thisMonday), ...createWeekPlan(addIsoDays(thisMonday, 7))];
+  return [...createWeekPlan(addIsoDays(thisMonday, -7)), ...createWeekPlan(thisMonday), ...createWeekPlan(addIsoDays(thisMonday, 7))];
 }
 
 function readPlan(): PlanDay[] {
   try {
     const saved = JSON.parse(localStorage.getItem(PLAN_KEY) ?? "null") as PlanDay[] | null;
-    if (!saved?.length || (saved.length !== 7 && saved.length !== 14)) return initialWeekPlan();
+    if (!Array.isArray(saved) || saved.length < 7) return initialWeekPlan();
     const defaults = initialWeekPlan();
     return defaults.map((fallback) => {
       const item = saved.find((candidate) => candidate.date === fallback.date);
@@ -903,31 +903,31 @@ function App() {
   }, [screen, session]);
 
   useEffect(() => {
-    // Swipe gesture navigation in workout screen
     let touchStartX = 0;
-    let touchEndX = 0;
+    let touchStartY = 0;
+    let swipeAllowed = false;
 
     const handleTouchStart = (event: TouchEvent) => {
       if (screen !== "workout") return;
+      const target = event.target as Element | null;
+      swipeAllowed = !target?.closest("button, input, textarea, select, label, a, [role='button'], [contenteditable='true']");
       touchStartX = event.changedTouches[0].screenX;
+      touchStartY = event.changedTouches[0].screenY;
     };
 
     const handleTouchEnd = (event: TouchEvent) => {
-      if (screen !== "workout" || !session) return;
+      if (screen !== "workout" || !session || !swipeAllowed) return;
       const idx = Math.max(0, session.exercises.findIndex((item) => item.id === session.currentId));
-      touchEndX = event.changedTouches[0].screenX;
-      
-      const swipeDistance = touchStartX - touchEndX;
-      const minSwipeDistance = 50; // minimum swipe distance
+      const swipeDistance = touchStartX - event.changedTouches[0].screenX;
+      const verticalDistance = touchStartY - event.changedTouches[0].screenY;
+      const minSwipeDistance = 110;
 
-      if (Math.abs(swipeDistance) > minSwipeDistance) {
+      if (Math.abs(swipeDistance) > minSwipeDistance && Math.abs(swipeDistance) > Math.abs(verticalDistance) * 1.5) {
         if (swipeDistance > 0) {
-          // Left swipe: next exercise
           if (idx < session.exercises.length - 1) {
             setSession((s) => ({ ...s, currentId: s.exercises[idx + 1].id }));
           }
         } else {
-          // Right swipe: previous exercise
           if (idx > 0) {
             setSession((s) => ({ ...s, currentId: s.exercises[idx - 1].id }));
           }
@@ -1200,16 +1200,17 @@ function App() {
   });
   const novaExerciseMatches = novaExerciseSearch.trim() ? fullExerciseLibrary.filter((item) => `${item.name} ${item.category} ${item.equipment} ${item.aliases.join(" ")}`.toLowerCase().includes(novaExerciseSearch.trim().toLowerCase())).slice(0, 12) : [];
   const selectedHistory = history.find((item) => item.finishedAt === selectedHistoryId) ?? null;
-  const selectedPlanDay = weeklyPlan.find((item) => item.id === selectedPlanDayId) ?? weeklyPlan[0];
   const currentWeekStart = weekStartFor(isoDate(new Date()));
   const currentWeekPlan = weeklyPlan.filter((day) => day.date >= currentWeekStart && day.date < addIsoDays(currentWeekStart, 7));
+  const selectedPlanDay = weeklyPlan.find((item) => item.id === selectedPlanDayId) ?? currentWeekPlan[0] ?? weeklyPlan[0];
   const viewedWeekStart = addIsoDays(currentWeekStart, planningWeekOffset * 7);
   const viewedWeekPlan = weeklyPlan.filter((day) => day.date >= viewedWeekStart && day.date < addIsoDays(viewedWeekStart, 7));
   const selectPlanDay = (day: PlanDay) => {
     setSelectedPlanDayId(day.id);
-    setPlanningWeekOffset(day.date >= addIsoDays(currentWeekStart, 7) ? 1 : 0);
+    const dayWeekStart = weekStartFor(day.date);
+    setPlanningWeekOffset(dayWeekStart < currentWeekStart ? -1 : dayWeekStart > currentWeekStart ? 1 : 0);
   };
-  const showPlanningWeek = (offset: 0 | 1) => {
+  const showPlanningWeek = (offset: -1 | 0 | 1) => {
     const start = addIsoDays(currentWeekStart, offset * 7);
     const days = weeklyPlan.filter((day) => day.date >= start && day.date < addIsoDays(start, 7));
     const weekdayIndex = (dateAtNoon(selectedPlanDay.date).getDay() + 6) % 7;
@@ -1240,7 +1241,7 @@ function App() {
   const weightTrendHeight = (value: number) => weightTrendMax === weightTrendMin ? 60 : 18 + (value - weightTrendMin) / (weightTrendMax - weightTrendMin) * 82;
   const recordedSets = history.reduce((total, workout) => total + sessionSetCount(workout), 0);
   const recordedVolume = history.reduce((total, workout) => total + sessionTonnage(workout), 0);
-  const todayPlan = weeklyPlan.find((item) => item.date === isoDate(new Date())) ?? weeklyPlan[0];
+  const todayPlan = weeklyPlan.find((item) => item.date === isoDate(new Date())) ?? currentWeekPlan[0] ?? weeklyPlan[0];
   const todayWorkoutCardImage = planWorkoutCardImage(todayPlan);
   const todayActivities = activities.filter((item) => item.date === todayPlan.date);
   const todayCompletedWorkout = history.find((item) => isoDate(new Date(workoutRecordDate(item) || 0)) === todayPlan.date);
@@ -1322,11 +1323,11 @@ function App() {
   ];
   const selectedProgram = programs.find((program) => program.id === selectedProgramId) ?? programs[0];
   const currentProgram = activeProgram ? programs.find((program) => program.id === activeProgram.programId) ?? null : null;
-  const programCompletedThisWeek = activeProgram ? activeProgram.trainingDayIndexes.filter((index) => weeklyPlan[index]?.status === "completed").length : 0;
+  const programCompletedThisWeek = activeProgram ? activeProgram.trainingDayIndexes.filter((index) => currentWeekPlan[index]?.status === "completed").length : 0;
   const programAdherence = activeProgram ? Math.round((activeProgram.weekHistory.reduce((sum, week) => sum + week.completed, 0) + programCompletedThisWeek) / Math.max(1, activeProgram.weekHistory.reduce((sum, week) => sum + week.planned, 0) + activeProgram.daysPerWeek) * 100) : 0;
   const previousCelebrationHistory = session.finishedAt ? history.filter((workout) => workout.finishedAt !== session.finishedAt) : history;
   const prospectiveProgramCompleted = activeProgram && session.planDayId
-    ? programCompletedThisWeek + (weeklyPlan.some((day, index) => day.id === session.planDayId && activeProgram.trainingDayIndexes.includes(index) && day.status !== "completed") ? 1 : 0)
+    ? programCompletedThisWeek + (currentWeekPlan.some((day, index) => day.id === session.planDayId && activeProgram.trainingDayIndexes.includes(index) && day.status !== "completed") ? 1 : 0)
     : programCompletedThisWeek;
   const sessionEarnedMoments = deriveEarnedMoments(
     previousCelebrationHistory,
@@ -1335,10 +1336,10 @@ function App() {
   );
   const weekSessions = history.filter((workout) => {
     const date = isoDate(new Date(workoutRecordDate(workout) || 0));
-    return date >= weeklyPlan[0].date && date <= weeklyPlan[6].date;
+    return date >= currentWeekPlan[0].date && date <= currentWeekPlan[6].date;
   });
-  const weekActivities = activities.filter((activity) => activity.date >= weeklyPlan[0].date && activity.date <= weeklyPlan[6].date);
-  const weekHealthActivities = healthActivities.filter((activity) => { const date = isoDate(new Date(activity.started_at)); return date >= weeklyPlan[0].date && date <= weeklyPlan[6].date; });
+  const weekActivities = activities.filter((activity) => activity.date >= currentWeekPlan[0].date && activity.date <= currentWeekPlan[6].date);
+  const weekHealthActivities = healthActivities.filter((activity) => { const date = isoDate(new Date(activity.started_at)); return date >= currentWeekPlan[0].date && date <= currentWeekPlan[6].date; });
   const weekTrainingMinutes = weekSessions.reduce((total, workout) => total + (sessionMinutes(workout) ?? 0), 0) + weekActivities.reduce((total, activity) => total + (Number.parseFloat(activity.duration) || 0), 0) + weekHealthActivities.reduce((total, activity) => total + activity.duration_minutes, 0);
   const lifetimeTrainingMinutes = history.reduce((total, workout) => total + (sessionMinutes(workout) ?? 0), 0) + activities.reduce((total, activity) => total + (Number.parseFloat(activity.duration) || 0), 0) + healthActivities.reduce((total, activity) => total + activity.duration_minutes, 0);
   const activityTotals = (kind: ActivityEntry["kind"]) => activities.filter((activity) => activity.kind === kind).reduce((total, activity) => ({ sessions: total.sessions + 1, distance: total.distance + (Number.parseFloat(activity.distance) || 0) }), { sessions: 0, distance: 0 });
@@ -1633,7 +1634,7 @@ function App() {
     window.setTimeout(() => setCopyStatus(""), 1800);
   }
   const fourWeekTrends = (() => {
-    const anchor = new Date(`${weeklyPlan[0].date}T00:00:00`);
+    const anchor = new Date(`${currentWeekStart}T00:00:00`);
     return [3, 2, 1, 0].map((weeksAgo) => {
       const start = new Date(anchor); start.setDate(anchor.getDate() - weeksAgo * 7);
       const end = new Date(start); end.setDate(start.getDate() + 6);
@@ -1733,7 +1734,7 @@ function App() {
       const averageSoreness = checkIns.reduce((total, item) => total + item.soreness, 0) / checkIns.length;
       insights.push({ id: "recovery", icon: "🌙", title: "You are giving recovery a voice", summary: `${checkIns.length} check-ins · energy averaging ${averageEnergy.toFixed(1)}/5`, evidence: `Across ${checkIns.length} check-ins, energy averages ${averageEnergy.toFixed(1)}/5 and soreness ${averageSoreness.toFixed(1)}/5. North will not infer a cause from those values without more context.`, novaPrompt: `Your recent check-ins average ${averageEnergy.toFixed(1)}/5 for energy. Is there anything outside training affecting that?` });
     }
-    const completedDays = weeklyPlan.filter((item) => item.status === "completed").length;
+    const completedDays = currentWeekPlan.filter((item) => item.status === "completed").length;
     if (completedDays >= 2) insights.push({ id: "plan", icon: "📍", title: "The plan is becoming real", summary: `${completedDays} planned days completed this week`, evidence: `${completedDays} days in the current seven-day plan have matching completed records. Skipped and rest days are not treated as failures.`, novaPrompt: `${completedDays} planned days are complete this week. Does the rhythm feel sustainable?` });
     if (!insights.length) insights.push({ id: "learning", icon: "🧭", title: "North is still learning", summary: "Complete and reflect before patterns become claims", evidence: "North needs repeated observations before it describes a pattern. A single workout, ride, or difficult morning should not become an identity.", novaPrompt: "We’re still building context together. What would be useful for North to understand first?" });
     return insights;
@@ -2205,14 +2206,16 @@ function App() {
       const requestedDuration = Number(lower.match(/\b(20|30|45|60|75)\s*(?:minutes?|mins?)/)?.[1] ?? activeProgram.duration);
       if (!currentProgram.dayOptions.includes(requestedDays)) return { text: `${currentProgram.name} supports ${currentProgram.dayOptions.join(", ")} training days per week. I won’t silently force it into ${requestedDays}. Choose a supported rhythm or open Programs to select a different path.`, confidence: "High", evidence: [`${currentProgram.name} supports ${currentProgram.dayOptions.join(" · ")} days per week.`], action: "open-week", actionLabel: "Review the current week" };
       const indexes = trainingIndexes(requestedDays);
-      const strengthPool = weeklyPlan.filter((day) => day.kind === "strength" && day.workout?.length);
-      const afterPlan = weeklyPlan.map((day, index) => {
+      const strengthPool = currentWeekPlan.filter((day) => day.kind === "strength" && day.workout?.length);
+      const afterPlan = weeklyPlan.map((day) => {
+        if (day.date < currentWeekStart || day.date >= addIsoDays(currentWeekStart, 7)) return structuredClone(day);
+        const index = (dateAtNoon(day.date).getDay() + 6) % 7;
         if (!indexes.includes(index)) return { ...structuredClone(day), kind: index === 6 ? "rest" as const : "recovery" as const, title: index === 6 ? "Rest" : "Recovery and mobility", workout: undefined, status: "planned" as const, note: `${currentProgram.name} · Week ${activeProgram.currentWeek} · adjusted with Nova` };
         const source = strengthPool[indexes.indexOf(index) % Math.max(1, strengthPool.length)];
         return source ? { ...structuredClone(day), kind: "strength" as const, title: source.title, workout: resetExercises(source.workout!), status: "planned" as const, note: `${currentProgram.name} · Week ${activeProgram.currentWeek} · ${activeProgram.priority}` } : { ...structuredClone(day), kind: "strength" as const, title: "Program strength session", workout: resetExercises(starterExercises), status: "planned" as const };
       });
       const afterProgram: ActiveProgram = { ...structuredClone(activeProgram), daysPerWeek: requestedDays, duration: requestedDuration, trainingDayIndexes: indexes, changes: [...activeProgram.changes, { createdAt: new Date().toISOString(), week: activeProgram.currentWeek, kind: "program schedule", from: `${activeProgram.daysPerWeek} days · ${activeProgram.duration} min`, to: `${requestedDays} days · ${requestedDuration} min` }] };
-      return { text: `I can adjust ${currentProgram.name} from ${activeProgram.daysPerWeek} to ${requestedDays} days per week${requestedDuration !== activeProgram.duration ? ` and from ${activeProgram.duration} to ${requestedDuration} minutes per session` : ""}. The current week will be rebuilt around ${indexes.map((index) => weeklyPlan[index].label).join(", ")}; completed history is never changed.`, confidence: "High", evidence: [`Active program: ${currentProgram.name} · week ${activeProgram.currentWeek}`, `Current rhythm: ${activeProgram.daysPerWeek} days · proposed: ${requestedDays} days`, `Training days after change: ${indexes.map((index) => weeklyPlan[index].label).join(" · ")}`], programProposal: { id: crypto.randomUUID(), summary: `${requestedDays} program days per week · ${requestedDuration} minutes per session`, beforeProgram: structuredClone(activeProgram), afterProgram, beforePlan: structuredClone(weeklyPlan), afterPlan } };
+      return { text: `I can adjust ${currentProgram.name} from ${activeProgram.daysPerWeek} to ${requestedDays} days per week${requestedDuration !== activeProgram.duration ? ` and from ${activeProgram.duration} to ${requestedDuration} minutes per session` : ""}. The current week will be rebuilt around ${indexes.map((index) => currentWeekPlan[index].label).join(", ")}; completed history is never changed.`, confidence: "High", evidence: [`Active program: ${currentProgram.name} · week ${activeProgram.currentWeek}`, `Current rhythm: ${activeProgram.daysPerWeek} days · proposed: ${requestedDays} days`, `Training days after change: ${indexes.map((index) => currentWeekPlan[index].label).join(" · ")}`], programProposal: { id: crypto.randomUUID(), summary: `${requestedDays} program days per week · ${requestedDuration} minutes per session`, beforeProgram: structuredClone(activeProgram), afterProgram, beforePlan: structuredClone(weeklyPlan), afterPlan } };
     }
     if (lower.includes("reflect") || lower.includes("review my week") || lower.includes("weekly review")) return { text: `This week records ${weekSessions.length + weekActivities.length} movement sessions and ${weekTrainingMinutes} active minutes. I can open a guided reflection for what felt good, what you learned, and what should change next week.`, confidence: "High", evidence: [`${weekSessions.length} completed workouts`, `${weekActivities.length} logged activities`, `${weekTrainingMinutes} recorded minutes`], action: "weekly-review", actionLabel: "Reflect on this week" };
     if (["short on time", "less time", "shorter", "quick workout", "only have"].some((term) => lower.includes(term)) && todayPlan.kind === "strength" && todayPlan.workout?.length) {
@@ -2236,7 +2239,7 @@ function App() {
     if (lower.includes("today") || lower.includes("workout") || lower.includes("train")) return { text: `Today is ${todayPlan.title}. It is planned as ${todayPlan.kind}${todayPlan.workout ? ` with ${todayPlan.workout.length} exercises and about ${plannedMinutes(todayPlan.workout)} minutes` : ""}. Open it to prepare, or tell me “short on time,” “low energy,” or “too sore” and I’ll show an exact proposed adjustment before anything changes.`, confidence: "High", evidence: [`Current plan: ${todayPlan.title}`, todayPlan.workout ? `${todayPlan.workout.length} exercises · ${plannedMinutes(todayPlan.workout)} estimated minutes` : `${todayPlan.kind} day`], action: "open-today", actionLabel: "Open today’s plan" };
     if (lower.includes("sore") || lower.includes("tired") || lower.includes("recovery") || lower.includes("energy")) return checkIns[0]?.date === isoDate(new Date()) ? { text: `Your check-in records energy ${checkIns[0].energy}/5 and soreness ${checkIns[0].soreness}/5. That is useful context, not a diagnosis. Keep the plan adjustable and use the first working set as another signal.`, confidence: "Moderate", evidence: [`Today’s check-in: energy ${checkIns[0].energy}/5`, `Today’s check-in: soreness ${checkIns[0].soreness}/5`], action: "open-today", actionLabel: "Review today’s plan" } : { text: "I don’t have a check-in for today, so I shouldn’t guess about readiness. Add energy, soreness, sleep, and a note; then I can compare that context with the planned session.", confidence: "Limited", evidence: ["No check-in is saved for today."], action: "check-in", actionLabel: "Check in now" };
     if (lower.includes("progress") || lower.includes("strong") || lower.includes("weight")) return history.length >= 2 ? { text: `North has ${history.length} completed workouts and ${personalRecords.length} detected personal records. Review Progression to see the exact saved sets behind each suggestion before changing load, reps, or rest.`, confidence: personalRecords.length ? "Moderate" : "Limited", evidence: [`${history.length} completed workouts`, `${personalRecords.length} detected personal records`], action: "progression", actionLabel: "Review progression" } : { text: "There isn’t enough repeated workout history for a responsible progression recommendation yet. Complete the same movements at least twice and record every working set.", confidence: "Limited", evidence: [`Only ${history.length} completed workout${history.length === 1 ? "" : "s"} available.`], action: "progression", actionLabel: "See what evidence is needed" };
-    if (lower.includes("week") || lower.includes("plan")) return { text: `This week contains ${weeklyPlan.filter((day) => day.kind === "strength").length} strength days and ${weeklyPlan.filter((day) => day.kind === "rest" || day.kind === "recovery").length} recovery/rest days. ${weeklyPlan.filter((day) => day.status === "completed").length} days are complete.`, confidence: "High", evidence: [`${weeklyPlan.filter((day) => day.status === "completed").length} of 7 days complete`, `${weeklyPlan.filter((day) => day.kind === "strength").length} strength days planned`], action: "open-week", actionLabel: "Open the full week" };
+    if (lower.includes("week") || lower.includes("plan")) return { text: `This week contains ${currentWeekPlan.filter((day) => day.kind === "strength").length} strength days and ${currentWeekPlan.filter((day) => day.kind === "rest" || day.kind === "recovery").length} recovery/rest days. ${currentWeekPlan.filter((day) => day.status === "completed").length} days are complete.`, confidence: "High", evidence: [`${currentWeekPlan.filter((day) => day.status === "completed").length} of 7 days complete`, `${currentWeekPlan.filter((day) => day.kind === "strength").length} strength days planned`], action: "open-week", actionLabel: "Open the full week" };
     return { text: "I can help with today’s workout, recovery context, weekly planning, or progression. I only use records North actually has, explain the evidence and limitations, and ask before changing your plan.", confidence: "Limited", evidence: ["No specific North record matched this question."], action: "open-today", actionLabel: "Start with today" };
   }
 
@@ -2244,7 +2247,7 @@ function App() {
     if (action === "open-week") setScreen("week-plan");
     else if (action === "check-in") { setDraftCheckIn({ id: "", date: isoDate(new Date()), weight: checkIns[0]?.weight ? displayBodyWeight(checkIns[0].weight).toFixed(1).replace(/\.0$/, "") : "", sleep: latestSleepDay?.sleep_minutes ? (latestSleepDay.sleep_minutes / 60).toFixed(1) : "", energy: 3, soreness: 2, note: "" }); setScreen("check-in"); }
     else if (action === "progression") setScreen("progression");
-    else if (action === "weekly-review") { const existing = weeklyReviews.find((item) => item.weekStart === weeklyPlan[0].date); setDraftReview(existing ? { proud: existing.proud, learned: existing.learned, next: existing.next } : { proud: "", learned: "", next: "" }); setScreen("weekly-review"); }
+    else if (action === "weekly-review") { const existing = weeklyReviews.find((item) => item.weekStart === currentWeekStart); setDraftReview(existing ? { proud: existing.proud, learned: existing.learned, next: existing.next } : { proud: "", learned: "", next: "" }); setScreen("weekly-review"); }
     else if (action === "open-today") { setSelectedPlanDayId(todayPlan.id); setScreen("training"); }
   }
 
@@ -2698,9 +2701,11 @@ function App() {
   function generateProgramWeek(program = selectedProgram, week = 1, priorProgram: ActiveProgram | null = activeProgram) {
     const indexes = trainingIndexes(programDays);
     const focuses = program.focusesByDays[programDays] ?? program.focusesByDays[program.defaultDays];
-    const monday = weeklyPlan[0].date;
+    const monday = currentWeekStart;
     let sessionIndex = 0;
-    setWeeklyPlan((days) => days.map((day, index) => {
+    setWeeklyPlan((days) => days.map((day) => {
+      if (day.date < currentWeekStart || day.date >= addIsoDays(currentWeekStart, 7)) return day;
+      const index = (dateAtNoon(day.date).getDay() + 6) % 7;
       if (!indexes.includes(index)) return { ...day, kind: index === 6 ? "rest" : "recovery", title: index === 6 ? "Rest" : "Recovery and mobility", workout: undefined, note: `${program.name} · Week ${week}`, status: "planned" };
       const focus = focuses[sessionIndex] ?? focuses[focuses.length - 1];
       const template = programTemplate(focus, sessionIndex++);
@@ -2863,13 +2868,13 @@ function App() {
   }
 
   function openWeeklyReview() {
-    const existing = weeklyReviews.find((item) => item.weekStart === weeklyPlan[0].date);
+    const existing = weeklyReviews.find((item) => item.weekStart === currentWeekStart);
     setDraftReview(existing ? { proud: existing.proud, learned: existing.learned, next: existing.next } : { proud: "", learned: "", next: "" });
     setScreen("weekly-review");
   }
 
   function saveWeeklyReview() {
-    const entry: WeeklyReview = { id: `${weeklyPlan[0].date}-${Date.now()}`, weekStart: weeklyPlan[0].date, ...draftReview, createdAt: new Date().toISOString() };
+    const entry: WeeklyReview = { id: `${currentWeekStart}-${Date.now()}`, weekStart: currentWeekStart, ...draftReview, createdAt: new Date().toISOString() };
     setWeeklyReviews((value) => [entry, ...value.filter((item) => item.weekStart !== entry.weekStart)].slice(0, 52));
     setScreen("journey");
   }
@@ -3413,8 +3418,8 @@ function App() {
 
       {screen === "training" && (
         <section className="screen destination-screen training-destination">
-          <header className="training-page-header destination-brand-header destination-brand-training"><div className="destination-header-copy"><p className="eyebrow destination-eyebrow">THE WORK</p><h1>Training</h1><p className="destination-subheading">Own the work.</p><p className="destination-header-detail">Your plan. Your progress. Your strength.</p></div><div className="training-page-actions destination-header-actions"><button aria-label="Review this week" title={weeklyReviews.some((item) => item.weekStart === weeklyPlan[0].date) ? "Revisit this week" : "Reflect on this week"} onClick={openWeeklyReview}><NotebookPen size={20} /></button><button aria-label="Open Trophy Room" title="Trophy Room" onClick={() => setScreen("progression")}><Trophy size={21} /></button></div></header>
-          <div className="section-heading training-rhythm-heading"><div className="choice-row" aria-label="Planning week"><button className={planningWeekOffset === 0 ? "active" : ""} onClick={() => showPlanningWeek(0)}>This week</button><button className={planningWeekOffset === 1 ? "active" : ""} onClick={() => showPlanningWeek(1)}>Next week</button></div><button className="text-button" onClick={() => setScreen("week-plan")}>See full week <ArrowRight size={14} /></button></div>
+          <header className="training-page-header destination-brand-header destination-brand-training"><div className="destination-header-copy"><p className="eyebrow destination-eyebrow">THE WORK</p><h1>Training</h1><p className="destination-subheading">Own the work.</p><p className="destination-header-detail">Your plan. Your progress. Your strength.</p></div><div className="training-page-actions destination-header-actions"><button aria-label="Review this week" title={weeklyReviews.some((item) => item.weekStart === currentWeekStart) ? "Revisit this week" : "Reflect on this week"} onClick={openWeeklyReview}><NotebookPen size={20} /></button><button aria-label="Open Trophy Room" title="Trophy Room" onClick={() => setScreen("progression")}><Trophy size={21} /></button></div></header>
+          <div className="section-heading training-rhythm-heading"><div className="choice-row" aria-label="Planning week"><button className={planningWeekOffset === -1 ? "active" : ""} onClick={() => showPlanningWeek(-1)}>Last week</button><button className={planningWeekOffset === 0 ? "active" : ""} onClick={() => showPlanningWeek(0)}>This week</button><button className={planningWeekOffset === 1 ? "active" : ""} onClick={() => showPlanningWeek(1)}>Next week</button></div><button className="text-button" onClick={() => setScreen("week-plan")}>See full week <ArrowRight size={14} /></button></div>
           <section className="week-strip training-rhythm-strip">
             {viewedWeekPlan.map((day) => <button key={day.id} onClick={() => selectPlanDay(day)} className={`${day.id === selectedPlanDay.id ? "selected" : ""} ${day.date === isoDate(new Date()) ? "today" : ""} ${day.status}`}><span>{day.label.slice(0, 1)}</span><small>{Number(day.date.slice(-2))}</small><i>{day.status === "completed" ? "✓" : day.status === "skipped" ? "×" : day.kind === "strength" ? "●" : day.kind === "rest" ? "—" : "·"}</i></button>)}
           </section>
@@ -3499,7 +3504,7 @@ function App() {
           <p className="eyebrow">FULL WEEK</p>
           <h1>Plan the rhythm.</h1>
           <p className="lead">See every day, preview the real prescription, then open any day to edit it.</p>
-          <div className="choice-row" aria-label="Planning week"><button className={planningWeekOffset === 0 ? "active" : ""} onClick={() => showPlanningWeek(0)}>This week</button><button className={planningWeekOffset === 1 ? "active" : ""} onClick={() => showPlanningWeek(1)}>Next week</button></div>
+          <div className="choice-row" aria-label="Planning week"><button className={planningWeekOffset === -1 ? "active" : ""} onClick={() => showPlanningWeek(-1)}>Last week</button><button className={planningWeekOffset === 0 ? "active" : ""} onClick={() => showPlanningWeek(0)}>This week</button><button className={planningWeekOffset === 1 ? "active" : ""} onClick={() => showPlanningWeek(1)}>Next week</button></div>
           <section className="expanded-week-list">{viewedWeekPlan.map((day) => {
             const workout = day.workout ?? [];
             return <article key={day.id} className={`${day.kind} ${day.status}`}><button onClick={() => { selectPlanDay(day); setScreen("training"); }}><div className="expanded-day-date"><span>{day.label}</span><strong>{Number(day.date.slice(-2))}</strong></div><div className="expanded-day-content"><small>{day.kind.toUpperCase()} · {day.status}{day.sessions?.length ? ` · ${day.sessions.length + 1} sessions` : ""}</small><h3>{day.title}</h3>{day.kind === "strength" && workout.length > 0 ? <><p>{workout.map((exercise) => exercise.name).join(" · ")}{day.sessions?.length ? ` · then ${day.sessions.map((item) => item.title).join(" · ")}` : ""}</p><div><span><Clock3 size={12} /> ≈{plannedMinutes(workout)} min</span><span><Dumbbell size={12} /> {workout.reduce((sum, exercise) => sum + exercise.sets.length, 0)} sets</span><span><TrendingUp size={12} /> {plannedIntensity(workout)}</span></div></> : <p>{day.note || (day.kind === "rest" ? "Recovery is part of the plan." : "Open the day to add details.")}</p>}</div><ArrowRight size={16} /></button></article>;
@@ -4095,7 +4100,7 @@ function App() {
           <p className="eyebrow">WEEKLY REVIEW</p>
           <h1>What did this week teach you?</h1>
           <p className="lead">Reflection is not a scorecard. It is how effort becomes understanding.</p>
-          <section className="week-review-summary"><div><strong>{weeklyPlan.filter((item) => item.status === "completed").length}</strong><span>planned days completed</span></div><div><strong>{history.filter((item) => item.finishedAt && item.finishedAt.slice(0, 10) >= weeklyPlan[0].date && item.finishedAt.slice(0, 10) <= weeklyPlan[6].date).reduce((total, item) => total + sessionSetCount(item), 0)}</strong><span>working sets</span></div><div><strong>{activities.filter((item) => item.date >= weeklyPlan[0].date && item.date <= weeklyPlan[6].date).reduce((total, item) => total + (Number.parseFloat(item.distance) || 0), 0).toFixed(1)}</strong><span>kilometres</span></div></section>
+          <section className="week-review-summary"><div><strong>{currentWeekPlan.filter((item) => item.status === "completed").length}</strong><span>planned days completed</span></div><div><strong>{history.filter((item) => item.finishedAt && item.finishedAt.slice(0, 10) >= currentWeekPlan[0].date && item.finishedAt.slice(0, 10) <= currentWeekPlan[6].date).reduce((total, item) => total + sessionSetCount(item), 0)}</strong><span>working sets</span></div><div><strong>{activities.filter((item) => item.date >= currentWeekPlan[0].date && item.date <= currentWeekPlan[6].date).reduce((total, item) => total + (Number.parseFloat(item.distance) || 0), 0).toFixed(1)}</strong><span>kilometres</span></div></section>
           <section className="reflection-fields">
             <label><span>What are you proud of?</span><textarea rows={3} value={draftReview.proud} onChange={(event) => setDraftReview((value) => ({ ...value, proud: event.target.value }))} placeholder="Showing up, adapting, resting, trying again…" /></label>
             <label><span>What did you learn?</span><textarea rows={3} value={draftReview.learned} onChange={(event) => setDraftReview((value) => ({ ...value, learned: event.target.value }))} placeholder="Something about your body, routine, or mindset." /></label>

@@ -69,3 +69,13 @@ test("the workout flow renders a desktop rail and pause review", () => {
   assert.match(source, /crossed a day or lasted more than six hours/);
   assert.match(source, /setWeeklyPlan[\s\S]*setWorkoutSubmitOpen\(false\);\s*setScreen\("today"\);/);
 });
+
+test("mobile workout actions use the real safe-area bottom and deliberate swipes", () => {
+  const source = readFileSync(new URL("../src/App.tsx", import.meta.url), "utf8");
+  const styles = readFileSync(new URL("../src/destination-reliability.css", import.meta.url), "utf8");
+  assert.match(source, /closest\("button, input, textarea, select, label, a, \[role='button'\]/);
+  assert.match(source, /const minSwipeDistance = 110/);
+  assert.match(source, /Math\.abs\(swipeDistance\) > Math\.abs\(verticalDistance\) \* 1\.5/);
+  assert.match(styles, /\.workout-mobile-dock \{[\s\S]*?bottom: 0;[\s\S]*?env\(safe-area-inset-bottom\)/);
+  assert.doesNotMatch(styles, /\.workout-mobile-dock \{[\s\S]*?bottom: calc\(76px/);
+});
