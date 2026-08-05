@@ -78,4 +78,14 @@ test("mobile workout actions use the real safe-area bottom and deliberate swipes
   assert.match(source, /Math\.abs\(swipeDistance\) > Math\.abs\(verticalDistance\) \* 1\.5/);
   assert.match(styles, /\.workout-mobile-dock \{[\s\S]*?bottom: 0;[\s\S]*?env\(safe-area-inset-bottom\)/);
   assert.doesNotMatch(styles, /\.workout-mobile-dock \{[\s\S]*?bottom: calc\(76px/);
+  assert.match(styles, /@media \(max-width: 640px\) \{[\s\S]*?\.workout-screen \.set-row \{ grid-template-columns: 24px minmax\(90px, 1\.2fr\) minmax\(74px, 1fr\) 26px; gap: 4px;[\s\S]*?\.set-check \{ width: 26px; min-width: 26px; height: 26px; min-height: 26px; \}/);
+});
+
+test("the active workout keeps the phone awake and reacquires after returning", () => {
+  const source = readFileSync(new URL("../src/App.tsx", import.meta.url), "utf8");
+  assert.match(source, /wakeLock\.request\("screen"\)/);
+  assert.match(source, /document\.visibilityState !== "visible"/);
+  assert.match(source, /document\.addEventListener\("visibilitychange", handleVisibility\)/);
+  assert.match(source, /if \(cancelled\) \{ await requestedLock\.release\(\); return; \}/);
+  assert.match(source, /if \(lock && !lock\.released\) void lock\.release\(\)/);
 });

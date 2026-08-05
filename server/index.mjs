@@ -7,6 +7,7 @@ import rateLimit from "@fastify/rate-limit";
 import bcrypt from "bcryptjs";
 import pg from "pg";
 import { registerCommunityRoutes } from "./community-routes.mjs";
+import { registerGuideRoutes } from "./guide-routes.mjs";
 import { healthExerciseKind, isPurposefulExercise, recordStartsAfterConnection, recordingMethodName } from "./health-policy.mjs";
 import { registerNovaRoutes } from "./nova-routes.mjs";
 
@@ -124,10 +125,13 @@ app.post("/v1/issues", { preHandler: app.authenticate, config: { rateLimit: { ma
   return reply.code(201).send({ ...created.rows[0], deliveredToOwnerInbox: true, webhookNotified: Boolean(notification.notifiedAt) });
 });
 
+const LEGAL_NOTICE_VERSION = "interim-v1.0";
+
 app.post("/v1/auth/register", { config: { rateLimit: { max: 8, timeWindow: "15 minutes" } } }, async (request, reply) => {
-  const { username, password, displayName, timezone = "UTC", accessCode } = request.body ?? {};
+  const { username, password, displayName, timezone = "UTC", accessCode, acceptedLegalVersion } = request.body ?? {};
   const normalizedUsername = String(username ?? "").trim().toLowerCase();
   if (!/^[a-z0-9][a-z0-9_-]{2,29}$/.test(normalizedUsername) || !password || password.length < 10 || !displayName) return reply.code(400).send({ error: "Choose a 3–30 character username, a name, and a password of at least 10 characters." });
+  if (acceptedLegalVersion !== LEGAL_NOTICE_VERSION) return reply.code(400).send({ error: "You must agree to the current Legal & Safety Notice before creating an account." });
   const client = await pool.connect();
   try {
     await client.query("begin");
@@ -143,12 +147,12 @@ app.post("/v1/auth/register", { config: { rateLimit: { max: 8, timeWindow: "15 m
     const recoveryCode = createRecoveryCode();
     const result = await client.query(
       `with created_user as (
-        insert into app_users(display_name, timezone, is_admin) values($1,$2,$6) returning *
+        insert into app_users(display_name, timezone, is_admin, legal_notice_version, legal_accepted_at) values($1,$2,$6,$7,now()) returning *
       ), credential as (
         insert into local_credentials(owner_user_id,username,password_hash,recovery_code_hash)
         select id,$3,$4,$5 from created_user
       ) select created_user.*, $3::text as username from created_user`,
-      [displayName.trim(), timezone, normalizedUsername, passwordHash, sha256(recoveryCode), normalizedUsername === OWNER_USERNAME],
+      [displayName.trim(), timezone, normalizedUsername, passwordHash, sha256(recoveryCode), normalizedUsername === OWNER_USERNAME, acceptedLegalVersion],
     );
     const session = await issueSession(client, result.rows[0], request);
     await client.query("commit");
@@ -494,15 +498,32 @@ app.post("/v1/admin/operations/events/:id/resolve", { preHandler: app.requireAdm
 app.get("/v1/admin/users/:id/export", { preHandler: app.requireAdmin }, async (request, reply) => {
   const user = await pool.query("select u.id,u.display_name,u.timezone,u.status,u.created_at,u.updated_at,c.username from app_users u join local_credentials c on c.owner_user_id=u.id where u.id=$1 and u.deleted_at is null", [request.params.id]);
   if (!user.rows[0]) return reply.code(404).send({ error: "User not found." });
-  const [documents, workouts, activities, devices] = await Promise.all([
+  const [documents, workouts, activities, checkIns, devices, sessions, healthConnections, healthRecords, novaConversations, novaMessages, novaGoals, novaMemory, novaProposals, novaActions, novaUsage, communityWorkouts, supportNotes, issueReports, syncConflicts, requestLogs, adminAuditEvents] = await Promise.all([
     pool.query("select document_key,collection,data,version,created_at,updated_at,deleted_at from sync_documents where owner_user_id=$1 order by updated_at", [request.params.id]),
     pool.query("select * from workout_sessions where owner_user_id=$1 order by session_date", [request.params.id]),
     pool.query("select * from activities where owner_user_id=$1 order by activity_date", [request.params.id]),
+    pool.query("select * from check_ins where owner_user_id=$1 order by check_in_date", [request.params.id]),
     pool.query("select id,name,last_seen_at,created_at,revoked_at from devices where owner_user_id=$1 order by created_at", [request.params.id]),
+    pool.query("select id,device_id,expires_at,revoked_at,created_at from refresh_tokens where owner_user_id=$1 order by created_at", [request.params.id]),
+    pool.query("select * from health_connections where owner_user_id=$1 order by connected_at", [request.params.id]),
+    pool.query("select * from health_records where owner_user_id=$1 order by started_at", [request.params.id]),
+    pool.query("select * from nova_conversations where owner_user_id=$1 order by created_at", [request.params.id]),
+    pool.query("select * from nova_messages where owner_user_id=$1 order by created_at", [request.params.id]),
+    pool.query("select * from nova_goals where owner_user_id=$1 order by created_at", [request.params.id]),
+    pool.query("select * from nova_memory_entries where owner_user_id=$1 order by created_at", [request.params.id]),
+    pool.query("select * from nova_action_proposals where owner_user_id=$1 order by created_at", [request.params.id]),
+    pool.query("select * from nova_action_events where owner_user_id=$1 order by created_at", [request.params.id]),
+    pool.query("select * from nova_usage_events where owner_user_id=$1 order by created_at", [request.params.id]),
+    pool.query("select * from community_workouts where owner_user_id=$1 order by created_at", [request.params.id]),
+    pool.query("select * from support_notes where owner_user_id=$1 order by created_at", [request.params.id]),
+    pool.query("select * from issue_reports where owner_user_id=$1 order by created_at", [request.params.id]),
+    pool.query("select * from sync_conflicts where owner_user_id=$1 order by created_at", [request.params.id]),
+    pool.query("select request_id,method,route,status_code,duration_ms,device_id,user_agent,occurred_at from api_request_logs where user_id=$1 order by occurred_at", [request.params.id]),
+    pool.query("select action,reason,ip_address,metadata,created_at,actor_user_id,target_user_id from admin_audit_events where actor_user_id=$1 or target_user_id=$1 order by created_at", [request.params.id]),
   ]);
   await auditAdmin(request, "user.export", request.params.id, "Owner requested a user data export");
   reply.header("content-disposition", `attachment; filename="north-${user.rows[0].username}-export.json"`);
-  return { exported_at: new Date().toISOString(), user: user.rows[0], documents: documents.rows, workouts: workouts.rows, activities: activities.rows, devices: devices.rows };
+  return { exported_at: new Date().toISOString(), user: user.rows[0], documents: documents.rows, workouts: workouts.rows, activities: activities.rows, check_ins: checkIns.rows, devices: devices.rows, sessions: sessions.rows, health: { connections: healthConnections.rows, records: healthRecords.rows }, nova: { conversations: novaConversations.rows, messages: novaMessages.rows, goals: novaGoals.rows, memory: novaMemory.rows, proposals: novaProposals.rows, actions: novaActions.rows, usage: novaUsage.rows }, community_workouts: communityWorkouts.rows, support_notes: supportNotes.rows, issue_reports: issueReports.rows, sync_conflicts: syncConflicts.rows, request_logs: requestLogs.rows, admin_audit_events: adminAuditEvents.rows };
 });
 
 app.get("/v1/admin/audit/export", { preHandler: app.requireAdmin }, async (request, reply) => {
@@ -869,6 +890,7 @@ function mapDocument(row) {
 }
 
 registerCommunityRoutes(app, { pool });
+registerGuideRoutes(app);
 registerNovaRoutes(app,{pool});
 
 app.addHook("onClose", async () => pool.end());

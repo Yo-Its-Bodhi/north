@@ -16,17 +16,22 @@ test("health context is separated across Today, You, Journey, Training and Setti
   assert.match(appSource, /const meaningfulHealthActivities = healthActivities/);
   assert.match(appSource, /weekHealthActivities\.reduce/);
   assert.match(appSource, /className="health-permission-controls"/);
+  assert.match(appSource, /const historyCalendarHealthActivities = healthActivities\.filter/);
+  assert.match(appSource, /dayHealthActivities = healthActivities\.filter/);
+  assert.match(appSource, /Samsung Health<\/small>/);
 });
 
 test("the client requests context and exposes the immutable import boundary", () => {
   assert.match(appSource, /\/v1\/health\/context\?days=365/);
-  assert.match(appSource, /imports from \$\{formatSessionDate\(samsungConnection\.import_from\)\}/);
+  assert.match(appSource, /samsungConnection\.import_from/);
   assert.match(appSource, /Nothing recorded before the connection date is imported/);
 });
 
-test("Settings exposes health sync without the connected-device wall", () => {
+test("Today exposes quick health sync and Settings owns connection details", () => {
   assert.match(appSource, /function openHealthSync\(\)/);
-  assert.match(appSource, /Open North Health to sync/);
+  assert.match(appSource, /destination-brand-today[\s\S]*aria-label="Sync Samsung Health"[\s\S]*onClick=\{openHealthSync\}/);
+  assert.match(appSource, /Connected services[\s\S]*Samsung Health · Health Connect[\s\S]*Last synced/);
+  assert.doesNotMatch(appSource, /className="settings-health-sync"/);
   assert.doesNotMatch(appSource, /<b>Your account<\/b><small>\{accountDevices\.length\}/);
 });
 
@@ -81,8 +86,7 @@ test("You logs the newest synced sleep and a transparent recorded-night average"
   assert.match(appSource, /latestSleepDay\?\.sleep_minutes.*toFixed\(1\)/);
 });
 
-test("You exposes an explicit device sign-out action", () => {
-  assert.match(appSource, /className="you-signout-button" onClick=\{signOutAccount\}/);
-  assert.match(appSource, /<strong>Sign out<\/strong>/);
+test("Account identity exposes an explicit device sign-out action", () => {
+  assert.match(appSource, /settings-account-session-actions[\s\S]*onClick=\{signOutAccount\}[\s\S]*Log out/);
   assert.match(appSource, /synced workouts, health records, and account data will remain safe/);
 });

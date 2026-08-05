@@ -70,7 +70,9 @@ test("Nova can persist explicitly requested reusable workouts",()=>{
   assert.match(appSource,/const detailedWorkout = proposedExercises/);
 });
 
-test("resolved Nova proposal cards leave the chat viewport",()=>{
-  assert.match(appSource,/apiProposal: undefined, appliedAt/);
+test("resolved Nova proposal cards become persistent applied receipts",()=>{
+  assert.match(appSource,/apiProposal: \{ \.\.\.approved, status: "applied" \}, appliedAt/);
   assert.match(appSource,/message\.apiProposal\?\.status === "pending"/);
+  assert.match(appSource,/message\.apiProposal\?\.status === "applied"/);
+  assert.match(appSource,/CHANGE APPLIED/);
 });

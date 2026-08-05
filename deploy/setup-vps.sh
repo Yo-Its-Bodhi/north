@@ -56,8 +56,7 @@ fi
 for migration in db/migrations/*.sql; do
   filename="$(basename "$migration")"
   if ! runuser -u postgres -- psql -d "$DB_NAME" -tAc "select 1 from schema_migrations where filename='$filename'" | grep -q 1; then
-    runuser -u postgres -- psql -v ON_ERROR_STOP=1 -d "$DB_NAME" -f "$migration"
-    runuser -u postgres -- psql -d "$DB_NAME" -c "insert into schema_migrations(filename) values('$filename')"
+    runuser -u postgres -- psql -1 -v ON_ERROR_STOP=1 -d "$DB_NAME" -f "$migration" -c "insert into schema_migrations(filename) values('$filename')"
   fi
 done
 

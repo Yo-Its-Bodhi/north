@@ -1,4 +1,4 @@
-import { Component, createElement, StrictMode, useEffect, type ErrorInfo, type ReactNode } from "react";
+import { Component, createElement, lazy, StrictMode, Suspense, useEffect, type ErrorInfo, type ReactNode } from "react";
 import { createRoot } from "react-dom/client";
 import "@fontsource/dm-sans/latin-400.css";
 import "@fontsource/dm-sans/latin-500.css";
@@ -10,8 +10,6 @@ import "@fontsource/barlow-condensed/latin-600.css";
 import "@fontsource/barlow-condensed/latin-700.css";
 import "@fontsource/barlow-condensed/latin-800.css";
 import App from "./App";
-import Admin from "./Admin";
-import MuscleMapPreview from "./components/MuscleMapPreview";
 import { BootIntro } from "./components/BrandMotion";
 import { hydratePublishedCatalogue } from "./data/catalogue";
 import "./styles/runtime-01.css";
@@ -25,6 +23,9 @@ import "./trophy-room.css";
 import "./destination-reliability.css";
 import "./product-tour.css";
 
+const Admin = lazy(() => import("./Admin"));
+const MuscleMapPreview = lazy(() => import("./components/MuscleMapPreview"));
+
 export function NorthRoot() {
   const admin = location.pathname.startsWith("/admin");
   const musclePreview = import.meta.env.DEV && location.pathname.startsWith("/dev/muscle-map");
@@ -32,7 +33,7 @@ export function NorthRoot() {
     if (admin || musclePreview) return;
     void hydratePublishedCatalogue();
   }, [admin, musclePreview]);
-  return <BootIntro>{createElement(musclePreview ? MuscleMapPreview : admin ? Admin : App)}</BootIntro>;
+  return <BootIntro><Suspense fallback={null}>{createElement(musclePreview ? MuscleMapPreview : admin ? Admin : App)}</Suspense></BootIntro>;
 }
 
 class NorthErrorBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {

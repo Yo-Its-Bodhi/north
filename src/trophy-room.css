@@ -38,6 +38,9 @@
 .trophy-masonry article:nth-child(5n+2),.trophy-masonry article:nth-child(5n+5){min-height:382px}
 .trophy-masonry article:nth-child(5n+3){min-height:352px}
 .trophy-masonry article:hover{z-index:2;border-color:color-mix(in srgb,var(--trophy-tone) 76%,var(--line));box-shadow:0 23px 48px color-mix(in srgb,var(--navy) 28%,transparent);transform:translateY(-3px)}
+.trophy-card-share{position:absolute;z-index:3;top:12px;right:12px;width:38px;height:38px;padding:0;display:grid;place-items:center;border:1px solid color-mix(in srgb,var(--trophy-tone) 34%,transparent);border-radius:50%;color:var(--trophy-tone);background:color-mix(in srgb,var(--surface-solid) 82%,transparent);box-shadow:0 7px 18px color-mix(in srgb,var(--navy) 14%,transparent);backdrop-filter:blur(10px);cursor:pointer}
+.trophy-card-share:hover{color:var(--surface-solid);background:var(--trophy-tone)}
+.trophy-card-share:focus-visible{outline:3px solid color-mix(in srgb,var(--trophy-tone) 48%,transparent);outline-offset:2px}
 .trophy-card-art{height:148px;display:grid;place-items:center;position:relative;overflow:hidden;background:linear-gradient(180deg,color-mix(in srgb,var(--trophy-tone) 22%,transparent),transparent)}
 .trophy-card-art::before{position:absolute;top:18px;width:112px;height:112px;content:"";border:1px solid color-mix(in srgb,var(--trophy-tone) 44%,transparent);transform:rotate(45deg);box-shadow:0 0 0 15px color-mix(in srgb,var(--trophy-tone) 5%,transparent)}
 .trophy-card-art>span{z-index:1;width:82px;height:82px;display:grid;place-items:center;color:var(--trophy-tone);filter:drop-shadow(0 12px 16px color-mix(in srgb,var(--trophy-tone) 28%,transparent))}

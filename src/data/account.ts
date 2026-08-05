@@ -1,5 +1,7 @@
 export type NorthUser = { id: string; username: string; displayName: string; timezone: string; isAdmin: boolean };
 
+export const NORTH_LEGAL_NOTICE_VERSION = "interim-v1.0";
+
 export interface NorthSession {
   user: NorthUser;
   device?: { id: string; name: string };
@@ -77,7 +79,7 @@ async function sessionRequest(path: string, body: unknown) {
   return result;
 }
 
-export const registerNorthAccount = (username: string, password: string, displayName: string, accessCode?: string) => sessionRequest("/v1/auth/register", { username, password, displayName, accessCode, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone });
+export const registerNorthAccount = (username: string, password: string, displayName: string, accessCode: string | undefined, acceptedLegalVersion: string) => sessionRequest("/v1/auth/register", { username, password, displayName, accessCode, acceptedLegalVersion, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone });
 export const loginNorthAccount = (username: string, password: string) => sessionRequest("/v1/auth/login", { username, password, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone });
 export const recoverNorthAccount = (username: string, recoveryCode: string, newPassword: string) => sessionRequest("/v1/auth/recover", { username, recoveryCode, newPassword });
 export const refreshNorthSession = (refreshToken: string) => sessionRequest("/v1/auth/refresh", { refreshToken });

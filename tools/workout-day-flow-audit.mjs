@@ -62,7 +62,7 @@ try {
     localStorage.setItem("north-account-session-v1", JSON.stringify(account));
     localStorage.setItem(`north-onboarding-complete:${account.user.id}`, new Date().toISOString());
     localStorage.setItem(`north-product-tour-v1:${account.user.id}`, new Date().toISOString());
-    localStorage.setItem("north-release-notes-dismissed", "north-0.6-the-whole-picture");
+    localStorage.setItem("north-release-notes-dismissed", "north-0.7-find-your-way");
     localStorage.setItem("north-profile-v1", JSON.stringify({
       name: "Workout Flow Audit",
       direction: "Build strength and consistency",

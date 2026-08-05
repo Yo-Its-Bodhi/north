@@ -842,7 +842,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   .primary-nav button:hover{color:var(--north-rail-text);background:color-mix(in srgb,var(--north-rail-text) 8%,transparent)}
   .primary-nav button.active{color:var(--north-rail-text);background:var(--north-rail-active);box-shadow:inset 3px 0 0 var(--north-action-primary)}
   .member-shell .nova-workout-builder-screen,.member-shell .nova-routine-builder-screen,.member-shell .workout-template-screen{width:min(100%,980px);margin-inline:auto}
-  .member-shell .workout-library-screen .template-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .member-shell .workout-library-screen .template-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
 }
 /* Shared hierarchy: editing, choosing, and scanning use different surface roles. */
 :root{

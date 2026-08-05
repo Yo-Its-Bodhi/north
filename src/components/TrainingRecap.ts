@@ -3,6 +3,7 @@ export type TrainingRecapFormat = "square" | "story" | "landscape";
 export type TrainingRecapTheme = {
   background: string;
   accent: string;
+  navy: string;
   ink: string;
   muted: string;
   line: string;
@@ -40,29 +41,11 @@ export function readTrainingRecapTheme(): TrainingRecapTheme {
   return {
     background: resolveThemeColor("--surface-solid", "#ffffff"),
     accent: resolveThemeColor("--blue", "#176b87"),
+    navy: resolveThemeColor("--navy", "#193136"),
     ink: resolveThemeColor("--ink", "#202d38"),
     muted: resolveThemeColor("--muted", "#667582"),
     line: resolveThemeColor("--line", "rgba(31,64,82,.16)"),
   };
-}
-
-function colorChannels(color: string) {
-  if (color.startsWith("#")) {
-    const value = color.slice(1);
-    const full = value.length === 3 ? value.split("").map((part) => part + part).join("") : value;
-    if (full.length >= 6) return [0, 2, 4].map((offset) => Number.parseInt(full.slice(offset, offset + 2), 16));
-  }
-  const values = color.match(/[\d.]+/g)?.map(Number) ?? [];
-  if (color.startsWith("color(srgb") && values.length >= 3) return values.slice(0, 3).map((value) => value * 255);
-  return values.length >= 3 ? values.slice(0, 3) : [23, 107, 135];
-}
-
-function contrastColor(color: string) {
-  const [red, green, blue] = colorChannels(color).map((value) => {
-    const channel = value / 255;
-    return channel <= .03928 ? channel / 12.92 : ((channel + .055) / 1.055) ** 2.4;
-  });
-  return .2126 * red + .7152 * green + .0722 * blue > .48 ? "#10191d" : "#ffffff";
 }
 
 function loadImage(source: string) {
@@ -89,25 +72,6 @@ function roundedRect(context: CanvasRenderingContext2D, x: number, y: number, wi
   context.roundRect(x, y, width, height, radius);
 }
 
-function drawTintedFootprint(context: CanvasRenderingContext2D, image: HTMLImageElement, x: number, y: number, maxWidth: number, maxHeight: number, color: string, alpha = 1) {
-  const scale = Math.min(maxWidth / image.naturalWidth, maxHeight / image.naturalHeight);
-  const width = Math.max(1, Math.round(image.naturalWidth * scale));
-  const height = Math.max(1, Math.round(image.naturalHeight * scale));
-  const layer = document.createElement("canvas");
-  layer.width = width;
-  layer.height = height;
-  const layerContext = layer.getContext("2d");
-  if (!layerContext) return;
-  layerContext.fillStyle = color;
-  layerContext.fillRect(0, 0, width, height);
-  layerContext.globalCompositeOperation = "destination-out";
-  layerContext.drawImage(image, 0, 0, width, height);
-  context.save();
-  context.globalAlpha = alpha;
-  context.drawImage(layer, x + (maxWidth - width) / 2, y + (maxHeight - height) / 2);
-  context.restore();
-}
-
 export async function renderTrainingRecap(model: TrainingRecapModel) {
   const [width, height] = formatSize[model.format];
   const canvas = document.createElement("canvas");
@@ -116,39 +80,85 @@ export async function renderTrainingRecap(model: TrainingRecapModel) {
   const context = canvas.getContext("2d");
   if (!context) throw new Error("Training recap canvas is unavailable");
 
-  const footprint = await loadImage("/transparent-background/png/footprint-clean-black-transparent.png").catch(() => null);
+  const footprint = await loadImage("/png/transparent/footprint-stamp-offwhite.png").catch(() => null);
   const isStory = model.format === "story";
   const isLandscape = model.format === "landscape";
   const inset = Math.round(width * .075);
   const contentWidth = width - inset * 2;
-  const bannerHeight = Math.round(height * .14);
-  const bannerInk = contrastColor(model.theme.accent);
+  const headerHeight = isStory ? 545 : isLandscape ? 240 : 330;
 
   context.fillStyle = model.theme.background;
   context.fillRect(0, 0, width, height);
-  context.fillStyle = model.theme.accent;
-  context.fillRect(0, 0, width, bannerHeight);
+  const header = context.createLinearGradient(0, 0, width, headerHeight);
+  header.addColorStop(0, model.theme.navy);
+  header.addColorStop(.62, model.theme.navy);
+  header.addColorStop(1, model.theme.accent);
+  context.fillStyle = header;
+  context.fillRect(0, 0, width, headerHeight);
 
-  context.fillStyle = bannerInk;
-  context.font = `800 ${isLandscape ? 38 : 32}px "Manrope", sans-serif`;
-  context.fillText("NORTH / TRAINING ATLAS", inset, bannerHeight * .59);
+  const patternStep = Math.max(54, Math.round(width / 15));
+  context.save();
+  context.globalAlpha = .12;
+  context.strokeStyle = "#ffffff";
+  context.lineWidth = 2;
+  for (let x = 0; x <= width; x += patternStep) {
+    context.beginPath(); context.moveTo(x, 0); context.lineTo(x, headerHeight); context.stroke();
+  }
+  for (let y = 0; y <= headerHeight; y += patternStep) {
+    context.beginPath(); context.moveTo(0, y); context.lineTo(width, y); context.stroke();
+  }
+  context.globalAlpha = .1;
+  const arcScale = Math.min(width / 1080, headerHeight / 545);
+  [170, 250, 330].forEach((radius) => {
+    context.lineWidth = Math.max(12, 28 * arcScale);
+    context.beginPath();
+    context.arc(width + 70 * arcScale, headerHeight + 50 * arcScale, radius * arcScale, Math.PI, Math.PI * 1.5);
+    context.stroke();
+  });
+  context.restore();
+
+  const diamondSize = Math.min(width * .23, headerHeight * .46);
+  const diamondX = width / 2;
+  const diamondY = headerHeight * .53;
+  context.save();
+  context.translate(diamondX, diamondY);
+  context.rotate(Math.PI / 4);
+  context.fillStyle = "rgba(255,255,255,.07)";
+  context.strokeStyle = "rgba(255,255,255,.32)";
+  context.lineWidth = Math.max(2, width / 360);
+  context.fillRect(-diamondSize / 2, -diamondSize / 2, diamondSize, diamondSize);
+  context.strokeRect(-diamondSize / 2, -diamondSize / 2, diamondSize, diamondSize);
+  context.strokeStyle = "rgba(255,255,255,.1)";
+  context.lineWidth = Math.max(10, diamondSize * .072);
+  context.strokeRect(-diamondSize / 2 - diamondSize * .1, -diamondSize / 2 - diamondSize * .1, diamondSize * 1.2, diamondSize * 1.2);
+  context.restore();
+
   if (footprint) {
-    const markHeight = bannerHeight * .64;
-    drawTintedFootprint(context, footprint, width - inset - markHeight * .7, bannerHeight * .22, markHeight * .7, markHeight, bannerInk, .92);
+    const stampHeight = diamondSize * .86;
+    const stampWidth = footprint.naturalWidth / footprint.naturalHeight * stampHeight;
+    context.drawImage(footprint, diamondX - stampWidth / 2, diamondY - stampHeight / 2, stampWidth, stampHeight);
   }
 
-  const periodY = bannerHeight + (isStory ? 108 : isLandscape ? 62 : 72);
+  context.fillStyle = "rgba(255,255,255,.82)";
+  context.font = `800 ${isLandscape ? 28 : 24}px "DM Sans", sans-serif`;
+  context.fillText("NORTH JOURNEY", inset, isLandscape ? 54 : 76);
+  context.textAlign = "right";
+  context.fillText("TRAINING RECAP", width - inset, isLandscape ? 54 : 76);
+  context.textAlign = "left";
+
+  const periodY = headerHeight + (isStory ? 108 : isLandscape ? 48 : 58);
   context.fillStyle = model.theme.accent;
   context.font = `800 ${isLandscape ? 28 : 24}px "Manrope", sans-serif`;
   context.fillText(model.periodLabel.toUpperCase(), inset, periodY);
 
-  const headlineY = periodY + (isStory ? 108 : isLandscape ? 92 : 96);
-  const headlineSize = fitFont(context, model.headline, contentWidth, isLandscape ? 76 : 62, isLandscape ? 48 : 42, '"Manrope", sans-serif');
+  const headlineY = periodY + (isStory ? 108 : isLandscape ? 70 : 84);
+  const headline = model.headline.toUpperCase();
+  const headlineSize = fitFont(context, headline, contentWidth, isLandscape ? 76 : 68, isLandscape ? 48 : 42, '"Barlow Condensed", sans-serif');
   context.fillStyle = model.theme.ink;
-  context.font = `800 ${headlineSize}px "Manrope", sans-serif`;
-  context.fillText(model.headline, inset, headlineY);
+  context.font = `800 ${headlineSize}px "Barlow Condensed", sans-serif`;
+  context.fillText(headline, inset, headlineY);
 
-  const statsTop = isStory ? 650 : isLandscape ? 335 : 410;
+  const statsTop = headerHeight + (isStory ? 300 : isLandscape ? 170 : 205);
   const statGap = isLandscape ? 22 : 18;
   const statWidth = (contentWidth - statGap * 2) / 3;
   const statHeight = isStory ? 166 : isLandscape ? 118 : 132;
@@ -166,14 +176,14 @@ export async function renderTrainingRecap(model: TrainingRecapModel) {
     context.fillStyle = model.theme.muted;
     context.font = `800 ${isStory ? 20 : 17}px "DM Sans", sans-serif`;
     context.fillText(stat.label.toUpperCase(), x + 22, statsTop + (isStory ? 48 : 38));
-    const valueSize = fitFont(context, stat.value, statWidth - 44, isStory ? 46 : 38, 24, '"Manrope", sans-serif');
+    const valueSize = fitFont(context, stat.value, statWidth - 44, isStory ? 52 : 44, 24, '"Barlow Condensed", sans-serif');
     context.fillStyle = model.theme.ink;
-    context.font = `800 ${valueSize}px "Manrope", sans-serif`;
+    context.font = `800 ${valueSize}px "Barlow Condensed", sans-serif`;
     context.fillText(stat.value, x + 22, statsTop + (isStory ? 116 : 88));
   });
 
-  const chartTop = Math.round(height * (isStory ? .52 : isLandscape ? .58 : .59));
-  const chartBottom = Math.round(height * (isStory ? .83 : isLandscape ? .84 : .84));
+  const chartTop = statsTop + statHeight + (isStory ? 80 : isLandscape ? 72 : 78);
+  const chartBottom = Math.round(height * (isStory ? .86 : isLandscape ? .84 : .84));
   context.fillStyle = model.theme.muted;
   context.font = `800 ${isStory ? 20 : 17}px "DM Sans", sans-serif`;
   context.fillText(`${model.metricLabel.toUpperCase()} BY PERIOD`, inset, chartTop - 34);
@@ -235,12 +245,15 @@ export async function renderTrainingRecap(model: TrainingRecapModel) {
     context.textAlign = "left";
   }
 
-  context.fillStyle = model.theme.ink;
-  context.font = `800 ${isStory ? 20 : 17}px "Manrope", sans-serif`;
-  context.fillText("north.bodhix.io", inset, height * .94);
+  context.strokeStyle = model.theme.line;
+  context.lineWidth = 2;
+  context.beginPath(); context.moveTo(inset, height * .91); context.lineTo(width - inset, height * .91); context.stroke();
   context.fillStyle = model.theme.muted;
-  context.font = `700 ${isStory ? 15 : 13}px "DM Sans", sans-serif`;
-  context.fillText("PRIVATE-SAFE TRAINING RECAP", inset, height * .94 + (isStory ? 30 : 24));
+  context.font = `700 ${isStory ? 20 : 17}px "DM Sans", sans-serif`;
+  context.fillText("NORTH TRAINING RECAP", inset, height * .95);
+  context.textAlign = "right";
+  context.fillText("north.bodhix.io", width - inset, height * .95);
+  context.textAlign = "left";
 
   return canvas;
 }

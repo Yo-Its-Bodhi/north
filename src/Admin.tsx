@@ -91,7 +91,7 @@ export default function Admin() {
   useEffect(() => { const timer = window.setTimeout(() => { if (tab === "users" || tab === "support") void loadUsers(); }, 250); return () => window.clearTimeout(timer); }, [search, statusFilter, tab]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { const timer = window.setTimeout(() => { if (tab === "content") void loadContent(); }, 250); return () => window.clearTimeout(timer); }, [contentKind, contentSearch, tab]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { const timer = window.setTimeout(() => { if (tab === "operations") void loadRequestLogs(); }, 250); return () => window.clearTimeout(timer); }, [logSearch, logStatus, tab]); // eslint-disable-line react-hooks/exhaustive-deps
-  useEffect(() => { const timer = window.setTimeout(() => { if (contentEditor) setPayloadText(JSON.stringify(contentEditor.payload || {}, null, 2)); }, 0); return () => window.clearTimeout(timer); }, [contentEditor?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { const timer = window.setTimeout(() => { if (contentEditor) setPayloadText(JSON.stringify(contentEditor.payload || {}, null, 2)); }, 0); return () => window.clearTimeout(timer); }, [contentEditor?.id]);
   useEffect(() => { const timer = window.setInterval(() => void loadIssues().catch(() => undefined), 30_000); return () => window.clearInterval(timer); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function openUser(id: string) { setBusy(true); try { setSelected(await adminRequest<UserDetail>(`/v1/admin/users/${id}`)); } catch (reason) { setError(reason instanceof Error ? reason.message : "User could not load."); } finally { setBusy(false); } }

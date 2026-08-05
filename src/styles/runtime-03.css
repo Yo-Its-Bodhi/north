@@ -2,12 +2,46 @@
 .onboarding-card input:focus, .onboarding-card select:focus { border-color: #2680f3; box-shadow: 0 0 0 3px rgba(38,128,243,.1); }
 .onboarding-field { margin: 16px 0; }
 .onboarding-card .onboarding-field label { margin: 0; }
+.password-label-row { display: flex; align-items: center; gap: 6px; }
+.password-requirements { position: relative; }
+.onboarding-card .password-requirements-trigger { width: 24px; min-width: 24px; height: 24px; min-height: 24px; padding: 0; border: 0; display: grid; place-items: center; border-radius: 50%; color: var(--muted); background: transparent; cursor: pointer; }
+.password-requirements-trigger:hover, .password-requirements-trigger:focus-visible { color: var(--blue); background: color-mix(in srgb,var(--blue) 8%,transparent); outline: none; }
+.password-requirements-trigger:focus-visible { box-shadow: 0 0 0 2px color-mix(in srgb,var(--blue) 28%,transparent); }
+.password-requirements-trigger svg { width: 16px; height: 16px; }
+.password-requirements-popover { position: absolute; z-index: 20; left: -6px; bottom: calc(100% + 8px); width: min(280px,calc(100vw - 48px)); padding: 12px 14px; border: 1px solid var(--north-divider); border-radius: 10px; color: var(--ink); background: var(--surface-solid); box-shadow: 0 12px 30px color-mix(in srgb,var(--navy) 16%,transparent); }
+.password-requirements-popover::after { position: absolute; left: 11px; bottom: -5px; width: 9px; height: 9px; border-right: 1px solid var(--north-divider); border-bottom: 1px solid var(--north-divider); content: ""; background: var(--surface-solid); transform: rotate(45deg); }
+.password-requirements-popover :is(strong,span,small) { display: block; text-transform: none; letter-spacing: 0; }
+.password-requirements-popover strong { font-size: 12px; }
+.password-requirements-popover > span { margin-top: 5px; font-size: 12px; }
+.password-requirements-popover small { margin-top: 3px; color: var(--muted); font-size: 10px; line-height: 1.4; }
 .password-field { position: relative; display: block; }
 .onboarding-card .password-field input { padding-right: 54px; }
 .password-field button { position: absolute; top: 4px; right: 4px; width: 44px; height: 44px; padding: 0; border: 0; border-radius: 10px; display: grid; place-items: center; color: var(--muted); background: transparent; cursor: pointer; }
 .password-field button:hover { color: var(--ink); background: color-mix(in srgb,var(--blue) 8%,transparent); }
 .password-field button svg { width: 19px; height: 19px; }
 .onboarding-error { padding: 10px; border-radius: 10px; color: #9e3546; background: #fff0f2; font-size: 11px; }
+.legal-consent{margin:16px 0;padding:14px;border:1px solid var(--line);border-radius:13px;background:color-mix(in srgb,var(--blue) 4%,var(--surface-solid))}
+.legal-consent label{margin:0;display:flex;align-items:flex-start;gap:10px;cursor:pointer}
+.legal-consent input{width:18px;height:18px;min-width:18px;margin-top:2px;accent-color:var(--blue)}
+.legal-consent span,.legal-consent strong,.legal-consent small{display:block;text-transform:none!important;letter-spacing:0!important}
+.legal-consent strong{color:var(--ink);font-size:12px;line-height:1.4}
+.legal-consent small{margin-top:4px;color:var(--muted);font-size:11px;line-height:1.5}
+.legal-consent>button{min-height:44px;margin:9px 0 -7px 28px;padding:0;border:0;color:var(--blue);background:transparent;font-size:11px;font-weight:700;text-decoration:underline;cursor:pointer}
+.legal-entry-shell{min-height:100dvh;padding:24px;background:var(--bg)}
+.legal-entry-shell .legal-screen{width:min(100%,920px);margin:0 auto}
+.legal-entry-shell .legal-header{margin:18px 0 28px;padding-bottom:24px;border-bottom:1px solid var(--north-divider)}
+.legal-entry-shell .legal-header h1{margin:6px 0 8px;font-size:66px;line-height:.92;outline:none}
+.legal-entry-shell .legal-review-notice,.legal-entry-shell .legal-emergency{margin:0 0 18px;padding:16px 18px;border-left:4px solid var(--blue);background:color-mix(in srgb,var(--blue) 7%,var(--surface-solid))}
+.legal-entry-shell .legal-emergency{display:grid;grid-template-columns:28px minmax(0,1fr);gap:12px;border-left-color:var(--north-state-danger);background:color-mix(in srgb,var(--north-state-danger) 8%,var(--surface-solid))}
+.legal-entry-shell .legal-contents{margin:28px 0 8px;padding:14px 0;display:flex;flex-wrap:wrap;gap:8px 20px;border-block:1px solid var(--north-divider)}
+.legal-entry-shell .legal-contents a,.legal-entry-shell .legal-document a{color:var(--blue);font-weight:800}
+.legal-entry-shell .legal-document{max-width:760px;margin:0 auto}
+.legal-entry-shell .legal-document>section{padding:28px 0;border-bottom:1px solid var(--north-divider)}
+.legal-entry-shell .legal-document h2{margin:0 0 12px;font-size:25px;line-height:1.05}
+.legal-entry-shell .legal-document p{margin:0;color:color-mix(in srgb,var(--ink) 82%,var(--muted));font-size:14px;line-height:1.72}
+.legal-entry-shell .legal-document p+p{margin-top:13px}
+@media(max-width:600px){.legal-entry-shell{padding:0}.legal-entry-shell .legal-screen{min-height:100dvh}}
+@media(max-width:600px){.legal-entry-shell .legal-header h1{font-size:44px}.legal-entry-shell .legal-document>section{padding:23px 0}.legal-entry-shell .legal-document h2{font-size:22px}.legal-entry-shell .legal-document p{font-size:13px;line-height:1.68}}
 .setup-card header { display: flex; justify-content: space-between; align-items: center; }
 .setup-card header small { color: #73839a; font-size: 9px; letter-spacing: .1em; }
 .onboarding-progress { height: 3px; margin: 22px 0 6px; overflow: hidden; border-radius: 3px; background: #e7edf5; }

@@ -35,4 +35,16 @@ test("Today and Training use the same art and overlay implementation", async () 
   assert.doesNotMatch(app, /training-hero-art/);
   assert.doesNotMatch(css, /training-hero::after|training-hero-art/);
   assert.match(css, /training-hero h2\s*\{[^}]*font-size:\s*clamp\(27px, 4vw, 34px\)/s);
+  assert.match(css, /data-theme="morning"[^}]*training-hero \.direction-run-art[^}]*opacity: \.82[^}]*brightness\(1\.08\)/s);
+  assert.match(css, /data-theme="morning"[^}]*training-hero \.direction-run-overlay[^}]*surface-solid[^}]*mix-blend-mode: normal/s);
+  assert.match(css, /today-screen > \.direction-panel \.direction-run-art \{[^}]*opacity: \.88;[^}]*brightness\(1\.04\)/s);
+  assert.match(css, /data-theme="morning"[^}]*today-screen > \.direction-panel \.direction-run-overlay[^}]*surface-solid[^}]*mix-blend-mode: normal/s);
+  assert.match(css, /data-theme="morning"[^}]*today-screen > \.direction-panel :is\(\.eyebrow, h2, p\)[^}]*color: var\(--ink\)[^}]*text-shadow: none/s);
+  assert.match(css, /data-theme="morning"[^}]*workout-builder-option[^}]*rgba\(255, 255, 255, \.1\)[^}]*var\(--workout-card-image\)/s);
+  assert.match(css, /data-theme="morning"[^}]*quick-log-section \.activity-shortcuts button[^}]*rgba\(255, 255, 255, \.1\)[^}]*var\(--quick-log-image\)/s);
+  assert.match(app, /className="quick-log-label">Bike<\/span>/);
+  assert.match(css, /theme-picker::before \{ content: "LIGHT THEMES"; order: 0/);
+  assert.match(css, /theme-picker::after \{ content: "DARK THEMES"; order: 2/);
+  assert.match(css, /settings-screen \.privacy-panel \{ border: 0 !important; \}/);
+  assert.match(css, /settings-screen \.privacy-panel > div:first-child,[^}]*div:last-child \{ display: none; \}/s);
 });

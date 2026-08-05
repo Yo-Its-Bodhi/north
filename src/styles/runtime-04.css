@@ -401,6 +401,18 @@ h1,h2,h3,.section-heading h2,.training-page-header h1,.training-hero h2 { font-f
 .workout-builder-option.custom{color:#ff9b52;background:#45332d}
 .workout-builder-option.personal{color:#64d3a3;background:#1d3c3a}
 @media(max-width:360px){.workout-builder-grid{grid-template-columns:1fr}.workout-builder-option{min-height:102px}}
+.favorite-exercises-section{margin:28px 0}
+.favorite-exercises-section>header{display:flex;align-items:end;justify-content:space-between;gap:12px;margin-bottom:10px}
+.favorite-exercises-section>header h2{margin:2px 0 0;font-size:20px}
+.favorite-exercises-section>header>span{color:var(--muted);font-size:11px;font-weight:800}
+.favorite-exercises-section>p{margin:0;color:var(--muted);font-size:12px}
+.favorite-exercise-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));gap:8px}
+.favorite-exercise-list>button{min-width:0;min-height:58px;display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--surface-solid);color:var(--ink);text-align:left}
+.favorite-exercise-list>button>svg:first-child{color:#c64f6c}
+.favorite-exercise-list>button>span{min-width:0;display:grid;gap:3px}
+.favorite-exercise-list strong,.favorite-exercise-list small{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.favorite-exercise-list strong{font-size:12px;line-height:1.25;white-space:normal;overflow-wrap:anywhere}
+.favorite-exercise-list small{color:var(--muted);font-size:9px;line-height:1.25;white-space:nowrap}
 .quick-log-section{margin:0 0 28px}
 .quick-log-section .section-heading{margin-bottom:12px}
 .quick-log-section .activity-shortcuts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:0}

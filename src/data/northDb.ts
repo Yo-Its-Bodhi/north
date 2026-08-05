@@ -1,3 +1,5 @@
+import { reportStorageFailure } from "./storageSafety";
+
 export type NorthDocument<T = unknown> = {
   key: string;
   collection: string;
@@ -43,15 +45,15 @@ function ownerDatabaseName() {
 function requestResult<T>(request: IDBRequest<T>) {
   return new Promise<T>((resolve, reject) => {
     request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error ?? new Error("IndexedDB request failed"));
+    request.onerror = () => { const error = request.error ?? new Error("IndexedDB request failed"); reportStorageFailure(error); reject(error); };
   });
 }
 
 function transactionDone(transaction: IDBTransaction) {
   return new Promise<void>((resolve, reject) => {
     transaction.oncomplete = () => resolve();
-    transaction.onerror = () => reject(transaction.error ?? new Error("IndexedDB transaction failed"));
-    transaction.onabort = () => reject(transaction.error ?? new Error("IndexedDB transaction aborted"));
+    transaction.onerror = () => { const error = transaction.error ?? new Error("IndexedDB transaction failed"); reportStorageFailure(error); reject(error); };
+    transaction.onabort = () => { const error = transaction.error ?? new Error("IndexedDB transaction aborted"); reportStorageFailure(error); reject(error); };
   });
 }
 
@@ -77,7 +79,7 @@ export function openNorthDatabase() {
       if (!database.objectStoreNames.contains("meta")) database.createObjectStore("meta", { keyPath: "key" });
     };
     request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error ?? new Error("North database could not open"));
+    request.onerror = () => { const error = request.error ?? new Error("North database could not open"); reportStorageFailure(error); databasePromises.delete(databaseName); reject(error); };
   });
   databasePromises.set(databaseName, databasePromise);
   return databasePromise;

@@ -1,5 +1,6 @@
-import { useMemo, useState } from "react";
-import { ChevronDown, ChevronLeft, ChevronRight, Download, Footprints, Share2, Trophy, X } from "lucide-react";
+import { useMemo, useState, type CSSProperties } from "react";
+import { ChartColumn, ChartSpline, ChevronDown, ChevronLeft, ChevronRight, Download, Footprints, Share2, Trophy, X } from "lucide-react";
+import { uniquePngName } from "./ExportFileName";
 import { readTrainingRecapTheme, renderTrainingRecap } from "./TrainingRecap";
 import "./TrainingAtlas.css";
 
@@ -16,6 +17,7 @@ export type AtlasRecord = {
 
 type Range = "week" | "month" | "quarter" | "year" | "all";
 type Metric = "sessions" | "minutes" | "reps" | "volume" | "distance";
+type ChartMode = "bars" | "lines";
 type RecapFormat = "square" | "story" | "landscape";
 type Totals = { sessions: number; minutes: number; reps: number; volume: number; distance: number };
 type Bucket = Totals & { key: string; label: string; start: Date; end: Date; records: AtlasRecord[] };
@@ -40,6 +42,23 @@ function formatValue(metric: Metric, value: number, weightUnit: string, distance
   if (metric === "volume") return `${Math.round(value).toLocaleString()} ${weightUnit}`;
   if (metric === "distance") return `${value.toFixed(1)} ${distanceUnit}`;
   return Math.round(value).toLocaleString();
+}
+
+function linePoints(values: number[], maximum: number) {
+  const lastIndex = Math.max(1, values.length - 1);
+  return values.map((value, index) => ({
+    x: values.length === 1 ? 500 : index / lastIndex * 1000,
+    y: 174 - value / maximum * 148,
+  }));
+}
+
+function smoothLine(points: Array<{ x: number; y: number }>) {
+  if (!points.length) return "";
+  return points.slice(1).reduce((path, point, index) => {
+    const previous = points[index];
+    const midpoint = (previous.x + point.x) / 2;
+    return `${path} C ${midpoint} ${previous.y}, ${midpoint} ${point.y}, ${point.x} ${point.y}`;
+  }, `M ${points[0].x} ${points[0].y}`);
 }
 
 function currentWeekStreak(records: AtlasRecord[]) {
@@ -100,8 +119,9 @@ function makeBuckets(range: Range, start: Date, end: Date, records: AtlasRecord[
 export default function TrainingAtlas({ records, weightUnit, distanceUnit, onOpenDate }: { records: AtlasRecord[]; weightUnit: string; distanceUnit: string; onOpenDate: (date: string) => void }) {
   const [range, setRange] = useState<Range>("month");
   const [metric, setMetric] = useState<Metric>("sessions");
+  const [chartMode, setChartMode] = useState<ChartMode>("bars");
   const [offset, setOffset] = useState(0);
-  const [selectedKey, setSelectedKey] = useState<string | null>(null);
+    const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
   const [recapOpen, setRecapOpen] = useState(false);
   const [recapFormat, setRecapFormat] = useState<RecapFormat>("square");
@@ -116,6 +136,10 @@ export default function TrainingAtlas({ records, weightUnit, distanceUnit, onOpe
   const buckets = useMemo(() => makeBuckets(range, new Date(boundsStartTime), new Date(boundsEndTime), periodRecords), [range, boundsStartTime, boundsEndTime, periodRecords]);
   const previousBuckets = useMemo(() => makeBuckets(range, new Date(previousStartTime), new Date(boundsStartTime - day), previousRecords), [range, previousStartTime, boundsStartTime, previousRecords]);
   const maxValue = Math.max(1, ...buckets.map((bucket) => bucket[metric]), ...previousBuckets.map((bucket) => bucket[metric]));
+  const currentLinePoints = linePoints(buckets.map((bucket) => bucket[metric]), maxValue);
+  const previousLinePoints = linePoints(previousBuckets.map((bucket) => bucket[metric]), maxValue);
+  const currentLinePath = smoothLine(currentLinePoints);
+  const previousLinePath = smoothLine(previousLinePoints);
   const selected = buckets.find((bucket) => bucket.key === selectedKey) ?? null;
   const currentValue = totals[metric]; const priorValue = previousTotals[metric];
   const change = priorValue ? Math.round((currentValue - priorValue) / priorValue * 100) : null;
@@ -137,6 +161,34 @@ export default function TrainingAtlas({ records, weightUnit, distanceUnit, onOpe
     previousTotals.sessions > 0 && totals.sessions !== previousTotals.sessions ? `Training frequency ${totals.sessions > previousTotals.sessions ? "increased" : "decreased"} ${Math.abs(Math.round((totals.sessions - previousTotals.sessions) / previousTotals.sessions * 100))}% from the previous period.` : "",
     composition.length > 1 ? `${composition.sort((a, b) => b.value - a.value)[0].kind[0].toUpperCase() + composition.sort((a, b) => b.value - a.value)[0].kind.slice(1)} made up the largest share of recorded activity.` : "",
   ].filter(Boolean);
+  const recapHeadline = personalHigh
+    ? "A personal-high period."
+    : totals.volume > 0
+      ? `${formatValue("volume", totals.volume, weightUnit, distanceUnit)} moved.`
+      : totals.reps > 0
+        ? `${formatValue("reps", totals.reps, weightUnit, distanceUnit)} reps put in.`
+        : `${totals.sessions} sessions put in.`;
+
+  function describeBucket(bucket: Bucket) {
+    const index = buckets.findIndex((item) => item.key === bucket.key);
+    const previous = previousBuckets[index]?.[metric] ?? 0;
+    return `${bucket.label}. Current: ${metricAmount(bucket[metric])}. Previous: ${metricAmount(previous)}. ${describeComparison(bucket, index)}`;
+  }
+
+  function metricAmount(value: number) {
+    const formatted = formatValue(metric, value, weightUnit, distanceUnit);
+    if (metric === "sessions") return `${formatted} session${value === 1 ? "" : "s"}`;
+    if (metric === "minutes") return `${formatted} minute${value === 1 ? "" : "s"}`;
+    if (metric === "reps") return `${formatted} rep${value === 1 ? "" : "s"}`;
+    return metric === "volume" ? `${formatted} moved` : `${formatted} covered`;
+  }
+
+  function describeComparison(bucket: Bucket, index: number) {
+    const previous = previousBuckets[index]?.[metric] ?? 0;
+    const difference = bucket[metric] - previous;
+    if (difference === 0) return `Same ${metrics.find((item) => item.id === metric)!.label.toLowerCase()} as the previous period.`;
+    return `${metricAmount(Math.abs(difference))} ${difference > 0 ? "more" : "less"} than the previous period.`;
+  }
 
   function changeRange(next: Range) { setRange(next); setOffset(0); setSelectedKey(null); }
   function toggleRecapStat(stat: Metric) { setRecapStats((current) => current.includes(stat) ? current.filter((item) => item !== stat) : current.length < 3 ? [...current, stat] : current); }
@@ -153,7 +205,7 @@ export default function TrainingAtlas({ records, weightUnit, distanceUnit, onOpe
     const canvas = await renderTrainingRecap({
       format: recapFormat,
       periodLabel: bounds.label,
-      headline: personalHigh ? "A personal-high period." : `${totals.sessions} sessions recorded.`,
+      headline: recapHeadline,
       metricLabel: metrics.find((item) => item.id === metric)!.label,
       metricTotal: formatValue(metric, totals[metric], weightUnit, distanceUnit),
       stats: recapStats.map((stat) => ({ label: metrics.find((item) => item.id === stat)!.label, value: formatValue(stat, totals[stat], weightUnit, distanceUnit) })),
@@ -165,7 +217,7 @@ export default function TrainingAtlas({ records, weightUnit, distanceUnit, onOpe
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `north-training-recap-${recapFormat}.png`;
+      link.download = uniquePngName(["north", "atlas", bounds.label, metric, recapFormat]);
       document.body.append(link);
       link.click();
       link.remove();
@@ -174,27 +226,27 @@ export default function TrainingAtlas({ records, weightUnit, distanceUnit, onOpe
   }
 
   return <section className="training-atlas" aria-labelledby="training-atlas-title">
-    <header className="atlas-heading"><div><p className="eyebrow">TRAINING ATLAS</p><h2 id="training-atlas-title">Understand the shape of your work.</h2><p>Explore what changed, then choose what is worth carrying forward.</p></div><button className="atlas-recap-launch" aria-expanded={recapOpen} onClick={openRecap}><Share2 size={16}/> Create recap</button></header>
-    <div className="atlas-range" aria-label="Atlas period">{ranges.map((item) => <button key={item.id} className={range === item.id ? "active" : ""} onClick={() => changeRange(item.id)}>{item.label}</button>)}</div>
+    <header className="atlas-heading"><div><p className="eyebrow">TRAINING ATLAS</p><h2 id="training-atlas-title">Understand the shape of your work.</h2><p>Compare the work you put in, spot what changed and open any point to see the sessions behind it.</p></div><button className="atlas-recap-launch" aria-expanded={recapOpen} onClick={openRecap}><Share2 size={16}/> Share your effort</button></header>
+    <section className="atlas-period-control" aria-labelledby="atlas-period-label"><div className="atlas-control-copy"><strong id="atlas-period-label">Period</strong><span>Sets every total and comparison below</span></div><div className="atlas-range" aria-label="Atlas period">{ranges.map((item) => <button key={item.id} className={range === item.id ? "active" : ""} onClick={() => changeRange(item.id)}>{item.label}</button>)}</div></section>
     <div className="atlas-period"><button aria-label="Previous period" disabled={range === "all"} onClick={() => { setOffset((value) => value - 1); setSelectedKey(null); }}><ChevronLeft/></button><strong>{bounds.label}</strong><button aria-label="Next period" disabled={range === "all" || offset >= 0} onClick={() => { setOffset((value) => value + 1); setSelectedKey(null); }}><ChevronRight/></button></div>
     <section className="atlas-snapshot" aria-label="Period snapshot">
-      {(["sessions", "minutes", "volume", "distance"] as Metric[]).map((item) => <article key={item}><small>{metrics.find((entry) => entry.id === item)!.label}</small><strong>{formatValue(item, totals[item], weightUnit, distanceUnit)}</strong>{item === metric && change !== null ? <span className={change >= 0 ? "positive" : "negative"}>{change >= 0 ? "+" : ""}{change}% vs previous</span> : <span>{item === "sessions" ? `${new Set(periodRecords.map((record) => record.date)).size} active days` : "Recorded total"}</span>}</article>)}
+      {(["sessions", "minutes", "volume", "distance"] as Metric[]).map((item) => <button type="button" key={item} className={item === metric ? "active" : ""} aria-pressed={item === metric} title={`Show ${metrics.find((entry) => entry.id === item)!.label.toLowerCase()} in the chart`} onClick={() => { setMetric(item); setSelectedKey(null); }}><small>{metrics.find((entry) => entry.id === item)!.label}</small><strong>{formatValue(item, totals[item], weightUnit, distanceUnit)}</strong>{item === metric && change !== null ? <span className={change >= 0 ? "positive" : "negative"}>{change >= 0 ? "+" : ""}{change}% vs previous</span> : <span>{item === "sessions" ? `${new Set(periodRecords.map((record) => record.date)).size} active days` : "Select to chart"}</span>}</button>)}
       <article><small>Current streak</small><strong>{weekStreak ? `${weekStreak} wk` : "—"}</strong><span>{weekStreak ? "consecutive active weeks" : "No active week yet"}</span></article>
       <article className={personalHigh ? "personal-high" : ""}><small>Personal high</small><strong>{personalHigh ? <><Trophy size={17}/> This period</> : "Building"}</strong><span>{personalHigh ? `Highest ${metric}` : "More periods add context"}</span></article>
     </section>
-    <button className="atlas-detail-disclosure" aria-expanded={detailOpen} aria-controls="atlas-detail-content" onClick={() => setDetailOpen((open) => !open)}><span><strong>Explore chart and evidence</strong><small>Compare metrics, periods and activity composition</small></span><ChevronDown size={17} aria-hidden="true" /></button>
+    <button className="atlas-detail-disclosure" aria-expanded={detailOpen} aria-controls="atlas-detail-content" onClick={() => setDetailOpen((open) => !open)}><span><strong>Explore chart and evidence</strong><small>Compare measures, periods and activity mix</small></span><ChevronDown size={17} aria-hidden="true" /></button>
     <div id="atlas-detail-content" className={`atlas-detail-content${detailOpen ? " open" : ""}`}>
-    <div className="atlas-metrics" aria-label="Chart metric">{metrics.map((item) => <button key={item.id} className={metric === item.id ? "active" : ""} onClick={() => { setMetric(item.id); setSelectedKey(null); }}>{item.label}</button>)}</div>
-    <section className="atlas-chart" aria-label={`${bounds.label} ${metric} chart`}>
-      {buckets.map((bucket, index) => { const details = `${bucket.label}: ${bucket.sessions} session${bucket.sessions === 1 ? "" : "s"}, ${bucket.minutes} minutes, ${bucket.reps} reps, ${formatValue("volume", bucket.volume, weightUnit, distanceUnit)} volume, ${formatValue("distance", bucket.distance, weightUnit, distanceUnit)}`; return <button key={bucket.key} className={selectedKey === bucket.key ? "selected" : ""} title={details} aria-label={`${details}. Open activities.`} onClick={() => setSelectedKey((value) => value === bucket.key ? null : bucket.key)}><span className="atlas-bars"><i className="comparison" style={{ height: `${Math.max(2, previousBuckets[index]?.[metric] / maxValue * 100)}%` }}/><i className="current" style={{ height: `${Math.max(3, bucket[metric] / maxValue * 100)}%` }}/>{bucket[metric] > 0 && bucket[metric] >= chartPersonalHigh && <Footprints className="atlas-best" size={13}/>}</span><small>{bucket.label}</small></button>; })}
+    <section className="atlas-chart-toolbar" aria-label="Chart controls"><div className="atlas-chart-control"><div className="atlas-control-copy"><strong>Measure</strong><span>Changes the chart and comparison</span></div><div className="atlas-metrics" aria-label="Chart metric">{metrics.map((item) => <button key={item.id} className={metric === item.id ? "active" : ""} onClick={() => { setMetric(item.id); setSelectedKey(null); }}>{item.label}</button>)}</div></div><div className="atlas-view-control"><div className="atlas-control-copy"><strong>View</strong><span>Same evidence, different shape</span></div><div className="atlas-chart-mode" aria-label="Chart view">{([{ id: "bars", label: "Bars", icon: ChartColumn }, { id: "lines", label: "Lines", icon: ChartSpline }] as const).map((item) => { const Icon = item.icon; return <button key={item.id} className={chartMode === item.id ? "active" : ""} aria-pressed={chartMode === item.id} onClick={() => setChartMode(item.id)}><Icon size={15}/>{item.label}</button>; })}</div></div></section>
+    <section className={`atlas-chart-surface atlas-chart-${chartMode}`} aria-label={`${bounds.label} ${metric} ${chartMode} chart`}>
+      {chartMode === "bars" ? <div className="atlas-chart">{buckets.map((bucket, index) => { const details = describeBucket(bucket); return <button key={bucket.key} className={selectedKey === bucket.key ? "selected" : ""} title={details} aria-label={`${details}. Open activities.`} onClick={() => setSelectedKey((value) => value === bucket.key ? null : bucket.key)}><span className="atlas-bars"><i className="comparison" style={{ height: `${Math.max(2, previousBuckets[index]?.[metric] / maxValue * 100)}%` }}/><i className="current" style={{ height: `${Math.max(3, bucket[metric] / maxValue * 100)}%` }}/>{bucket[metric] > 0 && bucket[metric] >= chartPersonalHigh && <Footprints className="atlas-best" size={13}/>}</span><small>{bucket.label}</small></button>; })}</div> : <div className="atlas-line-chart"><svg viewBox="0 0 1000 200" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="atlas-line-stroke" x1="0" x2="1"><stop stopColor="var(--atlas-accent)"/><stop offset=".52" stopColor="var(--atlas-coral)"/><stop offset="1" stopColor="var(--atlas-accent)"/></linearGradient><linearGradient id="atlas-line-fill" x1="0" y1="0" x2="0" y2="1"><stop stopColor="var(--atlas-accent)" stopOpacity=".34"/><stop offset="1" stopColor="var(--atlas-accent)" stopOpacity="0"/></linearGradient><filter id="atlas-line-glow" x="-20%" y="-30%" width="140%" height="160%"><feGaussianBlur stdDeviation="8" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>{[26, 100, 174].map((y) => <line key={y} className="atlas-line-grid" x1="0" x2="1000" y1={y} y2={y}/>)}<path className="atlas-line-area" d={`${currentLinePath} L ${currentLinePoints.at(-1)?.x ?? 1000} 174 L ${currentLinePoints[0]?.x ?? 0} 174 Z`}/><path className="atlas-line-previous" d={previousLinePath}/><path className="atlas-line-current-glow" d={currentLinePath}/><path className="atlas-line-current" d={currentLinePath}/>{previousLinePoints.map((point, index) => <circle className="atlas-line-dot previous" key={`previous-${buckets[index]?.key}`} cx={point.x} cy={point.y} r="5"/>)}{currentLinePoints.map((point, index) => <circle className="atlas-line-dot current" key={`current-${buckets[index]?.key}`} cx={point.x} cy={point.y} r="7"/>)}</svg><div className="atlas-line-hit-zones">{buckets.map((bucket, index) => { const details = describeBucket(bucket); const point = currentLinePoints[index]; return <button key={bucket.key} className={selectedKey === bucket.key ? "selected" : ""} style={{ "--atlas-point-y": `${point.y / 2}%` } as CSSProperties} title={details} aria-label={`${details}. Open activities.`} onClick={() => setSelectedKey((value) => value === bucket.key ? null : bucket.key)}><span/><small>{bucket.label}</small></button>; })}</div></div>}
     </section>
     <div className="atlas-legend"><span><i/>Selected period</span><span><i/>Previous period</span>{change !== null && <em className={change >= 0 ? "positive" : "negative"}>{change >= 0 ? "+" : ""}{change}%</em>}<b>{formatValue(metric, currentValue, weightUnit, distanceUnit)}</b></div>
     {selected && <section className="atlas-drilldown"><header><div><small>PERIOD ACTIVITIES</small><strong>{selected.label} · {selected.records.length} recorded</strong></div><button onClick={() => setSelectedKey(null)} aria-label="Close period activities"><X size={16}/></button></header>{selected.records.length ? selected.records.map((record) => <button key={record.id} onClick={() => onOpenDate(record.date)}><span className={`atlas-kind ${record.kind}`}/><div><strong>{record.title}</strong><small>{record.kind} · {record.minutes} min</small></div><ChevronRight size={15}/></button>) : <p>No recorded activities in this part of the period.</p>}</section>}
     <section className="atlas-lower">
-      <div className="atlas-observations"><p className="eyebrow">WHAT CHANGED</p><h3>Evidence from this period</h3>{insights.length ? insights.map((insight) => <p key={insight}>{insight}</p>) : <p>North needs repeated activity across periods before it describes a change.</p>}</div>
+      <div className="atlas-observations"><p className="eyebrow">WHAT CHANGED</p><h3>What stands out</h3>{insights.length ? insights.map((insight) => <p key={insight}>{insight}</p>) : <p>A little more training across both periods will bring this comparison to life.</p>}</div>
       <div className="atlas-composition"><p className="eyebrow">ACTIVITY COMPOSITION</p><h3>How the period was made</h3>{compositionTotal ? <div><span className="atlas-donut" role="img" style={{ background: `conic-gradient(${donut})` }} aria-label={`Activity composition: ${composition.map((item) => `${item.kind} ${item.value}`).join(", ")}`}/><ul>{composition.map((item, index) => <li key={item.kind}><i style={{ background: colors[index] }}/><span>{item.kind}</span><strong>{Math.round(item.value / compositionTotal * 100)}%</strong></li>)}</ul></div> : <p>No activity composition is available for this period.</p>}</div>
     </section>
     </div>
-    {recapOpen && <section className="atlas-recap" aria-label="North recap composer"><header><div><p className="eyebrow">NORTH RECAP</p><h3>Share the work, not the private context.</h3></div><button aria-label="Close recap composer" onClick={() => setRecapOpen(false)}><X/></button></header><p>Account identity, bodyweight, recovery and exact activity dates are always excluded.</p><div className="atlas-format" aria-label="Recap format">{(["square", "story", "landscape"] as RecapFormat[]).map((format) => <button key={format} className={recapFormat === format ? "active" : ""} onClick={() => setRecapFormat(format)}>{format === "square" ? "1:1 Square" : format === "story" ? "9:16 Story" : "16:9 Landscape"}</button>)}</div><fieldset><legend>Choose up to three statistics</legend>{metrics.map((item) => <label key={item.id}><input type="checkbox" checked={recapStats.includes(item.id)} disabled={!recapStats.includes(item.id) && recapStats.length >= 3} onChange={() => toggleRecapStat(item.id)}/><span>{item.label}<small>{formatValue(item.id, totals[item.id], weightUnit, distanceUnit)}</small></span></label>)}</fieldset><button className="atlas-export" disabled={!recapStats.length} onClick={exportRecap}><Download size={17}/> Export private-safe PNG</button></section>}
+    {recapOpen && <section className="atlas-recap" aria-label="North recap composer"><header><div><p className="eyebrow">SHARE THE WORK</p><h3>Show what your effort added up to.</h3></div><button aria-label="Close recap composer" onClick={() => setRecapOpen(false)}><X/></button></header><p>Pick the numbers that hit hardest and turn your sessions, reps, minutes and weight moved into a recap worth posting.</p><small>Your name, body weight, recovery notes and exact dates stay out of the image.</small><div className="atlas-format" aria-label="Recap format">{(["square", "story", "landscape"] as RecapFormat[]).map((format) => <button key={format} className={recapFormat === format ? "active" : ""} onClick={() => setRecapFormat(format)}>{format === "square" ? "1:1 Square" : format === "story" ? "9:16 Story" : "16:9 Landscape"}</button>)}</div><fieldset><legend>Pick up to three headline stats</legend>{metrics.map((item) => <label key={item.id}><input type="checkbox" checked={recapStats.includes(item.id)} disabled={!recapStats.includes(item.id) && recapStats.length >= 3} onChange={() => toggleRecapStat(item.id)}/><span>{item.label}<small>{formatValue(item.id, totals[item.id], weightUnit, distanceUnit)}</small></span></label>)}</fieldset><button className="atlas-export" disabled={!recapStats.length} onClick={exportRecap}><Download size={17}/> Export share image</button></section>}
   </section>;
 }

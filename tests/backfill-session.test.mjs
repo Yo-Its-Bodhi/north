@@ -15,6 +15,26 @@ test("a session entered for today is not marked as added later", () => {
   assert.equal(backfillSessionTiming("2026-07-27", "2026-07-27T21:15:00.000Z", "2026-07-27").addedLater, false);
 });
 
+test("Journey owns Trophy Room and Weekly Review navigation", () => {
+  const source = readFileSync(new URL("../src/App.tsx", import.meta.url), "utf8");
+  const trophyShare = readFileSync(new URL("../src/components/TrophyShare.ts", import.meta.url), "utf8");
+  assert.match(source, /journey-page-actions destination-header-actions[\s\S]*aria-label="Open Trophy Room"[\s\S]*aria-label="Review this week"/);
+  assert.match(source, /training-page-header destination-brand-header destination-brand-training"><div className="destination-header-copy">[\s\S]*?<\/div><\/header>/);
+  assert.match(source, /trophy-room-hero destination-brand-header destination-brand-journey/);
+  assert.match(source, /className="back-button" onClick=\{\(\) => setScreen\("journey"\)\}><ArrowLeft size=\{17\} \/> Journey/);
+  assert.match(source, /journey: \[[\s\S]*\{ id: "trophy-room", label: "Trophy Room" \},[\s\S]*\{ id: "weekly-review", label: "Weekly Review" \},[\s\S]*\],\s*training:/);
+  assert.doesNotMatch(source, /training: \[[\s\S]*\{ id: "trophy-room"/);
+  assert.match(source, /\["progression", "weekly-review"\]\.includes\(screen\)[\s\S]*\? "journey"/);
+  assert.match(source, /trophy-room-actions destination-header-actions[\s\S]*aria-label="Share Trophy Room highlights"[\s\S]*<Share2 size=\{20\}/);
+  assert.match(source, /aria-label="Ask Nova about progression"[\s\S]*<Sparkles size=\{20\}/);
+  assert.match(source, /aria-label=\{`Share \$\{record\.title\} as PNG`\}/);
+  assert.match(source, /shareTrophyPng\(record\)/);
+  assert.match(trophyShare, /const width = 1080;[\s\S]*const height = 1350;/);
+  assert.match(trophyShare, /footprint-stamp-offwhite\.png/);
+  assert.match(trophyShare, /navigator\.canShare/);
+  assert.doesNotMatch(source, /className="trophy-room-emblem"/);
+});
+
 test("future sessions cannot be backfilled", () => {
   assert.throws(() => backfillSessionTiming("2026-07-28", "2026-07-27T21:15:00.000Z", "2026-07-27"), /not in the future/);
 });
@@ -76,8 +96,9 @@ test("Training Atlas is the primary Journey insights explorer", () => {
   assert.match(atlas, /Week.*Month.*Quarter.*Year.*All time/s);
   assert.match(atlas, /Sessions.*Minutes.*Reps.*Volume.*Distance/s);
   assert.match(atlas, /PERIOD ACTIVITIES/);
-  assert.match(atlas, /Export private-safe PNG/);
-  assert.match(atlas, /bodyweight, recovery and exact activity dates are always excluded/);
+  assert.match(atlas, /Show what your effort added up to/);
+  assert.match(atlas, /name, body weight, recovery notes and exact dates stay out of the image/);
+  assert.match(recap, /NORTH TRAINING RECAP/);
   assert.match(atlasStyles, /--atlas-accent: var\(--blue\)/);
   assert.match(atlas, /readTrainingRecapTheme/);
   assert.match(recap, /resolveThemeColor\("--blue"/);
@@ -88,12 +109,20 @@ test("Training Atlas is the primary Journey insights explorer", () => {
 
 test("primary destinations use the shared North-branded header system", () => {
   const source = readFileSync(new URL("../src/App.tsx", import.meta.url), "utf8");
+  const guideSource = readFileSync(new URL("../src/components/NorthGuide.tsx", import.meta.url), "utf8");
   const styles = readFileSync(new URL("../src/destination-reliability.css", import.meta.url), "utf8");
   const globalStyles = readFileSync(new URL("../src/styles.css", import.meta.url), "utf8");
   const runtimeStyles = readFileSync(new URL("../src/styles/runtime-07.css", import.meta.url), "utf8");
-  for (const destination of ["today", "journey", "training", "nova", "you"]) {
+  for (const destination of ["today", "journey", "training", "nova", "you", "account", "settings"]) {
     assert.match(source, new RegExp(`destination-brand-header destination-brand-${destination}`));
   }
+  assert.match(guideSource, /destination-brand-header destination-brand-guide/);
+  assert.match(guideSource, /<h1>Guide<\/h1><p className="destination-subheading">Take your time\.<\/p>/);
+  assert.match(source, /destination-brand-account[\s\S]*<h1>Account<\/h1><p className="destination-subheading">Your North\.<\/p>/);
+  assert.match(source, /destination-brand-settings[\s\S]*<h1>Account<\/h1><p className="destination-subheading">North, your way\.<\/p>/);
+  assert.match(source, /check-in-header destination-brand-header destination-brand-today[\s\S]*<h1>Check-in<\/h1><p className="destination-subheading">How are you arriving\?<\/p>/);
+  assert.match(globalStyles, /\.coach-import-screen,\.check-in-screen,\.weekly-review-screen[\s\S]*max-width:980px!important/);
+  assert.match(source, /weekly-review-header destination-brand-header destination-brand-journey[\s\S]*<h1>Weekly Review<\/h1><p className="destination-subheading">What did this week teach you\?<\/p>/);
   for (const label of ["Today", "Journey", "Training", "Build workout", "Nova", "You"]) assert.match(source, new RegExp(`<h1>${label}<`));
   assert.match(source, /function BuildWorkoutDestinationHeader\(\)[\s\S]*nova-builder-page-header destination-brand-header destination-brand-builder/);
   for (const screen of ["workout-library", "nova-workout-builder", "nova-routine-builder", "workout-template"]) {
@@ -101,7 +130,7 @@ test("primary destinations use the shared North-branded header system", () => {
     const end = source.indexOf('{screen === "', start + 12);
     assert.match(source.slice(start, end), /<BuildWorkoutDestinationHeader \/>/);
   }
-  assert.match(source, /\["nova-routine-builder", "workout-library", "workout-template"\]\.includes\(screen\)[\s\S]*\? "nova-workout-builder"/);
+  assert.match(source, /\[\s*"nova-routine-builder",\s*"workout-library",\s*"workout-template",?\s*\]\.includes\(screen\)[\s\S]*\? "nova-workout-builder"/);
   assert.doesNotMatch(source, /className="routine-builder-launch"/);
   assert.doesNotMatch(source, /WORKOUT LIBRARY|Find the right session\.|North workouts,.*personal template/);
   const libraryStart = source.indexOf('{screen === "workout-library"');
@@ -115,14 +144,16 @@ test("primary destinations use the shared North-branded header system", () => {
   assert.match(runtimeStyles, /\.routine-library-switcher\{display:grid;grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
   assert.match(runtimeStyles, /@media\(min-width:1024px\)\{[\s\S]*\.routine-library-switcher\{grid-template-columns:repeat\(4,minmax\(0,1fr\)\)\}/);
   assert.match(styles, /@media \(min-width: 1024px\) \{[\s\S]*\.nova-workout-builder-screen,[\s\S]*\.nova-routine-builder-screen,[\s\S]*\.workout-library-screen,[\s\S]*\.workout-template-screen[\s\S]*> \.back-button \{ display: none; \}/);
+  assert.match(styles, /@media \(min-width: 1024px\) \{[\s\S]*\.trophy-room-screen,[\s\S]*\.check-in-screen,[\s\S]*\.weekly-review-screen[\s\S]*> \.back-button \{ display: none; \}/);
   assert.match(styles, /@media \(max-width: 700px\) \{[\s\S]*\.destination-brand-header \{[\s\S]*align-items: start;/);
   assert.match(source, /className="primary-nav-brand"[\s\S]*aria-label="North home"[\s\S]*lockup-horizontal-offwhite\.png/);
   assert.match(styles, /\.member-shell \.topbar-actions \{ margin-left: auto; \}/);
   assert.match(styles, /@media \(min-width: 1024px\) \{[\s\S]*\.member-shell \.topbar \.brand \{ display: none !important; \}[\s\S]*\.primary-nav-brand \{/);
   assert.match(source, /className=\{`nova-context-trigger[\s\S]*Open Nova memory and setup[\s\S]*<BrainCircuit size=\{18\}/);
   assert.match(source, /className="nova-clear-chat"[\s\S]*aria-label="Clear Nova conversation"[\s\S]*<Trash2 size=\{17\}/);
-  assert.match(styles, /\.destination-brand-nova \.nova-context-trigger \{[\s\S]*position: absolute;[\s\S]*width: 38px;[\s\S]*height: 38px;/);
-  assert.match(styles, /@media \(max-width: 700px\) \{[\s\S]*\.nova-screen \.nova-page-heading \{[\s\S]*box-sizing: border-box !important;[\s\S]*min-height: 148px !important;[\s\S]*\.nova-screen \.conversation-surface \{[\s\S]*scroll-padding-bottom: 16px;[\s\S]*\.nova-screen \.nova-input input \{ min-height: 44px; font-size: 16px !important; \}/);
+  assert.match(styles, /\.destination-brand-nova \.nova-heading-actions \{ position: static !important; \}/);
+  assert.doesNotMatch(styles, /\.destination-brand-nova \.nova-context-trigger \{[\s\S]*position: absolute;/);
+  assert.match(styles, /@media \(max-width: 700px\) \{[\s\S]*\.nova-screen \.nova-page-heading \{[\s\S]*box-sizing: border-box !important;[\s\S]*min-height: 96px !important;[\s\S]*\.nova-screen \.conversation-surface \{[\s\S]*scroll-padding-bottom: 16px;[\s\S]*\.nova-screen \.nova-input input \{ min-height: 44px; font-size: 16px !important; \}/);
 });
 
 test("member workspaces use theme-aware desktop depth and a quieter mobile wash", () => {
@@ -166,13 +197,25 @@ test("You separates declaration from current signals and keeps the relevance ord
   const signals = source.indexOf('className="you-wellbeing"');
   const record = source.indexOf('className="you-training-record"');
   const memory = source.indexOf("WHAT NORTH HAS LEARNED", record);
-  const account = source.indexOf("ACCOUNT & APP", memory);
-  assert.ok(header < declaration && declaration < signals && signals < record && record < memory && memory < account, "You sections should follow relevance order");
+  assert.ok(header < declaration && declaration < signals && signals < record && record < memory, "You sections should follow relevance order");
   assert.match(source, /className="you-declaration"[\s\S]*YOUR DECLARATION/);
   assert.match(source, /className="you-wellbeing"[\s\S]*CURRENT SIGNALS/);
+  assert.match(source, /<button className=\{`topbar-account-button account-avatar-button/);
+  assert.doesNotMatch(source, /you-account-menu/);
+  assert.doesNotMatch(source, /readNorthSession\(\) && <button className=\{`topbar-account-button/);
+  assert.doesNotMatch(source, /\{ id: "account", label: "Account & app" \}/);
 });
 
 test("Journey insights omit redundant secondary panels", () => {
   const source = readFileSync(new URL("../src/App.tsx", import.meta.url), "utf8");
   assert.doesNotMatch(source, /insight-next-step|YOUR NEXT SIGNAL|four-week-chart/);
+});
+
+test("Nova gives chat space to visibly distinct theme-aware messages", () => {
+  const source = readFileSync(new URL("../src/App.tsx", import.meta.url), "utf8");
+  const styles = readFileSync(new URL("../src/destination-reliability.css", import.meta.url), "utf8");
+  assert.doesNotMatch(source, /className="nova-line living"/);
+  assert.match(styles, /\.nova-screen \.nova-message \{[\s\S]*background: color-mix\(in srgb, var\(--ink\) 5%, var\(--surface-solid\)\)/);
+  assert.match(styles, /\.nova-screen \{ --nova-chat-tone: var\(--blue\); \}/);
+  assert.match(styles, /\.nova-screen \.user-message \{[\s\S]*background: color-mix\(in srgb, var\(--nova-chat-tone\) 18%, var\(--surface-solid\)\)/);
 });
