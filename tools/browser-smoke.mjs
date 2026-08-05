@@ -801,6 +801,16 @@ try {
     await page.getByRole("button", { name: "Account", exact: true }).waitFor();
     assert.equal(await page.locator(".primary-nav-social a").count(), 4, "desktop rail should expose four social links");
     assert.equal(await page.locator(".global-footer-copyright").isVisible(), false, "desktop page footer should not repeat rail copyright");
+    await page.setViewportSize({ width: 1440, height: 700 });
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+    const shortViewportRail = await page.evaluate(() => {
+      const rail = document.querySelector(".primary-nav").getBoundingClientRect();
+      const utility = document.querySelector(".primary-nav-utility").getBoundingClientRect();
+      return { railTop: rail.top, railBottom: rail.bottom, utilityTop: utility.top, utilityBottom: utility.bottom, viewportHeight: innerHeight };
+    });
+    assert.equal(shortViewportRail.railTop, 0, "desktop rail should stay pinned to the viewport top");
+    assert.equal(shortViewportRail.railBottom, shortViewportRail.viewportHeight, "desktop rail should end at the visible viewport bottom");
+    assert.ok(shortViewportRail.utilityTop >= 0 && shortViewportRail.utilityBottom <= shortViewportRail.viewportHeight, "desktop rail utility controls should remain visible on short screens");
     await page.setViewportSize({ width: 430, height: 932 });
   });
 
