@@ -84,6 +84,11 @@ function mapMessage(row) {
     body: row.removed_at ? "Message removed" : row.body,
     sharedPayload: row.removed_at ? null : row.shared_payload,
     replyToMessageId: row.reply_to_message_id,
+    replyTo: row.reply_to_message_id ? {
+      id: row.reply_id ?? row.reply_to_message_id,
+      body: row.reply_removed_at ? "Message removed" : row.reply_body ?? "Original message unavailable",
+      sender: mapPerson(row, "reply_sender_"),
+    } : null,
     removedAt: row.removed_at,
     createdAt: row.created_at,
     editedAt: row.edited_at,
@@ -355,9 +360,14 @@ export function registerTogetherRoutes(app, { pool }) {
     const cursorClause = cursor ? "and (m.created_at,m.id)<($4::timestamptz,$5::uuid)" : "";
     if (cursor) values.push(cursor.createdAt, cursor.id);
     const result = await pool.query(`select m.*,u.id sender_id,u.display_name sender_display_name,lc.username sender_username,
+      reply_message.id reply_id,reply_message.body reply_body,reply_message.removed_at reply_removed_at,
+      reply_sender.id reply_sender_id,reply_sender.display_name reply_sender_display_name,reply_credentials.username reply_sender_username,
       receipt.delivered_at,receipt.read_at from together_messages m
       join together_room_members access_member on access_member.room_id=m.room_id and access_member.owner_user_id=$2
       left join app_users u on u.id=m.sender_user_id left join local_credentials lc on lc.owner_user_id=u.id
+      left join together_messages reply_message on reply_message.id=m.reply_to_message_id
+      left join app_users reply_sender on reply_sender.id=reply_message.sender_user_id
+      left join local_credentials reply_credentials on reply_credentials.owner_user_id=reply_sender.id
       left join together_message_receipts receipt on receipt.message_id=m.id and receipt.owner_user_id=$2
       where m.room_id=$1 and (access_member.hidden_before is null or m.created_at>access_member.hidden_before)
       and (m.kind<>'system' or exists(select 1 from together_announcement_receipts announcement_receipt
@@ -374,7 +384,8 @@ export function registerTogetherRoutes(app, { pool }) {
     if (!access) return reply.code(404).send({ error: "Conversation not found." });
     if (access.member_status !== "active") return reply.code(403).send({ error: "Join this room before posting." });
     if (access.kind === "direct" && !access.connection_id) return reply.code(403).send({ error: "This connection is no longer available." });
-    if (access.posting_policy === "read_only" || (access.posting_policy === "staff" && !request.account?.is_admin)) return reply.code(403).send({ error: "This room is read-only." });
+    if (access.posting_policy === "read_only" && !await isCanonicalOwner(pool, request.user.sub)) return reply.code(403).send({ error: "This room is read-only." });
+    if (access.posting_policy === "staff" && !request.account?.is_admin) return reply.code(403).send({ error: "This room is read-only." });
     if (access.slow_mode_seconds > 0 && access.role === "member" && access.last_posted_at && Date.now() < new Date(access.last_posted_at).valueOf() + access.slow_mode_seconds * 1000) return reply.code(429).send({ error: "Slow mode is active. Wait before posting again." });
     const clientMessageId = String(request.body?.clientMessageId ?? "");
     const body = cleanText(request.body?.body, 4000);
@@ -397,6 +408,16 @@ export function registerTogetherRoutes(app, { pool }) {
       if (!sharedPayload) return reply.code(400).send({ error: "Review a supported photo snapshot before sharing it." });
     }
     if (!body && !sharedPayload) return reply.code(400).send({ error: "Write a message before sending." });
+    let replyTarget = null;
+    if (replyToMessageId) {
+      const result = await pool.query(`select message.id reply_id,message.body reply_body,message.removed_at reply_removed_at,
+        sender.id reply_sender_id,sender.display_name reply_sender_display_name,credentials.username reply_sender_username
+        from together_messages message left join app_users sender on sender.id=message.sender_user_id
+        left join local_credentials credentials on credentials.owner_user_id=sender.id
+        where message.id=$1 and message.room_id=$2`, [replyToMessageId, request.params.id]);
+      replyTarget = result.rows[0] ?? null;
+      if (!replyTarget) return reply.code(400).send({ error: "The message being replied to is not in this conversation." });
+    }
     if (access.kind === "direct") {
       const blocked = await pool.query(`select 1 from together_blocks b join together_room_members peer
         on peer.room_id=$2 and peer.owner_user_id<>$1 where
@@ -406,8 +427,8 @@ export function registerTogetherRoutes(app, { pool }) {
     }
     const existing = await pool.query("select * from together_messages where sender_user_id=$1 and client_message_id=$2", [request.user.sub, clientMessageId]);
     if (existing.rows[0]) {
-      if (existing.rows[0].room_id !== request.params.id || existing.rows[0].body !== body || existing.rows[0].kind !== kind) return reply.code(409).send({ error: "Client message ID was already used for different content." });
-      return { message: mapAccountMessage(existing.rows[0], request), deduplicated: true };
+      if (existing.rows[0].room_id !== request.params.id || existing.rows[0].body !== body || existing.rows[0].kind !== kind || (existing.rows[0].reply_to_message_id ?? null) !== replyToMessageId) return reply.code(409).send({ error: "Client message ID was already used for different content." });
+      return { message: mapAccountMessage({ ...existing.rows[0], ...replyTarget }, request), deduplicated: true };
     }
     const client = await pool.connect();
     try {
@@ -422,7 +443,7 @@ export function registerTogetherRoutes(app, { pool }) {
         select $1,owner_user_id,now() from together_room_members where room_id=$2 and owner_user_id<>$3 and status='active'
         on conflict(message_id,owner_user_id) do nothing`, [message.id, request.params.id, request.user.sub]);
       await client.query("commit");
-      const mapped = mapAccountMessage(message, request);
+      const mapped = mapAccountMessage({ ...message, ...replyTarget }, request);
       const recipients = await pool.query("select owner_user_id from together_room_members where room_id=$1 and status='active'", [request.params.id]);
       for (const recipient of recipients.rows) {
         publish(recipient.owner_user_id, "message", mapped);
@@ -470,7 +491,7 @@ export function registerTogetherRoutes(app, { pool }) {
       where message.id=$1 and message.sender_user_id=$2 and message.removed_at is null and message.kind<>'system'
       and exists(select 1 from together_room_members member where member.room_id=message.room_id and member.owner_user_id=$2 and member.status='active')
       returning message.id,message.room_id,message.removed_at`, [request.params.id, request.user.sub]);
-    if (!result.rows[0]) return reply.code(404).send({ error: "Shared item not found." });
+    if (!result.rows[0]) return reply.code(404).send({ error: "Message not found." });
     const event = { id: result.rows[0].id, roomId: result.rows[0].room_id, removedAt: result.rows[0].removed_at };
     const members = await pool.query("select owner_user_id from together_room_members where room_id=$1 and status='active'", [event.roomId]);
     for (const member of members.rows) publish(member.owner_user_id, "message_removed", event);
@@ -676,14 +697,21 @@ export function registerTogetherRoutes(app, { pool }) {
   });
 
   app.delete("/v1/together/rooms/:id/members/:userId", { preHandler: app.authenticate }, async (request, reply) => {
-    const access = await findRoomModerator(pool, request.params.id, request.user.sub, request.account?.is_admin);
+    const access = await findRoomAccess(pool, request.params.id, request.user.sub);
+    const publicModerator = access && ["general", "help"].includes(access.kind) && (request.account?.is_admin || access.role === "moderator");
+    const trainerOwner = access?.kind === "trainer" && access.role === "owner";
     const reason = cleanText(request.body?.reason, 1000);
-    if (!access) return reply.code(404).send({ error: "Moderated public room not found." });
+    if (!publicModerator && !trainerOwner) return reply.code(404).send({ error: "Manageable room not found." });
     if (!reason || request.params.userId === request.user.sub) return reply.code(400).send({ error: "Choose another member and record the removal reason." });
-    if (await isCanonicalOwner(pool, request.params.userId)) return reply.code(403).send({ error: `The North owner @${ownerUsername} cannot be removed from curated rooms.` });
-    const result = await pool.query(`update together_room_members set status='removed',removal_reason=$1,updated_at=now()
-      where room_id=$2 and owner_user_id=$3 and status='active' and role='member' returning owner_user_id`, [reason, request.params.id, request.params.userId]);
-    return result.rows[0] ? reply.code(204).send() : reply.code(404).send({ error: "Active room member not found." });
+    if (publicModerator && await isCanonicalOwner(pool, request.params.userId)) return reply.code(403).send({ error: `The North owner @${ownerUsername} cannot be removed from curated rooms.` });
+    const result = trainerOwner
+      ? await pool.query(`update together_room_members set status='removed',removal_reason=$1,updated_at=now()
+        where room_id=$2 and owner_user_id=$3 and status in ('active','invited') and role<>'owner' returning owner_user_id`, [reason, request.params.id, request.params.userId])
+      : await pool.query(`update together_room_members set status='removed',removal_reason=$1,updated_at=now()
+        where room_id=$2 and owner_user_id=$3 and status='active' and role='member' returning owner_user_id`, [reason, request.params.id, request.params.userId]);
+    if (!result.rows[0]) return reply.code(404).send({ error: "Active or invited room member not found." });
+    publish(request.params.userId, "membership", { roomId: request.params.id, status: "removed" });
+    return reply.code(204).send();
   });
 
   app.patch("/v1/admin/together/rooms/:id/members/:userId/role", { preHandler: app.requireAdmin }, async (request, reply) => {
@@ -704,28 +732,47 @@ export function registerTogetherRoutes(app, { pool }) {
   });
 
   app.post("/v1/together/trainer-rooms", { preHandler: app.authenticate, config: { rateLimit: { max: 10, timeWindow: "1 hour" } } }, async (request, reply) => {
-    const username = cleanText(request.body?.username, 30).toLowerCase();
+    const usernames = [...new Set((Array.isArray(request.body?.usernames) ? request.body.usernames : [request.body?.username]).map((value) => cleanText(value, 30).toLowerCase()).filter(Boolean))];
     const name = cleanText(request.body?.name, 80);
     const invitedRole = request.body?.invitedRole === "trainer" ? "trainer" : "member";
-    if (!name || !usernamePattern.test(username)) return reply.code(400).send({ error: "A room name and exact North username are required." });
-    const invited = await findActiveUser(pool, username);
-    if (!invited || invited.id === request.user.sub) return reply.code(404).send({ error: "No available North member matched that username." });
+    if (!name || usernames.length < 1 || usernames.length > 20 || usernames.some((username) => !usernamePattern.test(username))) return reply.code(400).send({ error: "A room name and 1 to 20 exact North usernames are required." });
+    const invited = await pool.query(`select user_account.id,user_account.display_name,credentials.username from app_users user_account
+      join local_credentials credentials on credentials.owner_user_id=user_account.id
+      where credentials.username=any($1::text[]) and user_account.status='active' and user_account.deleted_at is null`, [usernames]);
+    if (invited.rowCount !== usernames.length || invited.rows.some((person) => person.id === request.user.sub)) return reply.code(404).send({ error: "One or more invited North members could not be found." });
     const client = await pool.connect();
     try {
       await client.query("begin");
       const room = await client.query(`insert into together_rooms(name,description,kind,visibility,created_by_user_id)
         values($1,$2,'trainer','private',$3) returning *`, [name, cleanText(request.body?.description, 500), request.user.sub]);
-      await client.query(`insert into together_room_members(room_id,owner_user_id,role,status) values
-        ($1,$2,'owner','active'),($1,$3,$4,'invited')`, [room.rows[0].id, request.user.sub, invited.id, invitedRole]);
+      await client.query("insert into together_room_members(room_id,owner_user_id,role,status) values($1,$2,'owner','active')", [room.rows[0].id, request.user.sub]);
+      await client.query(`insert into together_room_members(room_id,owner_user_id,role,status)
+        select $1,person_id,$3,'invited' from unnest($2::uuid[]) as invitee(person_id)`, [room.rows[0].id, invited.rows.map((person) => person.id), invitedRole]);
       await client.query("commit");
-      publish(invited.id, "membership", { roomId: room.rows[0].id, status: "invited" });
-      return reply.code(201).send({ room: { id: room.rows[0].id, name, kind: "trainer" } });
+      for (const person of invited.rows) publish(person.id, "membership", { roomId: room.rows[0].id, status: "invited" });
+      return reply.code(201).send({ room: { id: room.rows[0].id, name, kind: "trainer" }, invited: invited.rows.map(mapPerson) });
     } catch (error) {
       await client.query("rollback");
       throw error;
     } finally {
       client.release();
     }
+  });
+
+  app.post("/v1/together/rooms/:id/members", { preHandler: app.authenticate, config: { rateLimit: { max: 30, timeWindow: "1 hour" } } }, async (request, reply) => {
+    const access = await findRoomAccess(pool, request.params.id, request.user.sub);
+    if (!access || access.kind !== "trainer" || access.role !== "owner") return reply.code(404).send({ error: "Private trainer room not found." });
+    const username = cleanText(request.body?.username, 30).toLowerCase();
+    const role = request.body?.role === "trainer" ? "trainer" : "member";
+    if (!usernamePattern.test(username)) return reply.code(400).send({ error: "Enter an exact North username." });
+    const invited = await findActiveUser(pool, username);
+    if (!invited || invited.id === request.user.sub) return reply.code(404).send({ error: "No available North member matched that username." });
+    const result = await pool.query(`insert into together_room_members(room_id,owner_user_id,role,status)
+      values($1,$2,$3,'invited') on conflict(room_id,owner_user_id) do update set role=$3,status='invited',removal_reason=null,updated_at=now()
+      where together_room_members.status in ('left','removed') returning room_id`, [request.params.id, invited.id, role]);
+    if (!result.rows[0]) return reply.code(409).send({ error: "This person is already a member or has an invitation waiting." });
+    publish(invited.id, "membership", { roomId: request.params.id, status: "invited" });
+    return reply.code(201).send({ member: { ...mapPerson(invited), role, status: "invited" } });
   });
 
   app.post("/v1/together/rooms/:id/join", { preHandler: app.authenticate }, async (request, reply) => {

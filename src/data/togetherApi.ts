@@ -5,6 +5,7 @@ export type TogetherPerson = { id: string; username: string; displayName: string
 export type TogetherRoomKind = "direct" | "general" | "help" | "updates" | "trainer";
 export type TogetherMessageKind = "text" | "workout" | "milestone" | "recap" | "photo" | "progress" | "encouragement" | "invitation" | "system";
 export type TogetherShareCard = { kind: "milestone" | "recap" | "photo"; title: string; detail: string; imageDataUrl?: string };
+export type TogetherReplyPreview = { id: string; body: string; sender: TogetherPerson | null };
 
 export type TogetherRoom = {
   id: string;
@@ -32,6 +33,7 @@ export type TogetherMessage = {
   body: string;
   sharedPayload?: unknown;
   replyToMessageId?: string | null;
+  replyTo?: TogetherReplyPreview | null;
   removedAt?: string | null;
   createdAt: string;
   editedAt?: string | null;
@@ -84,7 +86,7 @@ export const requestTogetherConnection = (username: string) => togetherRequest(`
 export const respondTogetherConnection = (requestId: string, decision: "accept" | "decline") => togetherRequest<{ connection: { id: string; status: string; roomId: string | null } }>(`${togetherPath}/requests/${requestId}/respond`, jsonRequest({ decision }));
 export const listTogetherMessages = (roomId: string, before?: string) => togetherRequest<{ room: TogetherRoom; messages: TogetherMessage[]; nextCursor: string | null }>(`${togetherPath}/rooms/${roomId}/messages?limit=50${before ? `&before=${encodeURIComponent(before)}` : ""}`);
 export const getTogetherRoomInfo = (roomId: string) => togetherRequest<TogetherRoomInfo>(`${togetherPath}/rooms/${roomId}/info`);
-export const sendTogetherMessage = (roomId: string, input: { clientMessageId: string; body: string; kind?: TogetherMessageKind; sharedPayload?: unknown }) => togetherRequest<{ message: TogetherMessage; deduplicated: boolean }>(`${togetherPath}/rooms/${roomId}/messages`, jsonRequest(input));
+export const sendTogetherMessage = (roomId: string, input: { clientMessageId: string; body: string; kind?: TogetherMessageKind; sharedPayload?: unknown; replyToMessageId?: string | null }) => togetherRequest<{ message: TogetherMessage; deduplicated: boolean }>(`${togetherPath}/rooms/${roomId}/messages`, jsonRequest(input));
 export const markTogetherRoomRead = (roomId: string) => togetherRequest<void>(`${togetherPath}/rooms/${roomId}/read`, jsonRequest(null));
 export const prepareTogetherWorkoutCopy = (messageId: string, copyId: string) => togetherRequest<{ template: WorkoutTemplate }>(`${togetherPath}/messages/${messageId}/workout-copy`, jsonRequest({ copyId }));
 export const removeTogetherMessage = (messageId: string) => togetherRequest<void>(`${togetherPath}/messages/${messageId}`, { method: "DELETE" });
@@ -117,4 +119,6 @@ export const disconnectTogetherConnection = (connectionId: string) => togetherRe
 export const blockTogetherConnection = (connectionId: string) => togetherRequest<void>(`${togetherPath}/connections/${connectionId}/block`, jsonRequest({ reason: "Blocked from conversation controls" }));
 export const reportTogetherRoom = (roomId: string, category: string, submittedContext: string) => togetherRequest(`${togetherPath}/rooms/${roomId}/reports`, jsonRequest({ category, submittedContext }));
 export const joinTogetherRoom = (roomId: string) => togetherRequest(`${togetherPath}/rooms/${roomId}/join`, jsonRequest(null));
-export const createTogetherTrainerRoom = (input: { username: string; name: string; description?: string; invitedRole: "trainer" | "member" }) => togetherRequest(`${togetherPath}/trainer-rooms`, jsonRequest(input));
+export const createTogetherTrainerRoom = (input: { usernames: string[]; name: string; description?: string; invitedRole: "trainer" | "member" }) => togetherRequest<{ room: { id: string; name: string; kind: "trainer" }; invited: TogetherPerson[] }>(`${togetherPath}/trainer-rooms`, jsonRequest(input));
+export const inviteTogetherTrainerMember = (roomId: string, username: string, role: "trainer" | "member" = "member") => togetherRequest<{ member: TogetherPerson & { role: "trainer" | "member"; status: "invited" } }>(`${togetherPath}/rooms/${roomId}/members`, jsonRequest({ username, role }));
+export const removeTogetherTrainerMember = (roomId: string, userId: string) => togetherRequest<void>(`${togetherPath}/rooms/${roomId}/members/${userId}`, jsonRequest({ reason: "Removed by the private room owner." }, "DELETE"));

@@ -39,6 +39,13 @@ test("Together messages are idempotent, bounded, ordered, and receipt-aware", ()
   assert.match(migration, /char_length\(body\) <= 4000/);
   assert.match(migration, /together_messages\(room_id,created_at desc,id desc\)/);
   assert.match(migration, /read_at timestamptz/);
+  assert.match(migration, /reply_to_message_id uuid references together_messages/);
+  assert.match(routes, /message\.id=\$1 and message\.room_id=\$2/);
+  assert.match(routes, /replyTo: row\.reply_to_message_id/);
+  assert.match(togetherApi, /replyToMessageId\?: string \| null/);
+  assert.match(togetherClient, /className="together-reply-quote"/);
+  assert.match(togetherClient, /aria-label="Delete message"/);
+  assert.match(togetherClient, /account\?\.user\.isAdmin \|\| isCanonicalOwner/);
 });
 
 test("Together provides curated public, help, updates, and private trainer spaces", () => {
@@ -46,6 +53,14 @@ test("Together provides curated public, help, updates, and private trainer space
   assert.match(migration, /'general','General'/);
   assert.match(migration, /'help','Help'/);
   assert.match(migration, /'north-updates','North Updates'/);
+  assert.match(routes, /Array\.isArray\(request\.body\?\.usernames\)/);
+  assert.match(routes, /usernames\.length > 20/);
+  assert.match(routes, /\/v1\/together\/rooms\/:id\/members/);
+  assert.match(routes, /access\.kind !== "trainer" \|\| access\.role !== "owner"/);
+  assert.match(togetherApi, /inviteTogetherTrainerMember/);
+  assert.match(togetherApi, /removeTogetherTrainerMember/);
+  assert.match(togetherClient, /Invite up to 20 people\. Only invited members can join/);
+  assert.match(togetherClient, /className="together-member-invite"/);
   assert.match(plan, /invite-only/);
 });
 
@@ -221,7 +236,7 @@ test("self-contained Together cards accept only reviewed text and cannot mutate 
   assert.match(routes, /\/v1\/together\/messages\/:id.*message\.sender_user_id=\$2/s);
   assert.match(routes, /shared_payload=null,removed_at=now\(\)/);
   assert.match(togetherApi, /export const removeTogetherMessage/);
-  assert.match(togetherClient, /removeSharedItem/);
+  assert.match(togetherClient, /removeMessage/);
 });
 
 test("Web Push subscriptions are opt-in, device bound, and owner scoped", () => {

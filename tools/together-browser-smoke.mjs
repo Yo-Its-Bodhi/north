@@ -16,13 +16,16 @@ const port = await new Promise((resolve, reject) => {
 const base = `http://127.0.0.1:${port}`;
 const server = spawn(process.execPath, ["node_modules/vite/bin/vite.js", "--host", "127.0.0.1", "--port", String(port)], { stdio: "ignore" });
 const chrome = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
-const account = { user: { id: "alex", username: "alex", displayName: "Alex", timezone: "America/Toronto" }, accessToken: "test", refreshToken: "test" };
+const account = { user: { id: "owner", username: "druwbi", displayName: "Druwbi", timezone: "America/Toronto", isAdmin: true }, accessToken: "test", refreshToken: "test" };
 const dad = { id: "dad", username: "dad", displayName: "Dad" };
+const morgan = { id: "morgan", username: "morgan", displayName: "Morgan" };
+const sam = { id: "sam", username: "sam", displayName: "Sam" };
 const rooms = [
   { id: "general", slug: "general", name: "General", kind: "general", description: "The shared North room.", role: "member", status: "active", notificationLevel: "all", unreadCount: 0 },
   { id: "help", slug: "help", name: "Help", kind: "help", description: "Ask for practical help.", role: "member", status: "active", notificationLevel: "all", unreadCount: 0 },
   { id: "updates", slug: "north-updates", name: "North Updates", kind: "updates", description: "Signed North announcements.", role: "member", status: "active", notificationLevel: "all", unreadCount: 1 },
   { id: "dad-room", name: "Dad", kind: "direct", description: "Private conversation", role: "member", status: "active", notificationLevel: "all", peer: dad, unreadCount: 1 },
+  { id: "team-room", name: "Team Training", kind: "trainer", description: "Private invite-only training group", role: "owner", status: "active", notificationLevel: "all", unreadCount: 0 },
 ];
 const messages = new Map([["dad-room", [{ id: "m1", roomId: "dad-room", clientMessageId: "dad-1", sender: dad, kind: "text", body: "Send me the new workout when it is ready.", createdAt: new Date().toISOString() }]]]);
 const preferences = Object.fromEntries(["direct_messages", "room_messages", "trainer_messages", "feature_announcements", "release_announcements", "incident_notices", "service_notices", "security_notices", "sounds"].map((key) => [key, true]));
@@ -31,6 +34,7 @@ let messagingOffline = false;
 let pendingStreamMessage = null;
 const connectionRequests = [];
 const trainerRooms = [];
+let trainerMembers = [{ ...account.user, role: "owner", status: "active" }, { ...morgan, role: "member", status: "invited" }];
 
 async function waitForServer() {
   for (let attempt = 0; attempt < 60; attempt += 1) {
@@ -74,12 +78,23 @@ async function createDevice(browser, viewport) {
       trainerRooms.push(request.postDataJSON());
       return route.fulfill({ status: 201, json: { room: { id: "trainer-probe" } } });
     }
+    if (path === "/v1/together/rooms/team-room/members" && request.method() === "POST") {
+      const body = request.postDataJSON();
+      trainerMembers = [...trainerMembers, { ...sam, username: body.username, role: body.role, status: "invited" }];
+      return route.fulfill({ status: 201, json: { member: trainerMembers.at(-1) } });
+    }
+    const trainerRemoval = path.match(/^\/v1\/together\/rooms\/team-room\/members\/([^/]+)$/);
+    if (trainerRemoval && request.method() === "DELETE") {
+      trainerMembers = trainerMembers.filter((member) => member.id !== trainerRemoval[1]);
+      return route.fulfill({ status: 204 });
+    }
     if (path === "/v1/together/preferences" && request.method() === "GET") return route.fulfill({ json: { preferences } });
     if (path === "/v1/together/preferences" && request.method() === "PATCH") {
       Object.assign(preferences, request.postDataJSON());
       return route.fulfill({ json: { preferences } });
     }
     if (path === "/v1/together/rooms/dad-room/info") return route.fulfill({ json: { room: { id: "dad-room", name: "Dad", description: "Private conversation", kind: "direct", role: "member", memberCount: 2 }, members: [{ ...account.user, role: "member", status: "active" }, { ...dad, role: "member", status: "active" }] } });
+    if (path === "/v1/together/rooms/team-room/info") return route.fulfill({ json: { room: { id: "team-room", name: "Team Training", description: "Private invite-only training group", kind: "trainer", role: "owner", memberCount: trainerMembers.filter((member) => member.status === "active").length }, members: trainerMembers } });
     const history = path.match(/^\/v1\/together\/rooms\/([^/]+)\/messages$/);
     if (history && request.method() === "GET") return route.fulfill({ json: { room: rooms.find((room) => room.id === history[1]), messages: messages.get(history[1]) ?? [], nextCursor: null } });
     if (history && request.method() === "POST") {
@@ -87,7 +102,8 @@ async function createDevice(browser, viewport) {
       const body = JSON.parse(request.postData() ?? "{}");
       const existing = (messages.get(history[1]) ?? []).find((message) => message.clientMessageId === body.clientMessageId);
       if (existing) return route.fulfill({ json: { message: existing, deduplicated: true } });
-      const message = { id: `m-${Date.now()}`, roomId: history[1], clientMessageId: body.clientMessageId, sender: account.user, kind: body.kind ?? "text", body: body.body, sharedPayload: body.sharedPayload, createdAt: new Date().toISOString() };
+      const replyTarget = (messages.get(history[1]) ?? []).find((message) => message.id === body.replyToMessageId);
+      const message = { id: `m-${Date.now()}`, roomId: history[1], clientMessageId: body.clientMessageId, sender: account.user, kind: body.kind ?? "text", body: body.body, sharedPayload: body.sharedPayload, replyToMessageId: body.replyToMessageId ?? null, replyTo: replyTarget ? { id: replyTarget.id, body: replyTarget.removedAt ? "Message removed" : replyTarget.body, sender: replyTarget.sender } : null, createdAt: new Date().toISOString() };
       messages.set(history[1], [...(messages.get(history[1]) ?? []), message]);
       return route.fulfill({ json: { message, deduplicated: false } });
     }
@@ -114,7 +130,7 @@ try {
   await desktopPage.goto(`${base}?open=together`);
   await desktopPage.locator(".together-screen").waitFor();
   await desktopPage.locator(".together-room").first().waitFor();
-  for (const room of ["General", "Help", "North Updates", "Dad"]) assert.equal(await desktopPage.locator(".together-room", { hasText: room }).count() > 0, true, `${room} is missing`);
+  for (const room of ["General", "Help", "North Updates", "Dad", "Team Training"]) assert.equal(await desktopPage.locator(".together-room", { hasText: room }).count() > 0, true, `${room} is missing`);
   await desktopPage.getByRole("button", { name: "Connect" }).click();
   await desktopPage.getByRole("textbox", { name: /North username/ }).fill("morgan");
   await desktopPage.getByRole("button", { name: "Send request" }).click();
@@ -122,10 +138,10 @@ try {
   assert.deepEqual(connectionRequests, [{ username: "morgan" }]);
   await desktopPage.getByRole("button", { name: "Trainer room" }).click();
   await desktopPage.getByRole("textbox", { name: "Room name" }).fill("Morgan training");
-  await desktopPage.getByRole("textbox", { name: /North username/ }).fill("morgan");
+  await desktopPage.getByRole("textbox", { name: "Invite usernames" }).fill("morgan, dad");
   await desktopPage.getByRole("button", { name: "Create room" }).click();
-  await desktopPage.getByText("Trainer room created. The invited member will see it in Together.").waitFor();
-  assert.deepEqual(trainerRooms, [{ username: "morgan", name: "Morgan training", invitedRole: "trainer" }]);
+  await desktopPage.getByText("Trainer room created. 2 invitations sent.").waitFor();
+  assert.deepEqual(trainerRooms, [{ usernames: ["morgan", "dad"], name: "Morgan training", invitedRole: "member" }]);
   await desktopPage.getByRole("button", { name: "Together notifications" }).click();
   const notificationDialog = desktopPage.getByRole("dialog", { name: "What is waiting" });
   await notificationDialog.waitFor();
@@ -154,12 +170,47 @@ try {
   assert.match(await roomInfoDialog.innerText(), /members\s+2/i);
   assert.match(await roomInfoDialog.innerText(), /@dad/);
   await roomInfoDialog.getByRole("button", { name: "Close conversation info" }).click();
+  await desktopPage.locator(".together-room", { hasText: "Team Training" }).click();
+  const trainerActions = desktopPage.locator(".together-actions");
+  if (!await trainerActions.evaluate((element) => element.open)) await trainerActions.locator('[aria-label="Conversation actions"]').click();
+  await desktopPage.getByRole("button", { name: "Conversation info" }).click();
+  const trainerInfoDialog = desktopPage.getByRole("dialog", { name: "Team Training" });
+  await trainerInfoDialog.waitFor();
+  assert.match(await trainerInfoDialog.innerText(), /private · invite only/i);
+  assert.match(await trainerInfoDialog.innerText(), /Morgan[\s\S]+invited/i);
+  await trainerInfoDialog.getByLabel("Invite another member").fill("sam");
+  await trainerInfoDialog.getByRole("button", { name: "Invite" }).click();
+  await trainerInfoDialog.getByText("Sam", { exact: true }).waitFor();
+  assert.equal(trainerMembers.some((member) => member.username === "sam" && member.status === "invited"), true, "Owner invitation did not remain pending");
+  desktopPage.once("dialog", (dialog) => dialog.accept());
+  await trainerInfoDialog.getByRole("button", { name: "Withdraw invitation for Sam" }).click();
+  await desktopPage.getByText("Invitation withdrawn.").waitFor();
+  assert.equal(trainerMembers.some((member) => member.username === "sam"), false, "Owner could not withdraw the pending invitation");
+  await trainerInfoDialog.getByRole("button", { name: "Close conversation info" }).click();
+  await desktopPage.locator(".together-room", { hasText: "Dad" }).click();
   await desktopPage.getByLabel("Message Dad").fill("I made the new workout for you.");
   await desktopPage.getByRole("button", { name: "Send message" }).click();
   const sentMessage = desktopPage.locator(".together-message", { hasText: "I made the new workout for you." });
   await sentMessage.first().waitFor();
   assert.equal(await sentMessage.count(), 1, "Together rendered a message more than once");
   await waitForState(() => messages.get("dad-room").some((message) => message.body === "I made the new workout for you."), "Mock server did not retain the desktop send");
+  await desktopPage.locator("#together-message-m1").getByRole("button", { name: "Reply to Dad" }).click();
+  const replyPreview = desktopPage.locator(".together-composer-reply");
+  await replyPreview.waitFor();
+  assert.match(await replyPreview.innerText(), /Dad[\s\S]+Send me the new workout/i, "Reply preview is not attached to the composer");
+  const replyComposer = desktopPage.getByLabel("Message Dad");
+  await replyComposer.fill("Yes, this is the one.");
+  await replyComposer.press("Enter");
+  await waitForState(() => messages.get("dad-room").some((message) => message.body === "Yes, this is the one."), `Reply did not reach the mock server. Browser errors: ${browserErrors.join(" | ")}`);
+  const replyRecord = messages.get("dad-room").find((message) => message.body === "Yes, this is the one.");
+  const replyMessage = desktopPage.locator(`#together-message-${replyRecord.id}`);
+  await replyMessage.waitFor();
+  assert.match(await replyMessage.locator(".together-reply-quote").innerText(), /Dad[\s\S]+Send me the new workout/i, "Sent reply lost its attached quote");
+  assert.equal(messages.get("dad-room").at(-1)?.replyToMessageId, "m1", "Mock server did not retain the reply target");
+  desktopPage.once("dialog", (dialog) => dialog.accept());
+  await replyMessage.getByRole("button", { name: "Delete message" }).click();
+  await desktopPage.getByText("Message deleted from the conversation.").waitFor();
+  assert.match(await replyMessage.innerText(), /Message removed/i, "Deleted text message did not become a tombstone");
   await desktopPage.locator('[aria-label="Share something"]').click();
   await desktopPage.getByRole("button", { name: "Progress update" }).click();
   await desktopPage.getByLabel("Title").fill("A steady week");
@@ -168,8 +219,8 @@ try {
   await desktopPage.locator(".together-shared-card", { hasText: "A steady week" }).waitFor();
   assert.equal(messages.get("dad-room").at(-1)?.kind, "progress");
   desktopPage.once("dialog", (dialog) => dialog.accept());
-  await desktopPage.getByRole("button", { name: "Remove shared progress" }).click();
-  await desktopPage.getByText(/Shared item removed/).waitFor();
+  await desktopPage.locator(".together-message", { hasText: "A steady week" }).getByRole("button", { name: "Delete message" }).click();
+  await desktopPage.getByText(/Message deleted from the conversation/).waitFor();
   assert.equal(await desktopPage.locator(".together-shared-card", { hasText: "A steady week" }).count(), 0, "Removed card is still visible");
   messagingOffline = true;
   await desktopPage.getByLabel("Message Dad").fill("Queue this through the outage.");
@@ -195,15 +246,15 @@ try {
   await desktopPage.locator(".together-room", { hasText: "Dad" }).click();
   await desktopPage.getByText("Got it. I will start tomorrow.").waitFor();
   await desktopPage.locator(".together-room", { hasText: "North Updates" }).click();
-  assert.match(await desktopPage.locator(".together-readonly").innerText(), /read-only.*signed by north/i, "Updates is not signed and read-only");
-  assert.equal(await desktopPage.locator(".together-composer").count(), 0, "Updates exposed a message composer");
+  assert.equal(await desktopPage.locator(".together-readonly").count(), 0, "Owner is incorrectly blocked from North Updates");
+  await desktopPage.getByLabel("Post a North Update").waitFor();
   assert.deepEqual(browserErrors, []);
   await mobilePage.screenshot({ path: "artifacts/visual/together-mobile.png", fullPage: true });
   await desktopPage.screenshot({ path: "artifacts/visual/together-desktop.png", fullPage: true });
   await desktop.close();
   await mobile.close();
   await browser.close();
-  console.log("Together browser smoke passed: creation, continuity, notifications, settings, room info, reviewed cards, curated rooms, and read-only Updates.");
+  console.log("Together browser smoke passed: creation, private group invitations, continuity, replies, deletion, notifications, settings, room info, reviewed cards, curated rooms, and owner Updates composing.");
 } finally {
   server.kill();
 }
