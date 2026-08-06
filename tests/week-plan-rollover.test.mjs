@@ -56,5 +56,5 @@ test("completed records reconcile plan status after sync or reload", () => {
 
 test("scheduling a workout persists before an immediate refresh", () => {
   assert.match(source, /function performWorkoutTemplateChange[\s\S]*const nextPlan = weeklyPlan\.map/);
-  assert.match(source, /setWeeklyPlan\(nextPlan\);\s*void persistAccountJson\(PLAN_KEY, "week-plan", nextPlan, true\)/);
+  assert.match(source, /setWeeklyPlan\(nextPlan\);\s*await persistAccountJson\(PLAN_KEY, "week-plan", nextPlan, true\)/);
 });

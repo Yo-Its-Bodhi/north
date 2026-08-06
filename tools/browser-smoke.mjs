@@ -51,7 +51,7 @@ try {
     localStorage.setItem("north-account-session-v1", JSON.stringify(account));
     localStorage.setItem(`north-onboarding-complete:${account.user.id}`, new Date().toISOString());
     localStorage.setItem(`north-product-tour-v1:${account.user.id}`, new Date().toISOString());
-    localStorage.setItem("north-release-notes-dismissed", "north-0.7-find-your-way");
+    localStorage.setItem("north-release-notes-dismissed", "north-0.8-together");
     localStorage.setItem("north-profile-v1", JSON.stringify({ name: "Browser Test", direction: "Build strength and consistency", trainingDays: 3, units: "imperial", language: "English", tone: "Encouraging and direct", notifications: false, memoryEnabled: true, reducedMotion: true, largeText: false, highContrast: false, connectedServices: [], dismissedInsights: [], memoryCorrections: {} }));
   }, { account });
   await context.route("**/v1/**", async (route) => {
@@ -294,7 +294,7 @@ try {
           overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
         };
       }, { palette, mode });
-      assert.deepEqual(metrics.destinations, ["today", "journey", "training", "nova-workout-builder", "nova", "you"], `${palette} nav identity drifted`);
+      assert.deepEqual(metrics.destinations, ["today", "journey", "training", "together", "nova-workout-builder", "nova", "you"], `${palette} nav identity drifted`);
       assert.deepEqual(metrics.visibleDestinations, ["today", "journey", "training", "nova", "you"], `${palette} mobile nav composition drifted`);
       assert.equal(metrics.topbarHeight, 78, `${palette} topbar height drifted`);
       assert.ok(metrics.headerHeight >= 148 && metrics.headerHeight <= 156, `${palette} destination header height drifted to ${metrics.headerHeight}px`);
@@ -506,7 +506,7 @@ try {
     await page.locator(".atlas-recap-launch").click();
     process.stdout.write("  exporting Atlas recap\n");
     const atlasDownloadPromise = page.waitForEvent("download", { timeout: 10000 });
-    await page.locator(".atlas-export").click();
+    await page.getByRole("button", { name: "Export share image" }).click();
     const atlasDownload = await atlasDownloadPromise;
     assert.match(atlasDownload.suggestedFilename(), /^north-atlas-[a-z0-9-]+-(sessions|minutes|reps|volume|distance)-(square|story|landscape)-exported-\d{4}-\d{2}-\d{2}-\d{6}-\d{3}\.png$/);
 
@@ -862,15 +862,22 @@ try {
     const firstName = (await firstTemplate.locator(".template-open > strong").textContent())?.trim();
     const secondName = (await secondTemplate.locator(".template-open > strong").textContent())?.trim();
     assert.ok(firstName && secondName, "scheduled templates need visible names");
+    const todayLabel = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" }).format(new Date(`${testDate}T12:00:00Z`));
+    const tomorrow = new Date(`${testDate}T12:00:00Z`);
+    tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+    const tomorrowLabel = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" }).format(tomorrow);
     await firstTemplate.getByRole("button", { name: "Schedule", exact: true }).click();
-    await page.locator(".schedule-picker > div > button").first().click();
+    await page.locator(".schedule-picker > div > button").filter({ hasText: todayLabel }).click();
     await page.locator(".schedule-picker").waitFor({ state: "hidden" });
+    await page.waitForFunction((name) => JSON.parse(localStorage.getItem("north-week-plan-v1") ?? "[]").filter((day) => day.title === name).length === 1, firstName);
     await page.getByRole("button", { name: "Training", exact: true }).last().click();
     await page.locator(".workout-builder-option.premade").click();
     await page.locator(".workout-library-screen:visible").waitFor();
     await secondTemplate.getByRole("button", { name: "Schedule", exact: true }).click();
-    await page.locator(".schedule-picker > div > button").nth(1).click();
+    await page.locator(".schedule-picker > div > button").filter({ hasText: tomorrowLabel }).click();
     await page.locator(".schedule-picker").waitFor({ state: "hidden" });
+    const beforeReload = await page.evaluate(() => JSON.parse(localStorage.getItem("north-week-plan-v1") ?? "[]").map((day) => ({ date: day.date, title: day.title })));
+    assert.equal(beforeReload.filter((day) => [firstName, secondName].includes(day.title)).length, 2);
     await page.reload();
     const scheduledDays = await page.evaluate((names) => JSON.parse(localStorage.getItem("north-week-plan-v1") ?? "[]")
       .filter((day) => names.includes(day.title))

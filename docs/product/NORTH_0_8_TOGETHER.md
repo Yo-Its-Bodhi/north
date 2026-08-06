@@ -64,6 +64,8 @@ Owner announcements are a separate product channel, not a private member convers
 - Operational logs exclude message bodies, shared photos, and private record content.
 - Reports preserve only the minimum content deliberately submitted for review.
 - Retention, export, account deletion, participant deletion, and legal-access behavior must be defined before release.
+- A member export includes only conversations they participate in, their receipts and preferences, reports they submitted, blocks they created, and announcements delivered to them. It never includes reports filed by someone else or unrelated conversations.
+- Account deletion removes memberships, preferences, receipts, connections, and blocks through foreign-key cascades. Message authorship is anonymized so another participant's retained copy does not silently change into a different person's content.
 - North must not claim end-to-end encryption unless the released transport, key management, device recovery, and multi-device behavior actually provide it.
 - Nova never reads Together conversations or uses them as memory unless a member explicitly submits specific text to Nova through a separate review step.
 
@@ -71,34 +73,36 @@ Owner announcements are a separate product channel, not a private member convers
 
 ### Foundation
 
-- [ ] Define connection, participant, conversation, message, receipt, block, report, and announcement schemas.
-- [ ] Add migrations with participant-scoped access rules, indexes, retention fields, and immutable audit events for administrative publishing.
-- [ ] Build authenticated connection-request, accept, decline, disconnect, block, mute, conversation-list, history, send, retry, and delete endpoints.
-- [ ] Add idempotent client message IDs, cursor pagination, optimistic delivery states, offline outbox behavior, and multi-device reconciliation.
-- [ ] Threat-model authorization, recipient enumeration, spam, replay, attachment access, rate limits, blocking bypasses, and notification leakage.
+- [x] Define connection, participant, conversation, message, receipt, block, report, and announcement schemas.
+- [x] Add migrations with participant-scoped access rules, indexes, retention fields, and immutable audit events for administrative publishing.
+- [x] Build authenticated connection-request, accept, decline, disconnect, block, mute, conversation-list, history, send, retry, and delete endpoints.
+- [x] Add idempotent client message IDs, cursor pagination, optimistic delivery states, offline outbox behavior, and multi-device reconciliation.
+- [x] Threat-model authorization, recipient enumeration, spam, replay, bounded photo snapshots, rate limits, blocking bypasses, and notification leakage in code and focused contracts; production Push-provider verification remains a release gate.
 
 ### Member product
 
-- [ ] Add Together as a member destination with conversation list, unread counts, latest previews, search, and resume behavior.
-- [ ] Build the persistent one-to-one thread with text messages, timestamps, delivery states, retry, pagination, and accessible keyboard/mobile behavior.
-- [ ] Add connection requests and clear decline, disconnect, block, report, and mute controls.
-- [ ] Add deliberate share review and conversation cards for workouts, milestones, recaps, selected photos, updates, and encouragement.
-- [ ] Keep all received items out of Journey, Training, Nova, recommendations, and analytics unless the recipient performs a separate explicit action.
-- [ ] Add independent controls for message notifications, previews, sounds, read receipts, typing, and presence.
+- [x] Add Together as a member destination with conversation list, unread counts, latest previews, search, and resume behavior.
+- [x] Build the persistent one-to-one thread with text messages, timestamps, delivery states, retry, pagination, and accessible keyboard/mobile behavior.
+- [x] Add connection requests and clear decline, disconnect, block, report, and mute controls.
+- [x] Add deliberate share review and conversation cards for workouts, milestones, recaps, selected photos, updates, encouragement, and invitations.
+- [x] Keep all received items out of Journey, Training, Nova, recommendations, and analytics unless the recipient performs a separate explicit action.
+- [x] Add independent controls for message notifications, previews, sounds, read receipts, typing, and presence.
+- [x] Let senders replace shared cards with an honest participant-visible tombstone without changing or deleting the private source record.
 
 ### Owner announcements
 
-- [ ] Complete the admin announcement composer with audience, preview, schedule, expiry, correction, archive, and publish confirmation.
-- [ ] Render a clearly signed, read-only North Updates conversation in the member inbox.
-- [ ] Separate direct-message preferences from release, feature, incident, service, and security notice preferences.
-- [ ] Audit every publish, edit, correction, audience change, and archive action without storing private member conversation content.
+- [x] Complete the admin announcement composer with audience, preview, schedule, expiry, correction, archive, and publish confirmation.
+- [x] Render a clearly signed, read-only North Updates conversation in the member inbox.
+- [x] Separate direct-message preferences from release, feature, incident, service, and security notice preferences.
+- [x] Audit every publish, edit, correction, audience change, and archive action without storing private member conversation content.
 
 ### Release proof
 
-- [ ] Prove with authorization tests that connections cannot read timelines, records, health data, Nova data, recommendations, analytics, or other conversations.
+- [x] Prove participant-scoped conversation access, blocked contact, trainer invitation boundaries, moderator authority, and post-deletion history behavior with adversarial route tests; existing owner-scoped APIs remain independent of connections.
 - [ ] Test send/retry/order/deduplication across offline use, reconnects, two devices, blocked users, disconnects, deletions, and account deletion.
-- [ ] Test notification privacy with locked-screen previews disabled and enabled.
-- [ ] Complete abuse-reporting, data export, retention, deletion, backup, restore, accessibility, and incident-response reviews.
+- [x] Test notification payload privacy with previews disabled and enabled, plus exact-room deep links; real desktop/mobile Push delivery remains a field gate.
+- [x] Complete local abuse-reporting, participant export, account-deletion, backup-scope, responsive browser, performance, technical privacy, and incident-response reviews.
+- [ ] Approve legal retention periods and complete an isolated production-style backup/restore rehearsal.
 - [ ] Run a two-person field test focused on leaving messages, returning later, resuming naturally, and deliberately sharing one experience.
 
 ## Release line

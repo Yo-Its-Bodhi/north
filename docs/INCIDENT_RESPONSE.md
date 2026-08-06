@@ -77,7 +77,7 @@ For P0 and P1 incidents:
 
 1. Create a private incident record with a unique ID, UTC declaration time, reporter, Incident Commander, severity, affected systems, and the facts known so far.
 2. Preserve volatile facts before changing systems: alert payloads, request IDs, process state, deployment version, migration version, active sessions, provider status, and relevant log locations.
-3. Contain the smallest safe scope. Options include maintenance mode, disabling registration or Nova, revoking sessions, rotating a credential, blocking an endpoint, isolating a host, pausing health imports, or rolling back a release.
+3. Contain the smallest safe scope. Options include maintenance mode, disabling registration, Nova, Together sends, or Push delivery, revoking sessions or Push subscriptions, rotating a credential, blocking an endpoint, isolating a host, pausing health imports, or rolling back a release.
 4. Do not delete logs, rebuild a compromised host in place, contact a suspected attacker, or make public attribution before evidence and legal needs are understood.
 5. Set the next internal update time and identify who can authorize downtime, data restoration, member communication, and external support.
 
@@ -108,7 +108,7 @@ Preserve only evidence relevant to the incident:
 - backup identifiers and restore-verification results;
 - screenshots or exports required to explain member-visible behavior.
 
-Do not copy workout notes, Nova conversations, health details, credentials, recovery codes, or complete database rows into tickets or chat unless strictly required and handled in an approved private evidence location. Record access to the evidence, preserve originals, and work from copies when possible.
+Do not copy workout notes, Nova or Together conversations, shared photos, health details, credentials, recovery codes, or complete database rows into tickets or chat unless strictly required and handled in an approved private evidence location. A Together safety report permits review only of the context deliberately submitted with that report. Record access to the evidence, preserve originals, and work from copies when possible.
 
 ## Privacy and breach assessment
 

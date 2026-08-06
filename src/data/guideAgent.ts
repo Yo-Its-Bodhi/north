@@ -1,4 +1,4 @@
-import { guideArticles, type GuideAction, type GuideArticle } from "./guide";
+import { loadGuideArticles, type GuideAction, type GuideArticle } from "./guide";
 
 export type GuideAgentSource = {
   id: string;
@@ -77,7 +77,7 @@ function sourceFromArticle(article: GuideArticle): GuideAgentSource {
   };
 }
 
-export function findGuideAgentSources(question: string, limit = 3) {
+export async function findGuideAgentSources(question: string, limit = 3) {
   const query = question.trim().toLowerCase();
   const queryTerms = terms(query);
   const wantsPlanningHorizon = /\b(?:how many|number of) weeks?\b|\bweeks?\b.*\b(?:plan|schedule|workout|block)\b/.test(query);
@@ -86,7 +86,7 @@ export function findGuideAgentSources(question: string, limit = 3) {
   const wantsMuscleMap = /\b(?:see|show|view|check|using|used|worked|target)\b.*\bmuscles?\b|\bmuscles?\b.*\b(?:see|show|view|check|using|used|worked|target)\b/.test(query);
   const wantsToBuildWorkout = !wantsPlanningHorizon && /\b(build|create|make|design)\b.*\b(workout|routine)\b|\b(workout|routine)\b.*\b(build|create|make|design)\b/.test(query);
   const wantsToAdjustWorkout = /\b(adjust|change|edit|swap|replace|add|remove)\b.*\b(active|current|live|during|while|set|exercise)\b/.test(query);
-  return guideArticles
+  return (await loadGuideArticles())
     .map((article) => {
       const title = article.title.toLowerCase();
       const searchTerms = article.searchTerms.join(" ").toLowerCase();
@@ -117,7 +117,7 @@ export function findGuideAgentSources(question: string, limit = 3) {
     .map(({ article }) => sourceFromArticle(article));
 }
 
-export function guideAgentFallback(question: string, sources = findGuideAgentSources(question)) {
+export function guideAgentFallback(question: string, sources: GuideAgentSource[] = []) {
   const smallTalk = guideAgentSmallTalk(question);
   if (smallTalk) return smallTalk;
   const primary = sources[0];

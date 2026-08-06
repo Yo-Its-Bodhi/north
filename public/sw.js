@@ -1,30 +1,6 @@
-const CACHE = "north-shell-v9";
-const SHELL = ["/", "/index.html", "/manifest.webmanifest", "/app-icons/pwa-icon-light-512.png"];
-self.addEventListener("install", (event) => {
-  event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(SHELL)));
-  self.skipWaiting();
-});
-self.addEventListener("activate", (event) => event.waitUntil(Promise.all([
-  caches.keys().then((keys) => Promise.all(keys.filter((key) => key.startsWith("north-") && key !== CACHE).map((key) => caches.delete(key)))),
-  self.clients.claim(),
-])));
-self.addEventListener("fetch", (event) => {
-  if (event.request.method !== "GET") return;
-  const url = new URL(event.request.url);
-  if (url.origin !== self.location.origin || url.pathname.startsWith("/v1/") || url.pathname.startsWith("/admin") || event.request.headers.has("authorization")) return;
-  if (event.request.mode === "navigate") {
-    event.respondWith(fetch(event.request).catch(async () => (await caches.match("/index.html")) || (await caches.match("/"))));
-    return;
-  }
-  event.respondWith(
-    fetch(event.request)
-      .then((response) => {
-        if (response.ok && response.type === "basic") {
-          const copy = response.clone();
-          caches.open(CACHE).then((cache) => cache.put(event.request, copy));
-        }
-        return response;
-      })
-      .catch(async () => (await caches.match(event.request)) || Response.error()),
-  );
-});
+const S=self,C="north-shell-v9",I="/app-icons/pwa-icon-light-512.png";
+S.addEventListener("install",e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(["/","/index.html","/manifest.webmanifest","/release-notes.json","/guide-articles.json",I])));S.skipWaiting()});
+S.addEventListener("activate",e=>e.waitUntil(Promise.all([caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith("north-")&&key!==C).map(key=>caches.delete(key)))),S.clients.claim()])));
+S.addEventListener("fetch",e=>{const r=e.request,u=r.url;if(r.method!=="GET"||!u.startsWith(location.origin)||u.includes("/v1/")||u.includes("/admin")||r.headers.has("authorization"))return;if(r.mode==="navigate")return e.respondWith(fetch(r).catch(()=>caches.match("/index.html")));e.respondWith(fetch(r).then(response=>{if(response.ok)caches.open(C).then(cache=>cache.put(r,response.clone()));return response}).catch(async()=>await caches.match(r)||Response.error()))});
+S.addEventListener("push",e=>{let n;try{n=e.data.json()}catch{n={}}e.waitUntil(S.registration.showNotification(n.title||"North",{body:n.body||"Open North to view this update.",icon:I,badge:I,data:{url:n.url||"/?open=together"}}))});
+S.addEventListener("notificationclick",e=>{e.notification.close();const target=new URL(e.notification.data?.url||"/?open=together",location.origin).href;e.waitUntil(S.clients.matchAll({type:"window",includeUncontrolled:true}).then(clients=>{const client=clients[0];return client?client.focus().then(()=>client.navigate(target)):S.clients.openWindow(target)}))});

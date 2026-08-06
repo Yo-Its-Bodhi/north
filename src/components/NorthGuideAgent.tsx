@@ -46,7 +46,7 @@ export default function NorthGuideAgent({ onOpenAction, onOpenArticle, onOpenFul
     const text = value.trim();
     if (!text || thinking) return;
     const smallTalk = guideAgentSmallTalk(text);
-    const sources = findGuideAgentSources(text);
+    const sources = smallTalk ? [] : await findGuideAgentSources(text);
     setQuestion("");
     setMessages((current) => [...current, { id: crypto.randomUUID(), role: "user", content: text }]);
     setThinking(true);

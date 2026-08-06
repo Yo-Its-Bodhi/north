@@ -37,9 +37,9 @@ test("Today and Training use the same art and overlay implementation", async () 
   assert.match(css, /training-hero h2\s*\{[^}]*font-size:\s*clamp\(27px, 4vw, 34px\)/s);
   assert.match(css, /data-theme="morning"[^}]*training-hero \.direction-run-art[^}]*opacity: \.82[^}]*brightness\(1\.08\)/s);
   assert.match(css, /data-theme="morning"[^}]*training-hero \.direction-run-overlay[^}]*surface-solid[^}]*mix-blend-mode: normal/s);
-  assert.match(css, /today-screen > \.direction-panel \.direction-run-art \{[^}]*opacity: \.88;[^}]*brightness\(1\.04\)/s);
-  assert.match(css, /data-theme="morning"[^}]*today-screen > \.direction-panel \.direction-run-overlay[^}]*surface-solid[^}]*mix-blend-mode: normal/s);
-  assert.match(css, /data-theme="morning"[^}]*today-screen > \.direction-panel :is\(\.eyebrow, h2, p\)[^}]*color: var\(--ink\)[^}]*text-shadow: none/s);
+  assert.match(css, /today-screen > \.direction-panel \.direction-run-art \{[^}]*opacity: 1;[^}]*filter: none/s);
+  assert.match(css, /data-theme="morning"[^}]*today-screen > \.direction-panel \.direction-run-overlay[^}]*linear-gradient\(90deg, rgba\(5, 12, 14, \.94\)[^}]*mix-blend-mode: normal/s);
+  assert.match(css, /data-theme="morning"[^}]*today-screen > \.direction-panel :is\(\.eyebrow, h2, p\)[^}]*color: #fff[^}]*text-shadow: 0 1px 2px/s);
   assert.match(css, /data-theme="morning"[^}]*workout-builder-option[^}]*rgba\(255, 255, 255, \.1\)[^}]*var\(--workout-card-image\)/s);
   assert.match(css, /data-theme="morning"[^}]*quick-log-section \.activity-shortcuts button[^}]*rgba\(255, 255, 255, \.1\)[^}]*var\(--quick-log-image\)/s);
   assert.match(app, /className="quick-log-label">Bike<\/span>/);

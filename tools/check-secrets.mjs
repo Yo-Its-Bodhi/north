@@ -36,7 +36,8 @@ function filesUnder(directory) {
 }
 
 function isTextFile(path) {
-  return textExtensions.has(extname(path).toLowerCase()) && statSync(join(root, path)).size <= maximumFileBytes;
+  const absolutePath = join(root, path);
+  return existsSync(absolutePath) && textExtensions.has(extname(path).toLowerCase()) && statSync(absolutePath).size <= maximumFileBytes;
 }
 
 const findings = [];

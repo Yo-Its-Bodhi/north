@@ -20,4 +20,20 @@ npm.cmd run server
 
 Nova remains account-scoped when the provider is unavailable. Goals, approved memory, messages, proposals and action receipts are stored server-side; the model is never given a caller-supplied user ID.
 
+## Together field test
+
+Use two disposable accounts on a database-backed test instance. The test reads credentials from the process environment, never prints them, and intentionally disconnects and blocks the accounts at the end.
+
+```powershell
+$env:NORTH_FIELD_BASE_URL='https://staging.example'
+$env:NORTH_FIELD_A_USERNAME='disposable-a'
+$env:NORTH_FIELD_A_PASSWORD='set-in-the-terminal'
+$env:NORTH_FIELD_B_USERNAME='disposable-b'
+$env:NORTH_FIELD_B_PASSWORD='set-in-the-terminal'
+$env:NORTH_TOGETHER_FIELD_DESTRUCTIVE='true'
+npm.cmd run test:together:field
+```
+
+Do not use production member accounts. Run against staging or an isolated local PostgreSQL instance after all migrations, including `0023_together_account_deletion.sql`, are applied.
+
 Access tokens expire after 15 minutes. Refresh tokens rotate on every refresh and are stored only as SHA-256 hashes. Sync writes require an `Idempotency-Key`; stale document versions return a 409 conflict instead of silently overwriting another device.

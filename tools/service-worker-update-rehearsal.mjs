@@ -92,7 +92,7 @@ try {
     localStorage.setItem("north-account-session-v1", JSON.stringify(account));
     localStorage.setItem(`north-onboarding-complete:${account.user.id}`, new Date().toISOString());
     localStorage.setItem(`north-product-tour-v1:${account.user.id}`, new Date().toISOString());
-    localStorage.setItem("north-release-notes-dismissed", "north-0.7-find-your-way");
+    localStorage.setItem("north-release-notes-dismissed", "north-0.8-together");
     if (!sessionStorage.getItem("north-sw-update-fixture-seeded")) {
       localStorage.setItem("north-active-session-v1", JSON.stringify(activeSession));
       sessionStorage.setItem("north-sw-update-fixture-seeded", "true");

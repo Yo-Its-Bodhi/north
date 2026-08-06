@@ -120,9 +120,15 @@ export const northRepository = {
     return document;
   },
 
-  async remove(collection: string, id: string) {
+  async remove(collection: string, id: string, queue = true) {
     const database = await openNorthDatabase();
     const key = `${collection}:${id}`;
+    if (!queue) {
+      const transaction = database.transaction("documents", "readwrite");
+      transaction.objectStore("documents").delete(key);
+      await transactionDone(transaction);
+      return;
+    }
     const transaction = database.transaction(["documents", "outbox"], "readwrite");
     const store = transaction.objectStore("documents");
     const existing = await requestResult(store.get(key)) as NorthDocument | undefined;

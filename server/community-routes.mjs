@@ -6,7 +6,7 @@ const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}
 
 const text = (value, maximum = 200) => String(value ?? "").trim().slice(0, maximum);
 
-function publicationSnapshot(input) {
+export function workoutSnapshot(input) {
   if (!input || typeof input !== "object") return null;
   const name = text(input.name, 120);
   const description = text(input.description, 1200);
@@ -73,7 +73,7 @@ export function registerCommunityRoutes(app, { pool }) {
 
   app.post("/v1/community/workouts", { preHandler: app.authenticate, config: { rateLimit: { max: 30, timeWindow: "1 hour" } } }, async (request, reply) => {
     const sourceTemplateId = text(request.body?.sourceTemplateId, 200);
-    const snapshot = publicationSnapshot(request.body?.template);
+    const snapshot = workoutSnapshot(request.body?.template);
     if (!sourceTemplateId || !snapshot) return reply.code(400).send({ error: "A complete, valid workout is required before publishing." });
     let originalWorkoutId = uuidPattern.test(String(request.body?.originalWorkoutId ?? "")) ? request.body.originalWorkoutId : null;
     if (originalWorkoutId) {

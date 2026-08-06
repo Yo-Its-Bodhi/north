@@ -10,6 +10,7 @@ import { registerCommunityRoutes } from "./community-routes.mjs";
 import { registerGuideRoutes } from "./guide-routes.mjs";
 import { healthExerciseKind, isPurposefulExercise, recordStartsAfterConnection, recordingMethodName } from "./health-policy.mjs";
 import { registerNovaRoutes } from "./nova-routes.mjs";
+import { registerTogetherRoutes } from "./together-routes.mjs";
 
 if (existsSync(".env.local")) process.loadEnvFile(".env.local");
 
@@ -892,6 +893,7 @@ function mapDocument(row) {
 registerCommunityRoutes(app, { pool });
 registerGuideRoutes(app);
 registerNovaRoutes(app,{pool});
+registerTogetherRoutes(app, { pool });
 
 app.addHook("onClose", async () => pool.end());
 await app.listen({ port: Number(process.env.PORT ?? 8080), host: process.env.HOST ?? "127.0.0.1" });

@@ -1,9 +1,11 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
-import { guideArticles, guideTopics, productTourGuideSteps } from "../src/data/guide.ts";
+import { guideTopics, productTourGuideSteps } from "../src/data/guide.ts";
 
 const appSource = readFileSync(new URL("../src/App.tsx", import.meta.url), "utf8");
+const guideDataSource = readFileSync(new URL("../src/data/guide.ts", import.meta.url), "utf8");
+const guideArticles = JSON.parse(readFileSync(new URL("../public/guide-articles.json", import.meta.url), "utf8"));
 const guideSource = readFileSync(new URL("../src/components/NorthGuide.tsx", import.meta.url), "utf8");
 const anatomySource = readFileSync(new URL("../src/components/AnatomyMap.tsx", import.meta.url), "utf8");
 const guideStyles = readFileSync(new URL("../src/destination-reliability.css", import.meta.url), "utf8");
@@ -58,6 +60,8 @@ test("the starter Guide covers every launch topic", () => {
 });
 
 test("Guide search, article reading and deep links share one content source", () => {
+  assert.match(guideDataSource, /fetch\("\/guide-articles\.json"\)/);
+  assert.match(guideSource, /loadGuideArticles\(\)/);
   assert.match(guideSource, /useDeferredValue/);
   assert.match(guideSource, /article\.searchTerms\.join/);
   assert.match(guideSource, /setSelectedArticle\(article\)/);
@@ -85,7 +89,7 @@ test("the existing product tour is resumable and Guide-launched", () => {
   const oneMinuteArticle = guideArticles.find((article) => article.id === "north-in-one-minute");
   assert.equal(tourArticle?.action?.intent, "start-product-tour");
   assert.equal(productTourGuideSteps.length, 5);
-  assert.equal(oneMinuteArticle?.steps, productTourGuideSteps);
+  assert.deepEqual(oneMinuteArticle?.steps, productTourGuideSteps);
   assert.match(appSource, /\.map\(\(step, index\) => \(\{ \.\.\.step, \.\.\.productTourGuideSteps\[index\] \}\)\)/);
   assert.match(appSource, /type ProductTourProgress = \{ step: number; completed: boolean; updatedAt: string \}/);
   assert.match(appSource, /writeProductTourProgress\(tourStep, false\)/);

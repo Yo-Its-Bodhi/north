@@ -1,7 +1,7 @@
 {
   "name": "north",
   "private": true,
-  "version": "0.7.0",
+  "version": "0.8.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -11,6 +11,7 @@
     "test": "node --import tsx --test tests/*.test.mjs",
     "test:live": "node tools/live-smoke.mjs",
     "test:browser": "node tools/browser-smoke.mjs",
+    "test:together:field": "node tools/together-field-test.mjs",
     "test:pwa-update": "npm run build && node tools/service-worker-update-rehearsal.mjs",
     "audit:workout-flow": "node tools/workout-day-flow-audit.mjs",
     "test:visual": "node tools/visual-regression.mjs",
@@ -43,7 +44,8 @@
     "pg": "latest",
     "react": "latest",
     "react-dom": "latest",
-    "vite": "latest"
+    "vite": "latest",
+    "web-push": "^3.6.7"
   },
   "devDependencies": {
     "@eslint/js": "latest",

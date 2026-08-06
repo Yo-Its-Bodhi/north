@@ -1,6 +1,6 @@
 # North Privacy Data Map
 
-Status: technical inventory for North 0.7, reviewed 2026-08-04
+Status: technical inventory for North 0.8 pre-release, reviewed 2026-08-04
 
 Owner: Dru
 
@@ -29,6 +29,7 @@ Current data subjects are:
 - owner/admin users operating North;
 - people submitting issue reports or receiving support;
 - community-workout authors whose public template attribution is displayed;
+- Together participants, connection requesters, room members, message senders, and people named in deliberately submitted safety reports;
 - people represented in imported health records, Journey photos, free-text notes, or Nova messages submitted by a member.
 
 The initial web product does not require an email address. Coach, family, team, referral-payment, public-social, Apple Health, and marketplace processing are outside current launch scope unless deliberately added later.
@@ -44,7 +45,8 @@ North currently processes data across:
 5. optional Android Health Connect import from member-authorized sources such as Samsung Health;
 6. Open-Meteo for optional current weather context;
 7. an optional private issue-alert webhook;
-8. member-controlled files and destinations after backup, recap, or image export.
+8. the member's browser Push service when Together notifications are enabled on that device;
+9. member-controlled files and destinations after backup, recap, or image export.
 
 ## Data inventory
 
@@ -116,6 +118,19 @@ Provider prompts may include a member message and allow-listed recent records, g
 
 Performance results, private notes, photos, health records, and Nova conversations are not part of the community template. Public/legal basis, moderation, attribution after deletion, and acceptable-use rules require final review before broad community availability.
 
+### Together correspondence and rooms
+
+| Data | Source | Current purpose | Storage and audience | Current lifecycle |
+|---|---|---|---|---|
+| Connections and room membership | Explicit request, acceptance, invitation, join, disconnect, block, or moderation action | Authorize direct, curated, and trainer-room access | North PostgreSQL; visible only to relevant participants, with public rooms exposing a count rather than a directory | Memberships and connections cascade on account deletion; a surviving participant may retain anonymized direct-message history, but cannot send after the connection disappears |
+| Messages and shared cards | Member-authored text or deliberately reviewed workout, milestone, recap, selected photo, progress, encouragement, or invitation | Continue conversations and share bounded snapshots | North PostgreSQL; active room participants only | Retained until room/message removal policy or account lifecycle requires otherwise; sender identity becomes null on account deletion; final message retention period is not approved |
+| Delivery and read state | Server delivery plus member read action | Unread counts and optional receipts | North PostgreSQL; participant scoped | Receipt rows cascade with the account or message; final inactive-room retention is not approved |
+| Blocks, reports, and submitted report context | Member safety actions | Stop contact and permit narrow abuse review | North PostgreSQL; blocks are member scoped; deliberately submitted report context is available to authorized owner review | Blocks cascade with either account; report identities become null on deletion while submitted context may remain for safety review; final report retention is not approved |
+| Notification preferences and Push subscription credentials | Member settings and browser Push subscription | Deliver opt-in device notifications with privacy-controlled previews | North PostgreSQL and the browser Push service; private message text is omitted unless separately enabled | Preferences and subscriptions cascade with account/device deletion; subscriptions are revocable and invalid endpoints are retired; provider retention is unresolved |
+| North Updates and delivery receipts | Owner-authored signed announcement and targeted audience | Product, release, incident, service, and security communication | North PostgreSQL; delivered only to the selected audience | Member receipts cascade with account deletion; announcement and immutable publication-audit retention is not approved |
+
+Together does not grant access to Journey, Training, health, Nova, recommendations, or analytics. Nova does not receive Together content by default. The admin product has no private-conversation browser, and operational request logs do not intentionally store message bodies or shared payloads. Together tables are included in encrypted whole-database backups and isolated restore verification; backup copies follow the backup retention and deletion schedule rather than immediate row-level deletion.
+
 ### Support, issue reports, and administration
 
 | Data | Source | Current purpose | Storage and recipients | Current lifecycle |
@@ -153,7 +168,7 @@ North can create a downloadable JSON backup and rendered recap/image exports. Th
 North uses first-party browser storage needed for account and product operation:
 
 - localStorage for the persistent session, device ID, owner-switch protection, selected UI/preferences, weather cache, and some locally persisted product documents;
-- owner-scoped IndexedDB for versioned documents, pending sync mutations, conflicts, and migration metadata;
+- owner-scoped IndexedDB for versioned documents, pending sync mutations, Together's offline outbox, conflicts, and migration metadata;
 - service-worker caches for the application shell and offline navigation;
 - browser permission APIs for optional geolocation, notifications, Wake Lock, and installed-app behavior.
 

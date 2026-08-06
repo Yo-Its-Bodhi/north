@@ -6,13 +6,13 @@
     ],
     "page": [
       320,
-      1663
+      1675
     ],
     "shell": {
       "x": 0,
       "y": 0,
       "width": 320,
-      "height": 1663,
+      "height": 1675,
       "display": "block",
       "fontSize": "16px",
       "color": "rgb(23, 52, 59)",
@@ -32,7 +32,7 @@
       "x": 0,
       "y": 78,
       "width": 320,
-      "height": 1410,
+      "height": 1416,
       "display": "block",
       "fontSize": "16px",
       "color": "rgb(23, 52, 59)",
@@ -50,13 +50,13 @@
     },
     "hero": {
       "x": 14,
-      "y": 357,
+      "y": 363,
       "width": 292,
       "height": 190,
       "display": "flex",
       "fontSize": "16px",
       "color": "rgb(255, 255, 255)",
-      "background": "rgba(0, 0, 0, 0)"
+      "background": "rgb(34, 91, 199)"
     },
     "navigation": {
       "x": 0,
@@ -76,13 +76,13 @@
     ],
     "page": [
       430,
-      1615
+      1627
     ],
     "shell": {
       "x": 0,
       "y": 0,
       "width": 430,
-      "height": 1615,
+      "height": 1627,
       "display": "block",
       "fontSize": "16px",
       "color": "rgb(23, 52, 59)",
@@ -102,7 +102,7 @@
       "x": 0,
       "y": 78,
       "width": 430,
-      "height": 1363,
+      "height": 1369,
       "display": "block",
       "fontSize": "16px",
       "color": "rgb(23, 52, 59)",
@@ -120,13 +120,13 @@
     },
     "hero": {
       "x": 10,
-      "y": 339,
+      "y": 345,
       "width": 410,
       "height": 190,
       "display": "flex",
       "fontSize": "16px",
       "color": "rgb(255, 255, 255)",
-      "background": "rgba(0, 0, 0, 0)"
+      "background": "rgb(34, 91, 199)"
     },
     "navigation": {
       "x": 0,
@@ -146,13 +146,13 @@
     ],
     "page": [
       430,
-      2645
+      2651
     ],
     "shell": {
       "x": 0,
       "y": 0,
       "width": 430,
-      "height": 2645,
+      "height": 2651,
       "display": "block",
       "fontSize": "16px",
       "color": "rgb(23, 52, 59)",
@@ -181,7 +181,7 @@
     "heading": {
       "x": 18,
       "y": 117,
-      "width": 278,
+      "width": 382,
       "height": 37,
       "display": "block",
       "fontSize": "42px",
@@ -195,7 +195,7 @@
       "height": 312,
       "display": "grid",
       "fontSize": "16px",
-      "color": "rgb(248, 251, 252)",
+      "color": "color(srgb 0.088 0.199216 0.226353)",
       "background": "rgba(0, 0, 0, 0)"
     },
     "navigation": {
@@ -216,13 +216,13 @@
     ],
     "page": [
       768,
-      2460
+      2494
     ],
     "shell": {
       "x": 16,
       "y": 24,
       "width": 736,
-      "height": 2412,
+      "height": 2446,
       "display": "block",
       "fontSize": "16px",
       "color": "rgb(23, 52, 59)",
@@ -242,7 +242,7 @@
       "x": 16,
       "y": 102,
       "width": 736,
-      "height": 2159,
+      "height": 2187,
       "display": "block",
       "fontSize": "16px",
       "color": "rgb(23, 52, 59)",
@@ -251,7 +251,7 @@
     "heading": {
       "x": 42,
       "y": 145,
-      "width": 560,
+      "width": 664,
       "height": 48,
       "display": "block",
       "fontSize": "54px",
@@ -265,7 +265,7 @@
       "height": 360,
       "display": "grid",
       "fontSize": "16px",
-      "color": "rgb(248, 251, 252)",
+      "color": "color(srgb 0.088 0.199216 0.226353)",
       "background": "rgba(0, 0, 0, 0)"
     },
     "navigation": {

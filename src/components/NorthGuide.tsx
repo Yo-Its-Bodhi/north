@@ -1,6 +1,6 @@
-import { useDeferredValue, useState } from "react";
+import { useDeferredValue, useEffect, useState } from "react";
 import { ArrowLeft, ArrowRight, BookOpen, Check, Search } from "lucide-react";
-import { guideArticles, guideTopics, type GuideAction, type GuideArticle, type GuideTopic } from "../data/guide";
+import { guideTopics, loadGuideArticles, type GuideAction, type GuideArticle, type GuideTopic } from "../data/guide";
 
 type NorthGuideProps = {
   onBack: () => void;
@@ -12,7 +12,9 @@ type NorthGuideProps = {
 export default function NorthGuide({ onBack, onOpen, backLabel, initialArticleId }: NorthGuideProps) {
   const [query, setQuery] = useState("");
   const [topic, setTopic] = useState<"All" | GuideTopic>("All");
-  const [selectedArticle, setSelectedArticle] = useState<GuideArticle | null>(() => guideArticles.find((article) => article.id === initialArticleId) ?? null);
+  const [guideArticles, setGuideArticles] = useState<GuideArticle[]>([]);
+  const [selectedArticle, setSelectedArticle] = useState<GuideArticle | null>(null);
+  useEffect(() => { void loadGuideArticles().then((articles) => { setGuideArticles(articles); setSelectedArticle(articles.find((article) => article.id === initialArticleId) ?? null); }); }, [initialArticleId]);
   const deferredQuery = useDeferredValue(query.trim().toLowerCase());
   const articles = guideArticles.filter((article) => {
     const matchesTopic = topic === "All" || article.topic === topic;

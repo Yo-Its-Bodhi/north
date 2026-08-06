@@ -164,7 +164,7 @@
 .member-shell .daily-check-in{margin-top:var(--north-space-5);padding:var(--north-space-4) 0;border-top:1px solid var(--line)}
 .member-shell .today-week-pulse{margin-top:var(--north-space-5)}
 .member-shell .today-record{margin-top:var(--north-space-6)}
-@media(min-width:1024px){
+@media(min-width:1024px){button.chat{display:none}
   body{padding:0;background:var(--surface-solid)}
   .member-shell{width:calc(100% - 232px)!important;max-width:none;min-height:100dvh;margin:0 0 0 232px!important;border:0!important;border-radius:0!important;box-shadow:none!important}
   .member-shell .topbar{height:76px;padding:14px 48px;border-bottom:1px solid var(--line)}

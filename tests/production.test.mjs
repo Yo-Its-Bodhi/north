@@ -14,9 +14,9 @@ test("production HTML includes installability and viewport foundations", async (
 test("service worker provides an offline shell without caching authenticated API responses", async () => {
   const worker = await readFile(new URL("../public/sw.js", import.meta.url), "utf8");
   assert.match(worker, /caches\.open/);
-  assert.match(worker, /request\.method/);
+  assert.match(worker, /(?:request|r)\.method/);
   assert.match(worker, /\/v1\//);
-  assert.match(worker, /request\.mode === "navigate"/);
+  assert.match(worker, /(?:request|r)\.mode==="navigate"/);
   assert.match(worker, /caches\.keys/);
 });
 

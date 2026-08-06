@@ -4,6 +4,7 @@ import { webcrypto } from "node:crypto";
 import { readFileSync } from "node:fs";
 
 const appSource = readFileSync(new URL("../src/App.tsx", import.meta.url), "utf8");
+const viteConfig = readFileSync(new URL("../vite.config.ts", import.meta.url), "utf8");
 
 class MemoryStorage {
   #values = new Map();
@@ -54,6 +55,11 @@ test("a successful non-session response is rejected before account persistence",
   globalThis.fetch = async () => new Response("<html>North</html>", { status: 200, headers: { "Content-Type": "text/html" } });
   await assert.rejects(() => loginNorthAccount("alpha", "password-one"), /account API is not running/);
   assert.equal(readNorthSession(), null);
+});
+
+test("local production previews proxy account routes to the North API", () => {
+  assert.match(viteConfig, /preview:\s*\{[\s\S]*"\/v1":\s*\{/);
+  assert.match(viteConfig, /env\.NORTH_PREVIEW_API_TARGET\s*\|\|\s*"https:\/\/north\.bodhix\.io"/);
 });
 
 test("new-account onboarding starts from clean defaults while synchronization is paused", () => {

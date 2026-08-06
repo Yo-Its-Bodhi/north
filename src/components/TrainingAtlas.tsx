@@ -1,7 +1,8 @@
 import { useMemo, useState, type CSSProperties } from "react";
-import { ChartColumn, ChartSpline, ChevronDown, ChevronLeft, ChevronRight, Download, Footprints, Share2, Trophy, X } from "lucide-react";
+import { ChartColumn, ChartSpline, ChevronDown, ChevronLeft, ChevronRight, Download, Footprints, MessageCircle, Share2, Trophy, X } from "lucide-react";
 import { uniquePngName } from "./ExportFileName";
 import { readTrainingRecapTheme, renderTrainingRecap } from "./TrainingRecap";
+import type { TogetherShareCard } from "../data/togetherApi";
 import "./TrainingAtlas.css";
 
 export type AtlasRecord = {
@@ -116,7 +117,7 @@ function makeBuckets(range: Range, start: Date, end: Date, records: AtlasRecord[
   });
 }
 
-export default function TrainingAtlas({ records, weightUnit, distanceUnit, onOpenDate }: { records: AtlasRecord[]; weightUnit: string; distanceUnit: string; onOpenDate: (date: string) => void }) {
+export default function TrainingAtlas({ records, weightUnit, distanceUnit, onOpenDate, onShareTogether }: { records: AtlasRecord[]; weightUnit: string; distanceUnit: string; onOpenDate: (date: string) => void; onShareTogether: (card: TogetherShareCard) => void }) {
   const [range, setRange] = useState<Range>("month");
   const [metric, setMetric] = useState<Metric>("sessions");
   const [chartMode, setChartMode] = useState<ChartMode>("bars");
@@ -224,6 +225,10 @@ export default function TrainingAtlas({ records, weightUnit, distanceUnit, onOpe
       window.setTimeout(() => URL.revokeObjectURL(url), 1000);
     }, "image/png");
   }
+  function shareRecapTogether() {
+    const stats = recapStats.map((stat) => `${metrics.find((item) => item.id === stat)!.label}: ${formatValue(stat, totals[stat], weightUnit, distanceUnit)}`).join(" · ");
+    onShareTogether({ kind: "recap", title: `${bounds.label} training recap`, detail: `${recapHeadline}${stats ? ` · ${stats}` : ""}` });
+  }
 
   return <section className="training-atlas" aria-labelledby="training-atlas-title">
     <header className="atlas-heading"><div><p className="eyebrow">TRAINING ATLAS</p><h2 id="training-atlas-title">Understand the shape of your work.</h2><p>Compare the work you put in, spot what changed and open any point to see the sessions behind it.</p></div><button className="atlas-recap-launch" aria-expanded={recapOpen} onClick={openRecap}><Share2 size={16}/> Share your effort</button></header>
@@ -247,6 +252,6 @@ export default function TrainingAtlas({ records, weightUnit, distanceUnit, onOpe
       <div className="atlas-composition"><p className="eyebrow">ACTIVITY COMPOSITION</p><h3>How the period was made</h3>{compositionTotal ? <div><span className="atlas-donut" role="img" style={{ background: `conic-gradient(${donut})` }} aria-label={`Activity composition: ${composition.map((item) => `${item.kind} ${item.value}`).join(", ")}`}/><ul>{composition.map((item, index) => <li key={item.kind}><i style={{ background: colors[index] }}/><span>{item.kind}</span><strong>{Math.round(item.value / compositionTotal * 100)}%</strong></li>)}</ul></div> : <p>No activity composition is available for this period.</p>}</div>
     </section>
     </div>
-    {recapOpen && <section className="atlas-recap" aria-label="North recap composer"><header><div><p className="eyebrow">SHARE THE WORK</p><h3>Show what your effort added up to.</h3></div><button aria-label="Close recap composer" onClick={() => setRecapOpen(false)}><X/></button></header><p>Pick the numbers that hit hardest and turn your sessions, reps, minutes and weight moved into a recap worth posting.</p><small>Your name, body weight, recovery notes and exact dates stay out of the image.</small><div className="atlas-format" aria-label="Recap format">{(["square", "story", "landscape"] as RecapFormat[]).map((format) => <button key={format} className={recapFormat === format ? "active" : ""} onClick={() => setRecapFormat(format)}>{format === "square" ? "1:1 Square" : format === "story" ? "9:16 Story" : "16:9 Landscape"}</button>)}</div><fieldset><legend>Pick up to three headline stats</legend>{metrics.map((item) => <label key={item.id}><input type="checkbox" checked={recapStats.includes(item.id)} disabled={!recapStats.includes(item.id) && recapStats.length >= 3} onChange={() => toggleRecapStat(item.id)}/><span>{item.label}<small>{formatValue(item.id, totals[item.id], weightUnit, distanceUnit)}</small></span></label>)}</fieldset><button className="atlas-export" disabled={!recapStats.length} onClick={exportRecap}><Download size={17}/> Export share image</button></section>}
+    {recapOpen && <section className="atlas-recap" aria-label="North recap composer"><header><div><p className="eyebrow">SHARE THE WORK</p><h3>Show what your effort added up to.</h3></div><button aria-label="Close recap composer" onClick={() => setRecapOpen(false)}><X/></button></header><p>Pick the numbers that hit hardest and turn your sessions, reps, minutes and weight moved into a recap worth posting.</p><small>Your name, body weight, recovery notes and exact dates stay out of the image.</small><div className="atlas-format" aria-label="Recap format">{(["square", "story", "landscape"] as RecapFormat[]).map((format) => <button key={format} className={recapFormat === format ? "active" : ""} onClick={() => setRecapFormat(format)}>{format === "square" ? "1:1 Square" : format === "story" ? "9:16 Story" : "16:9 Landscape"}</button>)}</div><fieldset><legend>Pick up to three headline stats</legend>{metrics.map((item) => <label key={item.id}><input type="checkbox" checked={recapStats.includes(item.id)} disabled={!recapStats.includes(item.id) && recapStats.length >= 3} onChange={() => toggleRecapStat(item.id)}/><span>{item.label}<small>{formatValue(item.id, totals[item.id], weightUnit, distanceUnit)}</small></span></label>)}</fieldset><button className="atlas-export" disabled={!recapStats.length} onClick={shareRecapTogether}><MessageCircle size={17}/> Share in Together</button><button className="atlas-export" disabled={!recapStats.length} onClick={exportRecap}><Download size={17}/> Export share image</button></section>}
   </section>;
 }
