@@ -40,13 +40,10 @@ test("the server filters Journey exercises by connection and recording policy", 
   assert.match(serverSource, /filter\(\([^)]*\) => isPurposefulExercise\([^)]*\.payload\)\)/);
   assert.match(serverSource, /record_type='sleep' then r\.ended_at/);
   assert.match(serverSource, /'active_calories','total_calories'/);
-  assert.match(serverSource, /active_calories: summary\?\.active_calories \?\? day\.active_calories/);
-  assert.match(serverSource, /total_calories: summary\?\.total_calories \?\? day\.total_calories/);
+  assert.match(serverSource, /map\(mergeHealthDay\)/);
   assert.match(serverSource, /row\.record_type === "exercise".*active_milliseconds/);
-  assert.match(serverSource, /active_minutes: summary\?\.active_minutes \?\? Math\.round\(active_milliseconds \/ 60000\)/);
+  assert.match(serverSource, /mergeHealthDay/);
   assert.match(serverSource, /row\.record_type === "daily_summary"/);
-  assert.match(serverSource, /summary\?\.steps \?\? day\.steps/);
-  assert.match(serverSource, /calories_kind: summary/);
   assert.match(androidReaderSource, /StepsRecord\.COUNT_TOTAL/);
   assert.match(androidReaderSource, /ExerciseSessionRecord\.EXERCISE_DURATION_TOTAL/);
   assert.match(androidReaderSource, /"daily_summary"/);

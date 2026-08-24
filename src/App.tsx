@@ -1576,6 +1576,7 @@ function App() {
   const recoveryTotals = activityTotals("recovery");
   const meaningfulHealthActivities = healthActivities;
   const samsungConnection = healthConnections.find((item) => item.provider === "health_connect" && item.status === "connected");
+  const healthDayEnergy = (day: HealthDailyContext) => day.calories_kind === "active" ? day.active_calories : day.total_calories;
   const todayHealth = healthContext?.daily.find((day) => day.date === isoDate(new Date()));
   const recentHealthDays = healthContext?.daily.slice(0, 7) ?? [];
   const syncedSleepDays = (healthContext?.daily ?? []).filter((day) => day.sleep_minutes > 0);
@@ -1596,7 +1597,7 @@ function App() {
     steps: healthChange(latestCompletedHealthDay.steps, healthBaselineAverage((day) => day.steps)),
     distance: healthChange(latestCompletedHealthDay.distance_metres, healthBaselineAverage((day) => day.distance_metres)),
     minutes: healthChange(latestCompletedHealthDay.active_minutes, healthBaselineAverage((day) => day.active_minutes)),
-    calories: healthChange(latestCompletedHealthDay.active_calories, healthBaselineAverage((day) => day.active_calories)),
+    calories: healthChange(healthDayEnergy(latestCompletedHealthDay), healthBaselineAverage(healthDayEnergy)),
     sleep: healthChange(latestCompletedHealthDay.sleep_minutes, healthBaselineAverage((day) => day.sleep_minutes, true)),
   } : null;
   const healthChangeLabel = (change: number | null) => healthBaselineDays.length < 2 || change === null ? "Building your baseline" : Math.abs(change) < 5 ? "Close to your recent baseline" : `${Math.abs(change)}% ${change > 0 ? "above" : "below"} your recent baseline`;
@@ -1606,14 +1607,14 @@ function App() {
     steps: total.steps + day.steps,
     distance_metres: total.distance_metres + day.distance_metres,
     active_minutes: total.active_minutes + day.active_minutes,
-    calories: total.calories + day.active_calories,
+    calories: total.calories + healthDayEnergy(day),
     sleep_days: total.sleep_days + (day.sleep_minutes > 0 ? 1 : 0),
   }), { steps: 0, distance_metres: 0, active_minutes: 0, calories: 0, sleep_days: 0 });
   const healthTotals = (healthContext?.daily ?? []).reduce((total, day) => ({
     steps: total.steps + day.steps,
     distance_metres: total.distance_metres + day.distance_metres,
     active_minutes: total.active_minutes + day.active_minutes,
-    calories: total.calories + day.active_calories,
+    calories: total.calories + healthDayEnergy(day),
   }), { steps: 0, distance_metres: 0, active_minutes: 0, calories: 0 });
   const averageHealthSteps = recentHealthDays.length ? Math.round(recentHealthDays.reduce((total, day) => total + day.steps, 0) / recentHealthDays.length) : 0;
   const timelineItems = [
@@ -1622,7 +1623,7 @@ function App() {
     ...checkIns.map((entry) => ({ id: `checkin-${entry.id}`, type: "Check-ins", date: `${entry.date}T08:00:00`, title: "Daily check-in", summary: `Energy ${entry.energy}/5 · soreness ${entry.soreness}/5${entry.sleep ? ` · ${entry.sleep} hours sleep` : ""}${entry.weight ? ` · ${displayBodyWeight(entry.weight).toFixed(1)} ${bodyWeightUnit}` : ""}. ${entry.note}`, checkIn: entry })),
     ...weeklyReviews.map((review) => ({ id: `review-${review.id}`, type: "Reflections", date: review.createdAt, title: "Weekly reflection", summary: `${review.proud || "A week reviewed."}${review.learned ? ` Learned: ${review.learned}` : ""}${review.next ? ` Next: ${review.next}` : ""}`, review })),
     ...journeyPhotos.map((photo) => ({ id: `photo-${photo.id}`, type: "Photos", date: photo.createdAt, title: photo.caption || "Journey photo", summary: "Stored privately in this browser.", photo })),
-    ...completedHealthDays.map((day) => ({ id: `health-day-${day.date}`, type: "Daily reports", date: `${day.date}T23:59:59`, title: "Health Connect daily report", summary: `${day.steps.toLocaleString()} steps · ${day.active_minutes} Health Connect exercise minutes · ${day.distance_metres > 0 ? `${displayDistance(day.distance_metres / 1000).toFixed(1)} ${distanceUnit} recorded distance` : "distance not shared"} · ${Math.round(day.active_calories).toLocaleString()} Health Connect kcal${day.sleep_minutes ? ` · ${Math.floor(day.sleep_minutes / 60)}h ${day.sleep_minutes % 60}m sleep` : ""}. Samsung dashboard estimates can differ; purposeful workouts remain separate and are not added again.`, healthDay: day })),
+    ...completedHealthDays.map((day) => ({ id: `health-day-${day.date}`, type: "Daily reports", date: `${day.date}T23:59:59`, title: "Health Connect daily report", summary: `${day.steps.toLocaleString()} steps · ${day.active_minutes ? `${day.active_minutes} Health Connect exercise minutes` : "exercise minutes not shared"} · ${day.distance_metres > 0 ? `${displayDistance(day.distance_metres / 1000).toFixed(1)} ${distanceUnit} recorded distance` : "distance not shared"} · ${healthDayEnergy(day) > 0 ? `${Math.round(healthDayEnergy(day)).toLocaleString()} Health Connect ${day.calories_kind === "active" ? "activity" : "total"} kcal` : "energy not shared"}${day.sleep_minutes ? ` · ${Math.floor(day.sleep_minutes / 60)}h ${day.sleep_minutes % 60}m sleep` : ""}. Samsung dashboard estimates can differ; purposeful workouts remain separate and are not added again.`, healthDay: day })),
     ...meaningfulHealthActivities.map((activity) => ({ id: `health-${activity.id}`, type: "Activities", date: activity.started_at, title: activity.title || (activity.kind === "bike" ? "Bike ride" : activity.kind === "run" ? "Run" : activity.kind === "walk" ? "Purposeful walk" : "Samsung Health workout"), summary: `${activity.duration_minutes} minutes${activity.distance_metres > 0 ? ` · ${displayDistance(activity.distance_metres / 1000).toFixed(1)} ${distanceUnit}` : ""}${activity.average_speed_kmh > 0 ? ` · ${displayDistance(activity.average_speed_kmh).toFixed(1)} ${distanceUnit}/h` : ""}${activity.average_heart_rate > 0 ? ` · ${activity.average_heart_rate} avg / ${activity.maximum_heart_rate} max bpm` : ""}${activity.calories > 0 ? ` · ${Math.round(activity.calories)} kcal` : ""} · Imported from Samsung Health.`, healthActivity: activity })),
   ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   const recentMovementRecords = timelineItems.filter((item) => item.type === "Workouts" || item.type === "Activities").slice(0, 4);
@@ -3483,16 +3484,6 @@ function App() {
     setScreen("together");
   }
 
-  function shareNorthRecap() {
-    const movementCount = weekSessions.length + weekActivities.filter((activity) => activity.kind !== "recovery").length;
-    setTogetherShareCard({
-      kind: "recap",
-      title: `${profile.name || "My"} North Recap`,
-      detail: `${movementCount} movement ${movementCount === 1 ? "session" : "sessions"} · ${weekTrainingMinutes} active minutes · ${completedWeekDays} planned ${completedWeekDays === 1 ? "day" : "days"} complete. Shared without notes, check-ins, body data, locations, or private photos.`,
-    });
-    setScreen("together");
-  }
-
   useEffect(() => {
     if (screen !== "today" || !navigator.permissions) return;
     let cancelled = false;
@@ -3967,7 +3958,7 @@ function App() {
       {screen === "together" && <Suspense fallback={<section className="screen destination-screen"><BrandLoader label="Opening Together" compact /></section>}><Together onUnreadChange={setTogetherUnread} shareWorkout={togetherShare} shareCard={togetherShareCard} onShareComplete={() => { setTogetherShare(null); setTogetherShareCard(null); }} onSaveWorkout={(template) => setPersonalTemplates((templates) => [migrateWorkoutTemplate(template), ...templates])} /></Suspense>}
       {screen === "journey" && (
         <section className={`screen destination-screen journey-destination journey-${journeyTab}${journeyHasMovement ? "" : " journey-empty"}`}>
-          <header className="journey-page-header destination-brand-header destination-brand-journey"><div className="destination-header-copy"><p className="eyebrow destination-eyebrow">THE RECORD</p><h1>Journey</h1><p className="destination-subheading">See how far you’ve come.</p><p className="destination-header-detail">Progress is more than a number. It is the story of choosing to continue.</p></div><div className="journey-page-actions destination-header-actions"><button aria-label="Share a privacy-safe North Recap" title="Share North Recap" onClick={shareNorthRecap}><Share2 size={20}/></button><button aria-label="Open Trophy Room" title="Trophy Room" onClick={() => setScreen("progression")}><Trophy size={21}/></button><button aria-label="Review this week" title={weeklyReviews.some((item) => item.weekStart === currentWeekStart) ? "Revisit this week" : "Reflect on this week"} onClick={openWeeklyReview}><NotebookPen size={20}/></button></div></header>
+          <header className="journey-page-header destination-brand-header destination-brand-journey"><div className="destination-header-copy"><p className="eyebrow destination-eyebrow">THE RECORD</p><h1>Journey</h1><p className="destination-subheading">See how far you’ve come.</p><p className="destination-header-detail">Progress is more than a number. It is the story of choosing to continue.</p></div><div className="journey-page-actions destination-header-actions"><button aria-label="Open Trophy Room" title="Trophy Room" onClick={() => setScreen("progression")}><Trophy size={21}/></button><button aria-label="Review this week" title={weeklyReviews.some((item) => item.weekStart === currentWeekStart) ? "Revisit this week" : "Reflect on this week"} onClick={openWeeklyReview}><NotebookPen size={20}/></button></div></header>
           <nav className="journey-tabs" aria-label="Journey views">{(["timeline", "milestones", "insights", "this-day"] as const).map((tab) => <button key={tab} className={journeyTab === tab ? "active" : ""} onClick={() => setJourneyTab(tab)}><span aria-hidden="true">{tab === "timeline" ? <MapIcon size={17} /> : tab === "milestones" ? <Award size={17} /> : tab === "insights" ? <TrendingUp size={17} /> : <CalendarDays size={17} />}</span><b>{tab === "insights" ? "Atlas" : tab === "this-day" ? "This Day" : tab[0].toUpperCase() + tab.slice(1)}</b></button>)}</nav>
           {journeyTab === "timeline" && <>
             <section className="journey-stats"><div><i><Dumbbell size={16} /></i><strong>{history.length}</strong><span>workouts</span></div><div><i><Award size={16} /></i><strong>{history.reduce((total, item) => total + sessionSetCount(item), 0)}</strong><span>completed sets</span></div><div><i><Clock3 size={16} /></i><strong>{lifetimeTrainingMinutes}</strong><span>training minutes</span></div><div><i><Footprints size={16} /></i><strong>{displayDistance(healthTotals.distance_metres / 1000).toFixed(1)}</strong><span>HC distance {distanceUnit}</span></div><div><i><Flame size={16} /></i><strong>{Math.round(healthTotals.calories).toLocaleString()}</strong><span>HC kcal</span></div></section>

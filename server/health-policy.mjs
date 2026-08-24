@@ -27,3 +27,22 @@ export function healthExerciseKind(exerciseType) {
   if (type === 79) return "walk";
   return "workout";
 }
+
+function positiveOrFallback(summaryValue, recordValue) {
+  const summary = Number(summaryValue) || 0;
+  return summary > 0 ? summary : Number(recordValue) || 0;
+}
+
+export function mergeHealthDay({ active_milliseconds = 0, summary = null, ...day }) {
+  const activeCalories = positiveOrFallback(summary?.active_calories, day.active_calories);
+  const totalCalories = positiveOrFallback(summary?.total_calories, day.total_calories);
+  return {
+    ...day,
+    steps: positiveOrFallback(summary?.steps, day.steps),
+    distance_metres: positiveOrFallback(summary?.distance_metres, day.distance_metres),
+    active_calories: activeCalories > 0 ? activeCalories : totalCalories,
+    total_calories: totalCalories,
+    calories_kind: activeCalories > 0 ? "active" : "total",
+    active_minutes: positiveOrFallback(summary?.active_minutes, Math.round(active_milliseconds / 60000)),
+  };
+}

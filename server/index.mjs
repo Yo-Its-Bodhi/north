@@ -8,7 +8,7 @@ import bcrypt from "bcryptjs";
 import pg from "pg";
 import { registerCommunityRoutes } from "./community-routes.mjs";
 import { registerGuideRoutes } from "./guide-routes.mjs";
-import { healthExerciseKind, isPurposefulExercise, recordStartsAfterConnection, recordingMethodName } from "./health-policy.mjs";
+import { healthExerciseKind, isPurposefulExercise, mergeHealthDay, recordStartsAfterConnection, recordingMethodName } from "./health-policy.mjs";
 import { registerNovaRoutes } from "./nova-routes.mjs";
 import { registerTogetherRoutes } from "./together-routes.mjs";
 
@@ -438,15 +438,7 @@ app.get("/v1/health/context", { preHandler: app.authenticate }, async (request) 
     if (preferences.bodyMeasurements === true && row.record_type === "weight") latestWeight = { kilograms: Number(row.payload?.kilograms) || 0, recorded_at: row.started_at };
     daily.set(row.local_date, day);
   }
-  return { days, daily: [...daily.values()].map(({ active_milliseconds, summary, ...day }) => ({
-    ...day,
-    steps: summary?.steps ?? day.steps,
-    distance_metres: summary?.distance_metres ?? day.distance_metres,
-    active_calories: summary?.active_calories ?? day.active_calories,
-    total_calories: summary?.total_calories ?? day.total_calories,
-    calories_kind: summary ? summary.active_calories > 0 ? "active" : "total" : day.active_calories > 0 ? "active" : "total",
-    active_minutes: summary?.active_minutes ?? Math.round(active_milliseconds / 60000),
-  })).sort((left, right) => right.date.localeCompare(left.date)), latest_weight: latestWeight };
+  return { days, daily: [...daily.values()].map(mergeHealthDay).sort((left, right) => right.date.localeCompare(left.date)), latest_weight: latestWeight };
 });
 
 async function auditAdmin(request, action, targetUserId, reason, metadata = {}) {

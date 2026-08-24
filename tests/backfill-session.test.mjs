@@ -19,6 +19,7 @@ test("Journey owns Trophy Room and Weekly Review navigation", () => {
   const source = readFileSync(new URL("../src/App.tsx", import.meta.url), "utf8");
   const trophyShare = readFileSync(new URL("../src/components/TrophyShare.ts", import.meta.url), "utf8");
   assert.match(source, /journey-page-actions destination-header-actions[\s\S]*aria-label="Open Trophy Room"[\s\S]*aria-label="Review this week"/);
+  assert.doesNotMatch(source, /Share a privacy-safe North Recap/);
   assert.match(source, /training-page-header destination-brand-header destination-brand-training"><div className="destination-header-copy">[\s\S]*?<\/div><\/header>/);
   assert.match(source, /trophy-room-hero destination-brand-header destination-brand-journey/);
   assert.match(source, /className="back-button" onClick=\{\(\) => setScreen\("journey"\)\}><ArrowLeft size=\{17\} \/> Journey/);
