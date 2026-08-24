@@ -87,16 +87,16 @@ try {
   browser = await chromium.launch({ executablePath: chrome, headless: true });
   const context = await browser.newContext({ serviceWorkers: "allow" });
   await context.addInitScript(({ account, activeSession }) => {
-    const initRuns = Number(sessionStorage.getItem("north-sw-update-init-runs") ?? "0") + 1;
-    sessionStorage.setItem("north-sw-update-init-runs", String(initRuns));
+    const initRuns = Number(localStorage.getItem("north-sw-update-init-runs") ?? "0") + 1;
+    localStorage.setItem("north-sw-update-init-runs", String(initRuns));
     localStorage.setItem("north-account-session-v1", JSON.stringify(account));
     localStorage.setItem(`north-onboarding-complete:${account.user.id}`, new Date().toISOString());
     localStorage.setItem(`north-product-tour-v1:${account.user.id}`, new Date().toISOString());
     localStorage.setItem("north-release-notes-dismissed", "north-0.8-together");
-    if (!sessionStorage.getItem("north-sw-update-fixture-seeded")) {
+    if (!localStorage.getItem("north-sw-update-fixture-seeded")) {
       localStorage.setItem("north-active-session-v1", JSON.stringify(activeSession));
-      sessionStorage.setItem("north-sw-update-fixture-seeded", "true");
-      sessionStorage.setItem("north-sw-update-fixture-seed-count", String(Number(sessionStorage.getItem("north-sw-update-fixture-seed-count") ?? "0") + 1));
+      localStorage.setItem("north-sw-update-fixture-seeded", "true");
+      localStorage.setItem("north-sw-update-fixture-seed-count", String(Number(localStorage.getItem("north-sw-update-fixture-seed-count") ?? "0") + 1));
     }
   }, { account, activeSession });
   await context.route("**/v1/**", async (route) => {
@@ -109,7 +109,7 @@ try {
     if (pathname.endsWith("/nova/bootstrap")) return route.fulfill({ json: { conversations: [], goals: [], memories: [], pendingProposals: [] } });
     return route.fulfill({ json: {} });
   });
-  const page = await context.newPage();
+  let page = await context.newPage();
   await page.goto(base, { waitUntil: "load" });
   await page.waitForFunction(() => navigator.serviceWorker.controller !== null);
   const revisionALoaded = page.waitForNavigation({ waitUntil: "load" });
@@ -144,7 +144,7 @@ try {
       request.onerror = () => reject(request.error);
     });
     database.close();
-    return { fixtureGuard: sessionStorage.getItem("north-sw-update-fixture-seeded"), initRuns: Number(sessionStorage.getItem("north-sw-update-init-runs")), seedCount: Number(sessionStorage.getItem("north-sw-update-fixture-seed-count")), storedSession: JSON.parse(localStorage.getItem("north-active-session-v1") ?? "null"), mutations };
+    return { fixtureGuard: localStorage.getItem("north-sw-update-fixture-seeded"), initRuns: Number(localStorage.getItem("north-sw-update-init-runs")), seedCount: Number(localStorage.getItem("north-sw-update-fixture-seed-count")), storedSession: JSON.parse(localStorage.getItem("north-active-session-v1") ?? "null"), mutations };
   });
   assert.equal(beforeUpdate.fixtureGuard, "true");
   assert.ok(beforeUpdate.initRuns >= 2, "the init script must run again for the revision-A settling reload");
@@ -162,12 +162,15 @@ try {
   });
   // Activation, cache replacement, and client control do not become observable in
   // a guaranteed order. The cache assertion proves revision B finished activating;
-  // the reload below then proves a real navigation is controlled by that revision.
+  // reopening the app then proves a new navigation is controlled by that revision.
   await page.waitForFunction(async () => {
     const keys = await caches.keys();
     return keys.includes("north-shell-update-b") && !keys.includes("north-shell-update-a");
   });
-  await page.reload({ waitUntil: "load" });
+  await page.close();
+  page = await context.newPage();
+  await page.goto(base, { waitUntil: "load" });
+  await page.waitForFunction(() => navigator.serviceWorker.controller !== null);
 
   const result = await page.evaluate(async () => {
     const storedSession = JSON.parse(localStorage.getItem("north-active-session-v1") ?? "null");
@@ -189,14 +192,14 @@ try {
       }),
     ]);
     database.close();
-    return { controlled: navigator.serviceWorker.controller !== null, cacheKeys: await caches.keys(), fixtureGuard: sessionStorage.getItem("north-sw-update-fixture-seeded"), initRuns: Number(sessionStorage.getItem("north-sw-update-init-runs")), seedCount: Number(sessionStorage.getItem("north-sw-update-fixture-seed-count")), storedSession, document, mutations };
+    return { controlled: navigator.serviceWorker.controller !== null, cacheKeys: await caches.keys(), fixtureGuard: localStorage.getItem("north-sw-update-fixture-seeded"), initRuns: Number(localStorage.getItem("north-sw-update-init-runs")), seedCount: Number(localStorage.getItem("north-sw-update-fixture-seed-count")), storedSession, document, mutations };
   });
 
   assert.equal(result.controlled, true, "release-candidate worker must control the reloaded app");
   assert.deepEqual(result.cacheKeys.filter((key) => key.startsWith("north-shell-update-")), ["north-shell-update-b"]);
-  assert.equal(result.fixtureGuard, "true", "the one-time fixture guard must remain set across the update reload");
-  assert.ok(result.initRuns >= 3, "the init script must run on both pre-update and post-update reloads");
-  assert.equal(result.seedCount, 1, "reloads must not reseed the active-session fixture");
+  assert.equal(result.fixtureGuard, "true", "the one-time fixture guard must remain set when the updated app reopens");
+  assert.ok(result.initRuns >= 3, "the init script must run before and after the updated app reopens");
+  assert.equal(result.seedCount, 1, "reopening must not reseed the active-session fixture");
   assert.equal(result.storedSession.exercises[0].note, survivalMarker, "the update must not replace the active local workout with its bootstrap fixture");
   assert.equal(result.document.data.exercises[0].sets[0].weight, "77");
   const pendingAfterUpdate = result.mutations.filter((mutation) => mutation.documentKey === "active-session:primary");
