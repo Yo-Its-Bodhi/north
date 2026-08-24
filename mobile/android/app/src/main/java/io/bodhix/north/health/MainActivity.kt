@@ -1,84 +1,84 @@
 package io.bodhix.north.health
 
-import android.os.Bundle
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
-import android.view.inputmethod.InputMethodManager
-import android.text.InputType
+import android.os.Bundle
 import android.view.ViewGroup
-import android.widget.*
+import android.webkit.CookieManager
+import android.webkit.WebResourceRequest
+import android.webkit.WebSettings
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import androidx.activity.ComponentActivity
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.health.connect.client.HealthConnectClient
-import androidx.health.connect.client.PermissionController
-import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.time.Instant
-import java.util.UUID
 
+/** Installable North shell with an Android identity separate from the production bridge. */
 class MainActivity : ComponentActivity() {
-    private lateinit var health: HealthReader
-    private lateinit var status: TextView
-    private lateinit var username: EditText
-    private lateinit var password: EditText
-    private lateinit var permissionButton: Button
-    private lateinit var syncButton: Button
-    private lateinit var openNorthButton: Button
-    private val api = NorthApi()
-    private val preferences by lazy { getSharedPreferences("north-health", MODE_PRIVATE) }
-    private val deviceId by lazy { preferences.getString("device-id", null) ?: UUID.randomUUID().toString().also { preferences.edit().putString("device-id", it).apply() } }
-    private val permissionLauncher = registerForActivityResult(PermissionController.createRequestPermissionResultContract()) { refreshStatus() }
+    private lateinit var webView: WebView
+    private val sessionStore by lazy { SecureSessionStore(this) }
 
+    @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (intent?.data?.scheme != "northhealth") {
-            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://north.bodhix.io")))
-            finish()
-            return
+        HealthSyncScheduler.schedule(this)
+        webView = WebView(this).apply {
+            layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+            settings.javaScriptEnabled = true
+            settings.domStorageEnabled = true
+            settings.databaseEnabled = true
+            settings.cacheMode = WebSettings.LOAD_DEFAULT
+            settings.allowFileAccess = false
+            settings.allowContentAccess = false
+            settings.mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
+            settings.setSupportZoom(false)
+            settings.userAgentString = "${settings.userAgentString} NorthBeta/${BuildConfig.VERSION_NAME}"
+            webViewClient = NorthWebViewClient()
         }
-        health = HealthReader(this)
-        val content = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setPadding(48, 72, 48, 48) }
-        content.addView(TextView(this).apply { text = "NORTH"; textSize = 14f })
-        content.addView(TextView(this).apply { text = "Connect Samsung Health"; textSize = 30f; setPadding(0, 22, 0, 8) })
-        content.addView(TextView(this).apply { text = "Galaxy Watch data flows through Samsung Health into Health Connect. North reads only the categories you approve."; textSize = 16f })
-        username = EditText(this).apply { hint = "North username" }
-        password = EditText(this).apply { hint = "North password"; inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD }
-        status = TextView(this).apply { textSize = 15f; setPadding(0, 28, 0, 20) }
-        permissionButton = Button(this).apply { text = "Choose Health Connect access"; setOnClickListener { permissionLauncher.launch(health.permissions) } }
-        syncButton = Button(this).apply { text = "Sign in and sync now"; setOnClickListener { sync() } }
-        openNorthButton = Button(this).apply { text = "Open North"; visibility = android.view.View.GONE; setOnClickListener { startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://north.bodhix.io"))) } }
-        listOf(username, password, status, permissionButton, syncButton, openNorthButton).forEach { content.addView(it, ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)) }
-        content.addView(TextView(this).apply { text = "Before syncing: Samsung Health → Settings → Health Connect → allow Samsung Health, then Sync now. You can revoke North in Health Connect at any time."; textSize = 13f; setPadding(0, 28, 0, 0) })
-        setContentView(ScrollView(this).apply { addView(content) }); refreshStatus()
+        CookieManager.getInstance().apply {
+            setAcceptCookie(true)
+            setAcceptThirdPartyCookies(webView, false)
+        }
+        setContentView(webView)
+        if (savedInstanceState == null) webView.loadUrl(BuildConfig.NORTH_WEB_URL) else webView.restoreState(savedInstanceState)
     }
 
-    private fun refreshStatus() = lifecycleScope.launch {
-        status.text = when (HealthConnectClient.getSdkStatus(this@MainActivity)) {
-            HealthConnectClient.SDK_AVAILABLE -> if (health.granted()) "Health Connect access granted. Ready to sync." else "Health Connect is available. Permission is still required."
-            HealthConnectClient.SDK_UNAVAILABLE_PROVIDER_UPDATE_REQUIRED -> "Health Connect needs to be installed or updated."
-            else -> "Health Connect is unavailable on this phone. Android 9 or newer with Google Play is required."
-        }
+    override fun onSaveInstanceState(outState: Bundle) {
+        webView.saveState(outState)
+        super.onSaveInstanceState(outState)
     }
 
-    private fun sync() = lifecycleScope.launch {
-        if (!health.granted()) { status.text = "Choose Health Connect access first."; return@launch }
-        if (username.text.isBlank() || password.text.isBlank()) { status.text = "Enter your North username and password."; return@launch }
-        status.text = "Connecting securely to your North account…"
-        runCatching {
-            val token = withContext(Dispatchers.IO) { api.login(username.text.toString(), password.text.toString(), deviceId) }
-            val connection = withContext(Dispatchers.IO) { api.connect(token, deviceId) }
-            val importFrom = Instant.parse(connection.getString("import_from"))
-            status.text = "Reading Samsung Health from ${importFrom}…"
-            val records = health.read(importFrom)
-            status.text = "Uploading ${records.length()} records securely…"
-            if (records.length() == 0) 0 else withContext(Dispatchers.IO) { api.importAll(token, deviceId, records) }
-        }.onSuccess { count ->
-            password.text.clear(); syncButton.text = "Sync again"; openNorthButton.visibility = android.view.View.VISIBLE
-            status.text = "Connected to North\n\n$count new Samsung Health records synced. Nothing from before this connection is imported."
-            (getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager).hideSoftInputFromWindow(status.windowToken, 0)
+    @Deprecated("Deprecated in Java")
+    override fun onBackPressed() {
+        if (webView.canGoBack()) webView.goBack() else super.onBackPressed()
+    }
+
+    override fun onDestroy() {
+        webView.stopLoading()
+        webView.destroy()
+        super.onDestroy()
+    }
+
+    private inner class NorthWebViewClient : WebViewClient() {
+        override fun onPageFinished(view: WebView, url: String) {
+            super.onPageFinished(view, url)
+            val deviceId = org.json.JSONObject.quote(sessionStore.deviceId)
+            view.evaluateJavascript("localStorage.setItem('north-device-id-v1', $deviceId);", null)
         }
-            .onFailure { status.text = "Sync failed: ${it.message ?: "Unknown error"}" }
+
+        override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean = open(request.url.toString())
+
+        @Deprecated("Deprecated in Java")
+        override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean = open(url)
+
+        private fun open(url: String): Boolean {
+            if (url.startsWith("northhealth://") || url.startsWith("intent://connect")) {
+                startActivity(Intent(this@MainActivity, HealthConnectActivity::class.java))
+                return true
+            }
+            val uri = runCatching { Uri.parse(url) }.getOrNull() ?: return true
+            if (uri.scheme == "https" && uri.host == Uri.parse(BuildConfig.NORTH_WEB_URL).host) return false
+            if (uri.scheme == "http" || uri.scheme == "https") startActivity(Intent(Intent.ACTION_VIEW, uri))
+            return true
+        }
     }
 }

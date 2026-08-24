@@ -1,6 +1,7 @@
 package io.bodhix.north.health
 
 import android.content.Context
+import android.os.Build
 import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.*
@@ -14,6 +15,10 @@ import java.time.Instant
 import java.time.ZoneId
 
 class HealthReader(context: Context) {
+    companion object {
+        const val BACKGROUND_PERMISSION = "android.permission.health.READ_HEALTH_DATA_IN_BACKGROUND"
+    }
+
     val client = HealthConnectClient.getOrCreate(context)
     val permissions = setOf(
         HealthPermission.getReadPermission(StepsRecord::class), HealthPermission.getReadPermission(HeartRateRecord::class),
@@ -22,8 +27,10 @@ class HealthReader(context: Context) {
         HealthPermission.getReadPermission(TotalCaloriesBurnedRecord::class),
         HealthPermission.getReadPermission(WeightRecord::class)
     )
+    val requestedPermissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) permissions + BACKGROUND_PERMISSION else permissions
 
     suspend fun granted() = client.permissionController.getGrantedPermissions().containsAll(permissions)
+    suspend fun backgroundGranted() = client.permissionController.getGrantedPermissions().contains(BACKGROUND_PERMISSION)
 
     suspend fun read(importFrom: Instant): JSONArray {
         val end = Instant.now(); val range = TimeRangeFilter.between(importFrom, end)
