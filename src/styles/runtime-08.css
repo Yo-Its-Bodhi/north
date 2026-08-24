@@ -251,6 +251,7 @@ body{background:var(--north-signature-canvas)!important}
 }
 
 @media(max-width:759px){
+  .today-screen>.weather-status{display:none!important}
   .training-destination{--training-gap:20px}
   .training-page-header .destination-header-detail{display:none!important}
   .planning-week-switcher{grid-template-columns:repeat(3,1fr)}
