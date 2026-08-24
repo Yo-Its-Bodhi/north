@@ -246,12 +246,13 @@ body{background:var(--north-signature-canvas)!important}
   :root .primary-nav>button{min-height:56px!important;border-radius:9px!important;color:var(--ink)!important;font-size:11px!important;transition:none!important}
   :root .primary-nav>button>svg:first-child{color:color-mix(in srgb,var(--blue) 62%,var(--north-signature-muted))!important;filter:none!important}
   :root .primary-nav>button.active{color:var(--ink)!important;background:color-mix(in srgb,var(--blue) 10%,transparent)!important}
-  :root .primary-nav>button.active>svg:first-child{color:color-mix(in srgb,var(--blue) 50%,var(--ink))!important;filter:none!important}
-  .mobile-training-now{border-radius:11px!important;background:var(--blue)!important;box-shadow:0 12px 24px color-mix(in srgb,var(--blue) 25%,transparent)!important}
+  :root .primary-nav>button.active>svg:first-child{color:color-mix(in srgb,var(--blue) 50%,var(--ink))!important}
 }
 
 @media(max-width:759px){
-  .today-screen>.weather-status{display:none!important}
+  .today-screen>.weather-status{display:none}
+  :root .member-shell .today-intro{margin:0!important}
+  .today-screen>.daily-check-in{margin:0!important}
   .training-destination{--training-gap:20px}
   .training-page-header .destination-header-detail{display:none!important}
   .planning-week-switcher{grid-template-columns:repeat(3,1fr)}
