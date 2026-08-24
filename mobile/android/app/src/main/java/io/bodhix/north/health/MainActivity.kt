@@ -1,8 +1,13 @@
 package io.bodhix.north.health
 
 import android.annotation.SuppressLint
+import android.content.ComponentName
 import android.content.Intent
+import android.content.pm.ShortcutInfo
+import android.content.pm.ShortcutManager
+import android.graphics.drawable.Icon
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.view.ViewGroup
 import android.webkit.CookieManager
@@ -39,7 +44,25 @@ class MainActivity : ComponentActivity() {
             setAcceptThirdPartyCookies(webView, false)
         }
         setContentView(webView)
+        requestHomeShortcut()
         if (savedInstanceState == null) webView.loadUrl(BuildConfig.NORTH_WEB_URL) else webView.restoreState(savedInstanceState)
+    }
+
+    private fun requestHomeShortcut() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
+        val preferences = getSharedPreferences("north-beta-launcher", MODE_PRIVATE)
+        if (preferences.getBoolean("home-shortcut-requested", false)) return
+        val manager = getSystemService(ShortcutManager::class.java)
+        if (!manager.isRequestPinShortcutSupported) return
+        val shortcut = ShortcutInfo.Builder(this, "north-beta-home")
+            .setShortLabel("North Beta")
+            .setLongLabel("Open North Beta")
+            .setIcon(Icon.createWithResource(this, R.drawable.north_beta_icon))
+            .setIntent(Intent(Intent.ACTION_MAIN).setComponent(ComponentName(this, MainActivity::class.java)))
+            .build()
+        if (manager.requestPinShortcut(shortcut, null)) {
+            preferences.edit().putBoolean("home-shortcut-requested", true).apply()
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {

@@ -7,8 +7,8 @@ android {
         applicationId = "io.bodhix.north.beta"
         minSdk = 28
         targetSdk = 35
-        versionCode = 1
-        versionName = "0.9.0-beta.1"
+        versionCode = 2
+        versionName = "0.9.0-beta.2"
         buildConfigField("String", "NORTH_WEB_URL", "\"https://north.bodhix.io\"")
     }
     buildFeatures { buildConfig = true }
