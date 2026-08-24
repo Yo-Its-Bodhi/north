@@ -121,10 +121,11 @@ export async function ensureNorthTimezone() {
   return current ? saveSession({ ...current, user }) : null;
 }
 
-export async function deleteNorthAccount() {
+export async function deleteNorthAccount(password: string) {
   await withFreshAccess(async (token) => {
-    const response = await fetch(`${NORTH_API_BASE}/v1/me`, { method: "DELETE", headers: { Authorization: `Bearer ${token}`, ...northDeviceHeaders() } });
-    if (!response.ok) throw new Error(`Account deletion returned ${response.status}`);
+    const response = await fetch(`${NORTH_API_BASE}/v1/me`, { method: "DELETE", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}`, ...northDeviceHeaders() }, body: JSON.stringify({ password }) });
+    const result = await response.json().catch(() => ({})) as { error?: string };
+    if (!response.ok) throw new Error(result.error || "The account could not be deleted.");
   });
   logoutNorthAccount();
 }

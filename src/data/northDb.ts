@@ -33,6 +33,13 @@ export type SyncConflict = {
   status: "open" | "local" | "remote";
 };
 
+export type RepositoryReplacement = {
+  collection: string;
+  id: string;
+  data: unknown;
+  deleted?: boolean;
+};
+
 const DB_VERSION = 2;
 
 function ownerDatabaseName() {
@@ -184,6 +191,45 @@ export const northRepository = {
     await transactionDone(transaction);
   },
 
+  async replaceDocuments(replacements: RepositoryReplacement[]) {
+    const database = await openNorthDatabase();
+    const transaction = database.transaction(["documents", "outbox"], "readwrite");
+    const documents = transaction.objectStore("documents");
+    const outbox = transaction.objectStore("outbox");
+    const updatedAt = new Date().toISOString();
+
+    for (const replacement of replacements) {
+      const key = `${replacement.collection}:${replacement.id}`;
+      const existing = await requestResult(documents.get(key)) as NorthDocument | undefined;
+      const document: NorthDocument = {
+        key,
+        collection: replacement.collection,
+        id: replacement.id,
+        data: replacement.deleted ? null : replacement.data,
+        version: (existing?.version ?? 0) + 1,
+        updatedAt,
+        ...(replacement.deleted ? { deletedAt: updatedAt } : {}),
+      };
+      documents.put(document);
+      const staleKeys = await requestResult(outbox.index("documentKey").getAllKeys(key));
+      staleKeys.forEach((staleKey) => outbox.delete(staleKey));
+      outbox.put({
+        mutationId: crypto.randomUUID(),
+        documentKey: key,
+        collection: replacement.collection,
+        operation: replacement.deleted ? "delete" : "put",
+        ...(replacement.deleted ? {} : { data: replacement.data }),
+        baseVersion: existing?.version ?? 0,
+        createdAt: updatedAt,
+        attempts: 0,
+        nextAttemptAt: updatedAt,
+      } satisfies OutboxMutation);
+    }
+
+    await transactionDone(transaction);
+    if (typeof window !== "undefined") window.dispatchEvent(new Event("north:account-change"));
+  },
+
   async addConflict(conflict: SyncConflict) {
     const database = await openNorthDatabase();
     const transaction = database.transaction("conflicts", "readwrite");
@@ -195,6 +241,13 @@ export const northRepository = {
     const database = await openNorthDatabase();
     const transaction = database.transaction("conflicts", "readonly");
     return requestResult(transaction.objectStore("conflicts").getAll()) as Promise<SyncConflict[]>;
+  },
+
+  async clearConflicts() {
+    const database = await openNorthDatabase();
+    const transaction = database.transaction("conflicts", "readwrite");
+    transaction.objectStore("conflicts").clear();
+    await transactionDone(transaction);
   },
 };
 

@@ -1,0 +1,317 @@
+:root[data-palette="off-white"]{
+  --north-signature-canvas:#edf0ec;
+  --north-signature-panel:#e4e9e5;
+  --north-signature-panel-strong:#d9e0dc;
+  --north-signature-line:rgba(17,25,28,.14);
+  --north-signature-line-strong:rgba(17,25,28,.25);
+  --north-signature-muted:#647175;
+  --north-signature-shadow:0 18px 48px rgba(10,28,32,.13);
+  --north-signature-rail:#0d171a;
+  --north-signature-accent:#007c78;
+  --north-workspace:#edf0ec;
+  --north-canvas:#e7ebe7;
+  --north-panel:#f7f9f6;
+  --north-input:#f1f4f0;
+  --north-raised:#fbfcfa;
+  --north-divider:rgba(17,25,28,.14);
+  --north-active-divider:rgba(0,124,120,.42);
+}
+
+:root{
+  --north-signature-canvas:color-mix(in srgb,var(--surface-solid) 97%,var(--blue) 3%);
+  --north-signature-panel:color-mix(in srgb,var(--surface-solid) 94%,var(--ink) 6%);
+  --north-signature-panel-strong:color-mix(in srgb,var(--surface-solid) 89%,var(--ink) 11%);
+  --north-signature-line:color-mix(in srgb,var(--ink) 13%,transparent);
+  --north-signature-line-strong:color-mix(in srgb,var(--ink) 24%,transparent);
+  --north-signature-muted:color-mix(in srgb,var(--ink) 62%,transparent);
+  --north-signature-shadow:0 18px 48px color-mix(in srgb,var(--navy) 14%,transparent);
+  --north-signature-shadow-deep:0 30px 80px color-mix(in srgb,#000 34%,transparent);
+  --north-signature-radius:14px;
+  --north-signature-radius-small:9px;
+  --north-signature-rail:color-mix(in srgb,var(--navy) 88%,#050708 12%);
+  --north-signature-accent:var(--blue);
+}
+:root[data-theme="night"]{
+  --north-signature-canvas:color-mix(in srgb,var(--surface-solid) 94%,#000 6%);
+  --north-signature-panel:color-mix(in srgb,var(--surface-solid) 90%,var(--ink) 10%);
+  --north-signature-panel-strong:color-mix(in srgb,var(--surface-solid) 84%,var(--ink) 16%);
+  --north-signature-line:color-mix(in srgb,var(--ink) 14%,transparent);
+  --north-signature-line-strong:color-mix(in srgb,var(--ink) 27%,transparent);
+  --north-signature-muted:color-mix(in srgb,var(--ink) 65%,transparent);
+  --north-signature-rail:color-mix(in srgb,var(--navy) 72%,#030405 28%);
+}
+
+html{background:var(--north-signature-canvas)}
+body{background:var(--north-signature-canvas)!important}
+.member-shell{color:var(--ink);background:var(--north-signature-canvas)!important}
+.member-shell::before{display:none!important}
+.member-shell .screen{isolation:isolate}
+.member-shell .screen::before{display:none!important}
+.member-shell .eyebrow{color:var(--blue);font:700 10px/1.1 "DM Sans",sans-serif;letter-spacing:.16em}
+.member-shell .section-heading{margin:0 0 15px;align-items:end}
+.member-shell .section-heading h2{margin-top:7px;color:var(--ink);font:700 clamp(23px,3vw,30px)/1.05 "Manrope",sans-serif;letter-spacing:-.035em;text-transform:none}
+:root .member-shell :is(.today-screen,.training-destination,.journey-destination,.you-screen,.nova-screen,.account-screen) h2{font-family:"Manrope",sans-serif!important;letter-spacing:-.04em!important;text-transform:none!important}
+:root .member-shell :is(.today-screen,.training-destination,.journey-destination,.you-screen,.nova-screen,.account-screen) h3{font-family:"Manrope",sans-serif;letter-spacing:-.025em;text-transform:none}
+.member-shell .primary-button,.member-shell .secondary-button{min-height:48px;border-radius:9px;font:700 13px/1 "DM Sans",sans-serif}
+.member-shell .primary-button{border-color:transparent;color:#fff;background:var(--blue)!important;box-shadow:0 12px 28px color-mix(in srgb,var(--blue) 28%,transparent)!important}
+.member-shell .primary-button:hover:not(:disabled){background:color-mix(in srgb,var(--blue) 84%,var(--ink))!important;box-shadow:0 16px 34px color-mix(in srgb,var(--blue) 34%,transparent)!important}
+.member-shell .secondary-button{border:1px solid var(--north-signature-line-strong);color:var(--ink);background:color-mix(in srgb,var(--surface-solid) 80%,transparent)!important;box-shadow:none!important}
+.member-shell .secondary-button:hover:not(:disabled){border-color:var(--blue);color:var(--blue);background:var(--north-signature-panel)!important}
+
+:root .member-shell .destination-brand-header{position:relative;width:100%!important;min-height:0!important;margin:0 0 34px!important;padding:0 0 24px!important;overflow:visible!important;border:0!important;border-bottom:1px solid var(--north-signature-line)!important;border-radius:0!important;background:none!important;box-shadow:none!important}
+.destination-brand-header::before,.destination-brand-header::after{display:none!important}
+.destination-header-copy{position:relative;z-index:1}
+.destination-brand-header .destination-eyebrow{margin:0 0 11px!important}
+.destination-brand-header h1{margin:0;color:var(--ink)!important;font:700 clamp(42px,6vw,66px)/.92 "Manrope",sans-serif!important;letter-spacing:-.065em!important;text-transform:none!important;text-shadow:none!important}
+.destination-brand-header .destination-subheading{margin:15px 0 0!important;color:var(--ink)!important;font:600 15px/1.2 "DM Sans",sans-serif!important}
+.destination-brand-header .destination-header-detail{margin:5px 0 0!important;color:var(--north-signature-muted)!important;font:500 13px/1.5 "DM Sans",sans-serif!important}
+.destination-header-actions button{border:1px solid var(--north-signature-line)!important;border-radius:9px!important;color:var(--ink)!important;background:var(--north-signature-panel)!important;box-shadow:none!important}
+
+.training-destination{--training-gap:28px;max-width:1180px!important}
+.training-destination>.training-page-header{margin-bottom:24px!important}
+.training-rhythm-heading{margin:0 0 10px!important}
+.planning-week-switcher{width:100%;min-height:48px;padding:4px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) auto;gap:3px;border:1px solid var(--north-signature-line);border-radius:11px;background:var(--north-signature-panel)}
+.planning-week-switcher button{min-height:44px;padding:0 16px;border:0;border-radius:7px;color:var(--north-signature-muted);background:transparent;font:700 12px/1 "DM Sans",sans-serif;cursor:pointer}
+.planning-week-switcher button:hover{color:var(--ink);background:color-mix(in srgb,var(--ink) 5%,transparent)}
+.planning-week-switcher button.active{color:var(--ink);background:var(--surface-solid);box-shadow:0 5px 14px color-mix(in srgb,#000 10%,transparent)}
+.planning-week-switcher button:last-child{padding-inline:18px;border-left:1px solid var(--north-signature-line);border-radius:0;color:var(--blue)}
+.training-rhythm-strip{margin:0 0 var(--training-gap)!important;padding:7px;gap:6px;border:1px solid var(--north-signature-line);border-radius:13px;background:var(--north-signature-panel);box-shadow:none!important}
+.training-rhythm-strip button{min-height:68px;border:0!important;border-radius:9px!important;color:var(--north-signature-muted)!important;background:transparent!important;box-shadow:none!important;transform:none!important;transition:color .16s ease,background .16s ease,box-shadow .16s ease!important}
+.training-rhythm-strip button span{font:700 10px/1 "DM Sans",sans-serif;letter-spacing:.08em}
+.training-rhythm-strip button small{color:var(--ink)!important;font:700 21px/1 "Manrope",sans-serif!important;letter-spacing:-.04em}
+.training-rhythm-strip button i{height:7px;color:var(--north-signature-muted)!important;font-size:10px!important}
+.training-rhythm-strip button:hover{background:color-mix(in srgb,var(--ink) 5%,transparent)!important}
+.training-rhythm-strip button.today:not(.selected){box-shadow:inset 0 0 0 1px var(--north-signature-line-strong)!important}
+.training-rhythm-strip button.selected{color:#fff!important;background:var(--blue)!important;box-shadow:0 10px 24px color-mix(in srgb,var(--blue) 28%,transparent)!important}
+.training-rhythm-strip button.selected small,.training-rhythm-strip button.selected i{color:#fff!important}
+.training-rhythm-strip button.completed:not(.selected) i{color:#4aa680!important}
+
+.training-hero{min-height:430px!important;margin:0!important;padding:42px!important;display:grid!important;grid-template-columns:minmax(0,1fr)!important;grid-template-rows:1fr auto!important;gap:30px!important;isolation:isolate;overflow:hidden;border:1px solid rgba(255,255,255,.14)!important;border-radius:16px!important;color:#fff!important;background:#080b0d!important;box-shadow:var(--north-signature-shadow-deep)!important}
+.training-hero::before{position:absolute!important;z-index:-1!important;inset:0!important;display:block!important;content:""!important;background:linear-gradient(90deg,rgba(3,5,7,.96) 0%,rgba(3,5,7,.88) 36%,rgba(3,5,7,.36) 68%,rgba(3,5,7,.08) 100%)!important;box-shadow:none!important}
+.training-hero::after{position:absolute;z-index:-1;bottom:0;left:0;width:46%;height:3px;content:"";background:var(--blue)}
+.training-hero .direction-run-art{z-index:-2!important;width:100%!important;height:100%!important;inset:0!important;opacity:.94!important;object-position:70% center!important;filter:saturate(.72) contrast(1.08)!important}
+.training-hero .direction-run-overlay{display:none!important}
+.training-hero-copy{width:min(58%,620px);align-self:center}
+:root .training-destination .training-hero .eyebrow{margin:0 0 14px!important;color:color-mix(in srgb,var(--blue) 66%,#fff)!important;font-size:10px!important}
+:root .training-destination .training-hero h2{max-width:620px!important;margin:0!important;color:#fff!important;font:700 clamp(38px,5vw,60px)/.94 "Manrope",sans-serif!important;letter-spacing:-.055em!important;text-wrap:balance;text-transform:none!important;text-shadow:0 4px 24px rgba(0,0,0,.55)!important}
+.training-muscle-tags{margin-top:15px!important;gap:0!important}
+.training-muscle-tags span{padding:0!important;border:0!important;color:rgba(255,255,255,.7)!important;background:transparent!important;font:700 10px/1 "DM Sans",sans-serif!important;letter-spacing:.08em!important;text-transform:uppercase}
+.training-muscle-tags span+span::before{margin:0 9px;color:rgba(255,255,255,.28);content:"/"}
+.training-hero-metrics{width:min(100%,480px);margin-top:28px!important;padding-top:18px!important;display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:0!important;border-top:1px solid rgba(255,255,255,.18)!important}
+.training-hero-metrics>span{min-width:0!important;padding:0 20px!important;display:flex!important;flex-direction:column!important;align-items:flex-start!important;gap:5px!important;border-left:1px solid rgba(255,255,255,.16)!important}
+.training-hero-metrics>span:first-child{padding-left:0!important;border-left:0!important}
+.training-hero-metrics svg{display:none!important}
+.training-hero-metrics strong{color:#fff!important;font:700 18px/1 "Manrope",sans-serif!important;letter-spacing:-.03em!important;text-transform:none!important}
+.training-hero-metrics small{color:rgba(255,255,255,.55)!important;font:700 8px/1 "DM Sans",sans-serif!important;letter-spacing:.12em!important}
+.training-hero-actions{grid-column:1!important;grid-row:2!important;width:min(100%,480px);display:grid!important;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr)!important;gap:9px!important;align-self:end!important}
+.training-hero-actions .primary-button,.training-hero-actions .secondary-button{min-height:50px!important}
+.training-hero-actions .primary-button{color:#fff!important;background:var(--blue)!important;box-shadow:0 14px 30px color-mix(in srgb,var(--blue) 30%,transparent)!important}
+.training-hero-actions .secondary-button{border-color:rgba(255,255,255,.3)!important;color:#fff!important;background:rgba(10,12,14,.58)!important;backdrop-filter:blur(12px)}
+.training-hero-actions .secondary-button:hover{border-color:#fff!important;background:rgba(255,255,255,.12)!important}
+.training-complete-state{color:#fff!important}
+.training-body-state{display:none!important}
+.training-add-session{min-height:48px;margin:11px 0 38px!important;border:1px solid var(--north-signature-line)!important;border-radius:10px!important;color:var(--north-signature-muted)!important;background:transparent!important;font-weight:700!important}
+.training-add-session:hover{border-color:var(--blue)!important;color:var(--blue)!important;background:color-mix(in srgb,var(--blue) 6%,transparent)!important}
+
+.training-desktop-choices{margin:38px 0 0!important;display:grid!important;grid-template-columns:1fr 1fr!important;gap:34px!important;align-items:start}
+.workout-builder-section,.quick-log-section{min-width:0}
+.training-desktop-choices .section-heading .eyebrow{margin:0}
+.training-desktop-choices .section-heading h2{font-size:24px}
+.workout-builder-grid,.quick-log-section .activity-shortcuts{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important;margin:0!important}
+.training-destination .workout-builder-option,.training-destination .quick-log-section .activity-shortcuts button{min-height:144px!important;padding:18px!important;position:relative;isolation:isolate;display:flex!important;align-items:flex-start!important;justify-content:flex-end!important;flex-direction:column!important;gap:5px!important;overflow:hidden;border:1px solid rgba(255,255,255,.1)!important;border-radius:12px!important;color:#fff;text-align:left!important;cursor:pointer;box-shadow:0 12px 28px color-mix(in srgb,#000 17%,transparent)!important;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease!important}
+.training-destination .workout-builder-option::before,.training-destination .quick-log-section .activity-shortcuts button::before{position:absolute;z-index:0;inset:0;content:"";background:linear-gradient(180deg,transparent 20%,rgba(4,7,9,.92) 100%)}
+.training-destination .workout-builder-option:hover,.training-destination .quick-log-section .activity-shortcuts button:hover{border-color:color-mix(in srgb,var(--blue) 70%,#fff)!important;box-shadow:0 18px 38px color-mix(in srgb,#000 25%,transparent)!important;transform:translateY(-3px)!important}
+.training-destination .workout-builder-option>svg,.training-destination .quick-log-section .activity-shortcuts button>svg{position:absolute!important;z-index:1!important;top:17px!important;left:17px!important;width:18px!important;height:18px!important;color:#fff!important}
+.training-destination .workout-builder-option strong,.training-destination .quick-log-label{z-index:1;color:#fff!important;font:700 17px/1.05 "Manrope",sans-serif!important;letter-spacing:-.035em!important;text-transform:none!important;text-shadow:0 2px 10px rgba(0,0,0,.85)!important}
+.training-destination .workout-builder-option small{z-index:1;color:rgba(255,255,255,.7)!important;font:600 10px/1.2 "DM Sans",sans-serif!important;text-shadow:0 2px 8px rgba(0,0,0,.9)!important}
+.training-destination .quick-log-section .quick-log-total{position:absolute;z-index:1;top:15px;right:16px;display:flex;align-items:baseline;gap:4px}
+.training-destination .quick-log-section .quick-log-total strong{font:700 22px/1 "Manrope",sans-serif!important;letter-spacing:-.055em!important}
+.training-destination .quick-log-section .quick-log-total small{font:700 10px/1 "DM Sans",sans-serif!important}
+
+.favorite-exercises-section{margin:42px 0 0!important;padding:23px 0!important;border-top:1px solid var(--north-signature-line)!important;border-bottom:1px solid var(--north-signature-line)!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
+.favorite-exercises-section>header h2{margin-top:6px!important;font:700 22px/1.1 "Manrope",sans-serif!important;letter-spacing:-.035em!important;text-transform:none!important}
+.favorite-exercises-section>header>span{min-width:32px;height:32px;border:1px solid var(--north-signature-line);border-radius:50%;display:grid;place-items:center;color:var(--north-signature-muted);background:transparent;font-size:11px}
+.favorite-exercises-section>p{margin:12px 0 0!important;color:var(--north-signature-muted)!important;font-size:12px!important}
+.favorite-exercise-list button{border-color:var(--north-signature-line)!important;border-radius:9px!important;background:var(--north-signature-panel)!important}
+
+.training-calendar-drawer{margin-top:44px!important}
+.training-calendar-drawer>.section-heading h2{font-size:26px!important}
+.training-calendar-layout{gap:14px!important}
+.training-calendar,.training-calendar-summary{border:1px solid var(--north-signature-line)!important;border-radius:12px!important;background:var(--north-signature-panel)!important;box-shadow:none!important}
+.calendar-day{border-radius:8px!important}
+.calendar-day.selected{color:#fff!important;background:var(--blue)!important;box-shadow:0 9px 20px color-mix(in srgb,var(--blue) 24%,transparent)!important}
+.training-performance-rail{margin-top:44px!important}
+.training-performance-panel{background:transparent!important}
+.training-performance-panel .panel-heading{margin-bottom:14px!important}
+.training-performance-panel .panel-heading h2{font:700 25px/1.05 "Manrope",sans-serif!important;letter-spacing:-.04em!important;text-transform:none!important}
+.training-history-calendar-layout{margin-top:0!important;gap:12px!important}
+.north-history-calendar,.north-history-day{border:1px solid var(--north-signature-line)!important;border-radius:12px!important;background:var(--north-signature-panel)!important;box-shadow:none!important}
+.north-history-calendar>header{min-height:66px!important;padding:11px 14px!important;background:transparent!important;border-bottom:1px solid var(--north-signature-line)!important}
+.north-history-calendar>header button{width:44px!important;height:44px!important;padding:10px!important;border:1px solid var(--north-signature-line-strong)!important;color:var(--blue)!important;background:transparent!important}
+.north-history-calendar>header h2{font:700 17px/1 "Manrope",sans-serif!important;letter-spacing:-.03em!important}
+.north-history-day{padding:18px!important}
+.north-history-day>h2{font:700 21px/1.1 "Manrope",sans-serif!important;letter-spacing:-.035em!important}
+.calendar-backfill{border-color:var(--north-signature-line)!important;border-radius:10px!important;background:var(--north-signature-panel)!important}
+
+.today-screen :is(.daily-check-in,.today-week-pulse,.today-record),.journey-destination :is(.journey-stats,.momentum-panel,.milestone-summary),.you-screen :is(.you-wellbeing,.you-training-record),.account-screen :is(.account-panel,.settings-group){border-color:var(--north-signature-line)!important;box-shadow:none!important}
+.training-active-session{width:100%;min-height:64px;margin:0 0 14px;padding:11px 14px;border:1px solid color-mix(in srgb,var(--blue) 35%,var(--north-signature-line));border-radius:10px;display:grid;grid-template-columns:38px minmax(0,1fr) 18px;align-items:center;gap:11px;color:var(--ink);background:color-mix(in srgb,var(--blue) 8%,var(--north-signature-panel));text-align:left;cursor:pointer}.training-active-session>span{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;color:var(--surface-solid);background:var(--blue)}.training-active-session div{min-width:0}.training-active-session small,.training-active-session strong,.training-active-session p{display:block}.training-active-session small{color:var(--blue);font-size:10px;font-weight:800;letter-spacing:.08em}.training-active-session strong{margin-top:2px;font-size:14px}.training-active-session p{margin:2px 0 0!important;color:var(--north-signature-muted);font-size:11px!important}
+.today-screen .direction-panel{border-radius:16px!important;box-shadow:var(--north-signature-shadow-deep)!important}
+.journey-tabs{padding:4px!important;border:1px solid var(--north-signature-line)!important;border-radius:11px!important;background:var(--north-signature-panel)!important}
+.journey-tabs button{border-radius:7px!important}
+.journey-tabs button.active{background:var(--surface-solid)!important;box-shadow:0 5px 14px color-mix(in srgb,#000 10%,transparent)!important}
+:root .journey-destination .timeline h3{font:700 18px/1.15 "Manrope",sans-serif!important;letter-spacing:-.035em!important;text-transform:none!important}
+.journey-empty .chapter-progress,.journey-empty .chapter-filters{display:none!important}.journey-empty .chapter-milestone-list article:nth-of-type(n+4){display:none}
+.gym-mode .exercise-header-info h2{font-size:22px!important}.gym-mode .set-row:not(.set-head){min-height:66px}.gym-mode .set-value-control input{font-size:18px!important}.gym-mode .set-check{box-shadow:0 0 0 3px color-mix(in srgb,var(--blue) 16%,transparent)}
+.member-shell.workout-shell{backdrop-filter:none!important}
+.member-shell.workout-shell .topbar.workout-topbar{position:static!important}
+
+.nova-screen::before{display:none!important}
+.nova-screen .nova-page-heading{margin-bottom:0!important}
+.nova-screen .conversation-surface{background:none!important;scrollbar-width:none!important}
+.nova-screen .conversation-surface::-webkit-scrollbar{display:none}
+.nova-screen .nova-message,.nova-screen .user-message{border:1px solid var(--north-signature-line)!important;border-left:2px solid var(--blue)!important;border-radius:11px!important;background:var(--north-signature-panel)!important;box-shadow:none!important}
+.nova-screen .user-message{margin-left:auto!important;border-right:2px solid var(--blue)!important;border-left:1px solid var(--north-signature-line)!important;background:color-mix(in srgb,var(--blue) 10%,var(--north-signature-panel))!important}
+.nova-screen .nova-message>small,.nova-screen .user-message>small{color:var(--blue)!important;font:700 10px/1 "DM Sans",sans-serif!important;letter-spacing:.13em!important}
+.nova-screen .nova-message>p,.nova-screen .user-message>p{color:var(--ink)!important;font-size:14px!important;line-height:1.55!important}
+.nova-screen .nova-starters{gap:8px!important}
+.nova-screen .nova-starters button{min-height:52px!important;padding:12px 14px!important;border:1px solid var(--north-signature-line)!important;border-radius:9px!important;color:var(--ink)!important;background:transparent!important;font:600 12px/1.25 "DM Sans",sans-serif!important;transition:border-color .16s ease,color .16s ease,background .16s ease!important}
+.nova-screen .nova-starters button:hover{border-color:var(--blue)!important;color:var(--blue)!important;background:color-mix(in srgb,var(--blue) 7%,transparent)!important}
+.nova-screen .nova-input{min-height:56px!important;padding:5px!important;border:1px solid var(--north-signature-line-strong)!important;border-radius:11px!important;background:var(--north-signature-panel)!important;box-shadow:0 14px 34px color-mix(in srgb,#000 16%,transparent)!important}
+.nova-screen .nova-input input{padding:0 13px!important;color:var(--ink)!important;background:transparent!important;font-size:14px!important}
+.nova-screen .nova-input button{width:44px!important;height:44px!important;border-radius:8px!important;color:#fff!important;background:var(--blue)!important}
+.nova-screen .nova-safety-note{color:var(--north-signature-muted)!important;font-size:11px!important}
+
+@media(min-width:1024px){
+  body{background:var(--north-signature-canvas)!important}
+  .member-shell{width:calc(100% - 224px)!important;margin-left:224px!important}
+  .member-shell .topbar{height:64px!important;padding:10px 40px!important;border-bottom:1px solid var(--north-signature-line)!important;background:color-mix(in srgb,var(--north-signature-canvas) 88%,transparent)!important;backdrop-filter:blur(18px)}
+  .member-shell .screen{width:min(100%,1280px)!important;padding:42px 52px 80px!important}
+  .primary-nav{width:224px!important;padding:24px 12px 18px!important;border-right:1px solid var(--north-signature-line)!important;background:var(--north-signature-rail)!important;box-shadow:none!important}
+  .primary-nav::before{display:none!important}
+  .primary-nav-brand{margin:0 8px 30px!important;padding:0 7px 24px!important;border-bottom:1px solid var(--north-signature-line)!important}
+  .primary-nav-brand button{min-height:40px!important;padding:0!important;background:transparent!important}
+  .primary-nav-brand img{width:124px!important}
+  .primary-nav>button{min-height:46px!important;margin:1px 0!important;padding:0 12px!important;border-radius:8px!important;gap:12px!important;color:rgba(255,255,255,.62)!important;font:600 12px/1 "DM Sans",sans-serif!important}
+  .primary-nav>button svg{width:18px;height:18px;stroke-width:1.7}
+  .primary-nav>button:hover{color:#fff!important;background:rgba(255,255,255,.06)!important}
+  .primary-nav>button.active{color:#fff!important;background:color-mix(in srgb,var(--blue) 18%,transparent)!important;box-shadow:inset 2px 0 0 color-mix(in srgb,var(--blue) 62%,#fff)!important}
+  .primary-nav>button[data-nav-destination="nova-workout-builder"]{display:none!important}
+  .nav-submenu{margin:2px 0 8px 20px!important;padding:2px 0 2px 13px!important;border-left:1px solid var(--north-signature-line)!important}
+  .nav-submenu button{min-height:34px!important;padding:0 8px!important;border-radius:6px!important;color:rgba(255,255,255,.46)!important;background:transparent!important;font-size:10px!important}
+  .nav-submenu button.current{color:color-mix(in srgb,var(--blue) 62%,#fff)!important;background:transparent!important}
+  .primary-nav-utility{margin-top:auto!important;padding-top:14px!important;border-top:1px solid var(--north-signature-line)!important}
+  .primary-nav-utility-links{gap:2px!important}
+  .primary-nav-utility-links button{min-height:37px!important;border-radius:7px!important;color:rgba(255,255,255,.62)!important;font-size:10px!important}
+  .primary-nav-social{margin-top:12px!important}
+  .primary-nav-social a{width:31px!important;height:31px!important;border-color:var(--north-signature-line)!important;background:transparent!important}
+  .primary-nav-copyright{margin-top:12px!important;color:rgba(255,255,255,.38)!important;font-size:8px!important;line-height:1.5!important}
+  .north-calendar-grid>button{min-height:48px!important;padding:7px!important}
+  .member-shell .nova-screen{width:min(100%,1160px)!important;max-width:1160px!important;height:calc(100dvh - 64px)!important;margin-inline:auto!important;padding:32px 52px 20px!important;display:flex!important;overflow:hidden!important}
+  .nova-screen .nova-page-heading{flex:0 0 auto!important;margin:0!important;padding-bottom:20px!important}
+  .nova-screen .conversation-surface{width:100%!important;max-width:none!important;min-height:0!important;margin:0!important;padding:24px 0 18px!important;flex:1 1 auto!important;overflow-y:auto!important}
+  .nova-screen .conversation-surface:has(.nova-starters){display:grid!important;grid-template-columns:minmax(260px,.82fr) minmax(360px,1.18fr)!important;gap:14px!important;align-content:center!important}
+  .nova-screen .conversation-surface:has(.nova-starters) .nova-message{height:100%;min-height:172px;margin:0!important;padding:24px!important;display:flex!important;flex-direction:column!important;justify-content:center!important}
+  .nova-screen .conversation-surface:has(.nova-starters) .nova-starters{max-width:none!important;align-self:stretch!important}
+  .nova-screen .nova-message,.nova-screen .user-message{max-width:760px!important;padding:18px 20px!important}
+  .nova-screen .nova-starters{max-width:760px!important}
+  .nova-screen .nova-input{position:static!important;flex:0 0 auto!important;width:100%!important;max-width:none!important;margin:0!important;transform:none!important}
+  .nova-screen .nova-safety-note{flex:0 0 auto!important;margin:9px auto 0!important}
+}
+
+@media(min-width:1024px) and (max-width:1120px){
+  .member-shell .screen{padding-inline:34px!important}
+  .member-shell .today-screen{grid-template-columns:minmax(0,1fr) minmax(260px,.72fr)!important;column-gap:32px!important}
+  .member-shell .today-screen>*{min-width:0}
+}
+
+@media(min-width:1024px) and (max-height:760px){
+  .primary-nav{padding:14px 10px 9px!important}
+  .primary-nav-brand{margin-bottom:12px!important;padding-bottom:11px!important}
+  .primary-nav-brand img{width:110px!important}
+  .primary-nav>button{min-height:38px!important}
+  .nav-submenu{display:none!important}
+  .primary-nav-utility{position:absolute!important;right:10px!important;bottom:9px!important;left:10px!important;margin:0!important;padding-top:7px!important}
+  .primary-nav-utility-links button{min-height:30px!important}
+  .primary-nav-social{margin-top:6px!important}
+  .primary-nav-social a{width:28px!important;height:28px!important}
+  .primary-nav-copyright{margin-top:5px!important;line-height:1.25!important}
+}
+
+@media(max-width:1023px){
+  .member-shell .topbar{height:64px;padding:10px 18px;border-bottom:1px solid var(--north-signature-line);background:color-mix(in srgb,var(--north-signature-canvas) 90%,transparent)!important;backdrop-filter:blur(18px)}
+  .member-shell .screen{padding:24px 18px calc(98px + env(safe-area-inset-bottom))!important}
+  .destination-brand-header{margin-bottom:24px!important;padding-bottom:20px!important}
+  .destination-brand-header h1{font-size:45px!important}
+  .primary-nav{height:calc(68px + env(safe-area-inset-bottom))!important;padding:4px 8px max(4px,env(safe-area-inset-bottom))!important;border-color:var(--north-signature-line)!important;background:color-mix(in srgb,var(--north-signature-canvas) 88%,transparent)!important;box-shadow:0 -14px 34px color-mix(in srgb,#000 16%,transparent)!important;backdrop-filter:blur(22px)!important}
+  :root .primary-nav>button{min-height:56px!important;border-radius:9px!important;color:var(--ink)!important;font-size:11px!important;transition:none!important}
+  :root .primary-nav>button>svg:first-child{color:color-mix(in srgb,var(--blue) 62%,var(--north-signature-muted))!important;filter:none!important}
+  :root .primary-nav>button.active{color:var(--ink)!important;background:color-mix(in srgb,var(--blue) 10%,transparent)!important}
+  :root .primary-nav>button.active>svg:first-child{color:color-mix(in srgb,var(--blue) 50%,var(--ink))!important;filter:none!important}
+  .mobile-training-now{border-radius:11px!important;background:var(--blue)!important;box-shadow:0 12px 24px color-mix(in srgb,var(--blue) 25%,transparent)!important}
+}
+
+@media(max-width:759px){
+  .training-destination{--training-gap:20px}
+  .training-page-header .destination-header-detail{display:none!important}
+  .planning-week-switcher{grid-template-columns:repeat(3,1fr)}
+  .planning-week-switcher button{padding:0 6px;font-size:11px}
+  .planning-week-switcher button:last-child{grid-column:1/-1;min-height:44px;border-top:1px solid var(--north-signature-line);border-left:0}
+  .training-rhythm-strip{margin-bottom:18px!important;padding:5px;gap:2px}
+  .training-rhythm-strip button{min-height:58px!important;border-radius:7px!important}
+  .training-rhythm-strip button span{font-size:10px}
+  .training-rhythm-strip button small{font-size:17px!important}
+  .training-hero{min-height:390px!important;padding:24px 22px!important;grid-template-rows:1fr auto!important;border-radius:13px!important}
+  .training-hero::before{background:linear-gradient(180deg,rgba(3,5,7,.88) 0%,rgba(3,5,7,.4) 42%,rgba(3,5,7,.92) 78%,rgba(3,5,7,.98) 100%)!important}
+  .training-hero .direction-run-art{object-position:64% center!important}
+  .training-hero-copy{width:100%;align-self:end}
+  .training-hero h2{max-width:92%!important;font-size:38px!important}
+  .training-hero-metrics{margin-top:20px!important;padding-top:14px!important}
+  .training-hero-metrics>span{padding:0 10px!important}
+  .training-hero-metrics strong{font-size:15px!important}
+  .training-hero-actions{width:100%;grid-template-columns:1fr!important}
+  .training-hero-actions .secondary-button{display:flex!important;align-items:center;justify-content:center}
+  .training-add-session{margin-bottom:30px!important}
+  .training-desktop-choices{margin-top:30px!important;display:block!important;grid-template-columns:none!important}
+  .workout-builder-grid,.quick-log-section .activity-shortcuts{gap:8px!important}
+  .training-destination .workout-builder-option,.training-destination .quick-log-section .activity-shortcuts button{min-height:132px!important;padding:15px!important}
+  .training-destination .workout-builder-option>svg,.training-destination .quick-log-section .activity-shortcuts button>svg{top:14px!important;left:14px!important}
+  .favorite-exercises-section{margin-top:34px!important}
+  .training-calendar-drawer{margin-top:34px!important}
+  .nova-screen .conversation-surface:has(.nova-starters){display:block!important}
+  .nova-screen .nova-message,.nova-screen .user-message{max-width:94%!important;padding:15px!important}
+  .nova-screen .nova-starters{grid-template-columns:1fr!important;margin-top:12px!important}
+  .training-details-drawer :is(label>span,.plan-date>span,.workout-edit-station small,.day-session-stack small,.day-session-stack article span,.plan-save-row>span),.planned-workout-prescriptions label>span{font-size:10px!important}
+  .training-details-drawer :is(.kind-picker button,.plan-actions button,.planned-workout-edit,.day-session-stack header button){min-height:44px!important}
+  .planned-exercise-title>button{width:44px!important;height:44px!important}
+  .workout-screen :is(small,label>span){font-size:10px!important}
+  .workout-screen :is(.set-head,.set-head span,.set-count,.timer-panel span){font-size:10px!important}
+  .workout-screen :is(.workout-session-controls button,.simple-set-logger header button,.dynamic-set-top button,.gym-set-controls button,.header-rest-timer,.timer-panel button){min-height:44px!important}
+  .workout-screen .set-check{width:45px!important;height:45px!important;min-width:45px!important;min-height:45px!important}
+  .workout-movement-hero em{font-size:10px!important}
+  .header-rest-timer{height:44px!important;min-height:44px!important}.header-rest-timer small{font-size:10px!important}
+  .prescription-editor select{min-height:44px!important}
+}
+
+@media(max-width:390px){
+  .member-shell .screen{padding-inline:14px!important}
+  .training-hero{margin-inline:-2px!important;padding:23px 18px!important}
+  .training-hero h2{font-size:34px!important}
+  .training-destination .workout-builder-option strong,.training-destination .quick-log-label{font-size:15px!important}
+}
+
+@media(max-width:640px){
+  .member-shell.workout-shell .workout-mobile-dock{position:fixed!important;z-index:100!important;right:0!important;bottom:0!important;left:0!important;transform:translateZ(0)}
+  .member-shell.workout-shell:has(.note-field textarea:focus) .workout-mobile-dock{transform:translateY(calc(100% + env(safe-area-inset-bottom)))!important}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .training-destination .workout-builder-option,.training-destination .quick-log-section .activity-shortcuts button,.training-rhythm-strip button{transition:none!important}
+  .training-destination .workout-builder-option:hover,.training-destination .quick-log-section .activity-shortcuts button:hover{transform:none!important}
+}
+
+.routine-builder-settings label>span>small,
+.nova-builder-form label>span>small{
+  font:inherit;
+  letter-spacing:inherit;
+  text-transform:inherit;
+}

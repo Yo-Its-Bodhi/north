@@ -4,54 +4,47 @@ import { northDeviceHeaders } from "./account";
 export type SyncResult = { sent: number; conflicts: number; failed: number; pending: number };
 export type PullResult = { restored: number; serverTime: string };
 
-type MutationResponse = { status: "applied" | "conflict"; conflictId?: string; remote?: NorthDocument };
+type MutationResponse = { status: "applied" | "conflict" | "superseded"; remote?: NorthDocument; document?: NorthDocument };
+
+async function pushLatest(apiBase: string, accessToken: string, mutation: OutboxMutation) {
+  let candidate = mutation;
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    const response = await fetch(`${apiBase.replace(/\/$/, "")}/v1/sync/mutations`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${accessToken}`, "Idempotency-Key": candidate.mutationId, ...northDeviceHeaders() },
+      body: JSON.stringify(candidate),
+    });
+    if (response.status === 429) throw Object.assign(new Error("Sync paused by server rate limit"), { status: 429, retryAfter: Math.max(5, Number.parseInt(response.headers.get("retry-after") || "60", 10) || 60) });
+    if (!response.ok && response.status !== 409) throw Object.assign(new Error(`Sync returned ${response.status}`), { status: response.status });
+    const result = await response.json() as MutationResponse;
+    if (result.status === "applied") return result;
+    const latest = result.remote ?? result.document;
+    if (!latest) throw new Error("Account save did not return its latest version");
+    candidate = { ...candidate, mutationId: crypto.randomUUID(), baseVersion: latest.version, createdAt: new Date().toISOString() };
+  }
+  throw new Error("Account changed repeatedly while saving; North will retry the latest save");
+}
 
 export async function syncNorth(apiBase: string, accessToken: string): Promise<SyncResult> {
   const mutations = (await northRepository.pendingMutations()).filter((mutation) => new Date(mutation.nextAttemptAt).getTime() <= Date.now()).slice(0,12);
   let sent = 0;
-  let conflicts = 0;
+  const conflicts = 0;
   let failed = 0;
   for (const mutation of mutations) {
     try {
-      const response = await fetch(`${apiBase.replace(/\/$/, "")}/v1/sync/mutations`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${accessToken}`, "Idempotency-Key": mutation.mutationId, ...northDeviceHeaders() },
-        body: JSON.stringify(mutation),
-      });
-      if (response.status === 409) {
-        const result = await response.json() as MutationResponse;
-        const local = await northRepository.get(mutation.collection, mutation.documentKey.split(":").slice(1).join(":"));
-        if (local && result.remote) await northRepository.addConflict({ conflictId: result.conflictId || `${mutation.documentKey}:${result.remote.version}`, documentKey: mutation.documentKey, collection: mutation.collection, local, remote: result.remote, createdAt: new Date().toISOString(), status: "open" });
-        await northRepository.acknowledge(mutation.mutationId);
-        conflicts += 1;
-      } else if (response.ok) {
-        await northRepository.acknowledge(mutation.mutationId);
-        sent += 1;
-      } else if (response.status === 429) {
-        const retryAfterSeconds = Math.max(5, Number.parseInt(response.headers.get("retry-after") || "60", 10) || 60);
-        await northRepository.retry(mutation, "Sync paused by server rate limit", retryAfterSeconds * 1000);
-        failed += 1;
-        break;
-      } else {
-        throw Object.assign(new Error(`Sync returned ${response.status}`), { status: response.status });
-      }
+      const result = await pushLatest(apiBase, accessToken, mutation);
+      if (result.document) await northRepository.acceptRemote(result.document, true);
+      else await northRepository.acknowledge(mutation.mutationId);
+      sent += 1;
     } catch (error) {
       if (error instanceof Error && (error as Error & { status?: number }).status === 401) throw error;
-      await northRepository.retry(mutation, error instanceof Error ? error.message : "Unknown sync error");
+      const retryAfter = error instanceof Error ? Number((error as Error & { retryAfter?: number }).retryAfter ?? 0) * 1000 : 0;
+      await northRepository.retry(mutation, error instanceof Error ? error.message : "Unknown sync error", retryAfter);
       failed += 1;
+      if (error instanceof Error && (error as Error & { status?: number }).status === 429) break;
     }
   }
   return { sent, conflicts, failed, pending: (await northRepository.pendingMutations()).length };
-}
-
-export async function resolveConflict(conflictId: string, choice: "local" | "remote") {
-  const conflicts = await northRepository.conflicts();
-  const conflict = conflicts.find((item) => item.conflictId === conflictId);
-  if (!conflict) throw new Error("Conflict not found");
-  const [collection, ...idParts] = conflict.documentKey.split(":");
-  await northRepository.acceptRemote(conflict.remote);
-  if (choice === "local") await northRepository.put(collection, idParts.join(":"), conflict.local.data, true);
-  await northRepository.addConflict({ ...conflict, status: choice });
 }
 
 const storageKeys: Record<string, string> = {

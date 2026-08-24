@@ -47,7 +47,7 @@ test("updates begin as a compact notice and remain available in Settings", () =>
   assert.match(appSource, /if \(!release\) return null/);
   assert.match(appSource, /North 0\.8 is here/);
   assert.match(appSource, /className="whats-new-card"/);
-  assert.match(appSource, /North 0\.7 · Find Your Way/);
+  assert.match(appSource, /North 0\.8 · Together/);
   assert.match(appSource, /View updates/);
   assert.match(serviceWorkerSource, /"\/release-notes\.json"/);
 });

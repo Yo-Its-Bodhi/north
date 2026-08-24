@@ -27,6 +27,11 @@ function trackedFiles() {
   return output.split("\0").filter(Boolean);
 }
 
+function untrackedFiles() {
+  const output = execFileSync("git", ["ls-files", "--others", "--exclude-standard", "-z"], { cwd: root, encoding: "utf8" });
+  return output.split("\0").filter(Boolean);
+}
+
 function filesUnder(directory) {
   if (!existsSync(directory)) return [];
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
@@ -41,7 +46,7 @@ function isTextFile(path) {
 }
 
 const findings = [];
-const files = [...new Set([...trackedFiles(), ...filesUnder(join(root, "dist"))])];
+const files = [...new Set([...trackedFiles(), ...untrackedFiles(), ...filesUnder(join(root, "dist"))])];
 
 for (const path of files) {
   if (allowedExampleFiles.has(path) || !isTextFile(path)) continue;

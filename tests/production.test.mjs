@@ -18,6 +18,8 @@ test("service worker provides an offline shell without caching authenticated API
   assert.match(worker, /\/v1\//);
   assert.match(worker, /(?:request|r)\.mode==="navigate"/);
   assert.match(worker, /caches\.keys/);
+  assert.match(worker, /NORTH_ACTIVATE_UPDATE/);
+  assert.match(worker, /skipWaiting/);
 });
 
 test("manifest supports standalone installation and useful launch shortcuts", async () => {
@@ -29,7 +31,7 @@ test("manifest supports standalone installation and useful launch shortcuts", as
 });
 
 test("member source has no known mojibake markers", async () => {
-  const files = ["App.tsx", "Onboarding.tsx", "SyncCentre.tsx", "styles.css"];
+  const files = ["App.tsx", "Onboarding.tsx", "styles.css"];
   for (const file of files) {
     const source = await readFile(new URL(`../src/${file}`, import.meta.url), "utf8");
     assert.equal(/[ÂÃ]|â€/.test(source), false, `${file} contains a likely encoding artifact`);

@@ -544,34 +544,33 @@
     }
   },
   {
-    "id": "local-data-and-sync-conflicts",
+    "id": "account-saving-and-local-data",
     "topic": "Settings & access",
-    "title": "Understand local data and sync conflicts",
-    "summary": "Tell device storage from account storage and resolve two competing versions carefully.",
+    "title": "Understand account saving and local data",
+    "summary": "North saves changes to your signed-in account and keeps a temporary device copy for offline use.",
     "searchTerms": [
       "database",
       "storage",
       "local",
       "sync",
-      "conflict",
       "device",
-      "account version",
+      "account save",
       "wipe",
       "restore"
     ],
-    "introduction": "North keeps a working copy on the device and synchronizes account documents when possible. A conflict means two versions need a deliberate choice.",
+    "introduction": "North saves changes to the signed-in account automatically. A temporary device copy keeps the app usable while offline, and the latest account save wins when several tabs or devices are open.",
     "steps": [
       {
-        "title": "Read the save state",
-        "body": "Saved on this device means the local copy exists. Sync status separately tells you whether the account has received pending work."
+        "title": "Let North save automatically",
+        "body": "Changes are sent to your signed-in North account without version prompts or manual conflict decisions."
       },
       {
-        "title": "Inspect both conflict versions",
-        "body": "When North shows a conflict, compare the device and account versions before choosing which one should remain."
+        "title": "Know what happens in several tabs",
+        "body": "If the same item is changed in several open tabs or devices, the latest completed account save becomes the current version."
       },
       {
-        "title": "Treat the choice as replacement",
-        "body": "Keeping one conflict version can discard differences found only in the other version. Export a backup first when the choice is unclear."
+        "title": "Use one tab for important edits",
+        "body": "North does not ask you to merge competing versions. Avoid editing the same workout or setting in several places at the same time."
       },
       {
         "title": "Prepare before wiping this device",
@@ -582,7 +581,7 @@
         "body": "Deleting local data signs out and removes this browser copy. Restoring from the account requires sign-in, a connection, and a successful account pull. Account deletion is a separate action that removes account records and access."
       }
     ],
-    "remember": "Local, synced, and deleted are different states. Read the confirmation before replacing any copy.",
+    "remember": "Your signed-in account is the source of truth. The device copy exists only to keep North usable while offline.",
     "action": {
       "label": "Open data settings",
       "destination": "settings"

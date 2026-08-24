@@ -18,7 +18,7 @@ Object.defineProperty(globalThis, "navigator", { configurable: true, value: { us
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
 
 const { northRepository } = await import("../src/data/northDb.ts");
-const { syncNorth, pullNorth, resolveConflict } = await import("../src/data/sync.ts");
+const { syncNorth, pullNorth } = await import("../src/data/sync.ts");
 const token = "test-access-token";
 
 function useOwner(id) {
@@ -52,18 +52,39 @@ test("queued account mutations notify the automatic sync scheduler", async () =>
   assert.deepEqual(events, ["change"]);
 });
 
-test("409 creates a durable conflict with the server id and removes the stale mutation", async () => {
+test("a stale save is automatically rebased so the latest account save wins", async () => {
   useOwner("sync-conflict");
   const local = await northRepository.put("week-plan", "primary", { source: "local" });
   const remote = { ...local, data: { source: "remote" }, version: 4, updatedAt: new Date().toISOString() };
-  globalThis.fetch = async () => Response.json({ status: "conflict", conflictId: "server-conflict", remote }, { status: 409 });
+  const requests = [];
+  globalThis.fetch = async (_url, options) => {
+    requests.push({ key: options.headers["Idempotency-Key"], body: JSON.parse(options.body) });
+    return requests.length === 1
+      ? Response.json({ status: "conflict", remote }, { status: 409 })
+      : Response.json({ status: "applied", document: { ...remote, data: { source: "local" }, version: 5 } });
+  };
   const result = await syncNorth("https://north.example", token);
-  assert.equal(result.conflicts, 1);
+  assert.deepEqual(result, { sent: 1, conflicts: 0, failed: 0, pending: 0 });
+  assert.equal(requests[1].body.baseVersion, 4);
+  assert.notEqual(requests[1].key, requests[0].key);
   assert.equal(result.pending, 0);
-  const conflicts = await northRepository.conflicts();
-  assert.equal(conflicts[0].conflictId, "server-conflict");
-  assert.deepEqual(conflicts[0].local.data, { source: "local" });
-  assert.deepEqual(conflicts[0].remote.data, { source: "remote" });
+  assert.equal((await northRepository.conflicts()).length, 0);
+  assert.deepEqual((await northRepository.get("week-plan", "primary")).data, { source: "local" });
+});
+
+test("a legacy superseded response is also retried as latest-save-wins", async () => {
+  useOwner("sync-legacy-superseded");
+  const local = await northRepository.put("workouts", "primary", [{ id: "local-workout" }]);
+  const remote = { ...local, data: [{ id: "remote-workout" }], version: 9, updatedAt: new Date().toISOString() };
+  let calls = 0;
+  globalThis.fetch = async () => ++calls === 1
+    ? Response.json({ status: "superseded", document: remote })
+    : Response.json({ status: "applied", document: { ...remote, data: [{ id: "local-workout" }], version: 10 } });
+
+  const result = await syncNorth("https://north.example", token);
+
+  assert.deepEqual(result, { sent: 1, conflicts: 0, failed: 0, pending: 0 });
+  assert.deepEqual((await northRepository.get("workouts", "primary")).data, [{ id: "local-workout" }]);
 });
 
 test("network failure leaves the mutation queued with retry evidence", async () => {
@@ -162,19 +183,16 @@ test("first-device hydration replaces queued UI defaults with the real account p
   assert.equal((await northRepository.pendingMutations()).length, 0);
 });
 
-test("choosing local conflict content first accepts the remote version then queues a valid replacement", async () => {
-  useOwner("sync-resolve-local");
+test("legacy conflict metadata is cleared without touching account documents", async () => {
+  useOwner("sync-clear-conflicts");
   const now = new Date().toISOString();
+  await northRepository.put("profile", "primary", { name: "Saved account" }, false);
   await northRepository.addConflict({
     conflictId: "resolve-1", documentKey: "profile:primary", collection: "profile", createdAt: now, status: "open",
-    local: { key: "profile:primary", collection: "profile", id: "primary", data: { name: "Local choice" }, version: 2, updatedAt: now },
-    remote: { key: "profile:primary", collection: "profile", id: "primary", data: { name: "Remote choice" }, version: 5, updatedAt: now },
+    local: { key: "profile:primary", collection: "profile", id: "primary", data: { name: "Old local" }, version: 2, updatedAt: now },
+    remote: { key: "profile:primary", collection: "profile", id: "primary", data: { name: "Old remote" }, version: 5, updatedAt: now },
   });
-  await resolveConflict("resolve-1", "local");
-  const saved = await northRepository.get("profile", "primary");
-  assert.deepEqual(saved.data, { name: "Local choice" });
-  assert.equal(saved.version, 6);
-  const pending = (await northRepository.pendingMutations())[0];
-  assert.equal(pending.baseVersion, 5);
-  assert.equal((await northRepository.conflicts())[0].status, "local");
+  await northRepository.clearConflicts();
+  assert.equal((await northRepository.conflicts()).length, 0);
+  assert.deepEqual((await northRepository.get("profile", "primary")).data, { name: "Saved account" });
 });

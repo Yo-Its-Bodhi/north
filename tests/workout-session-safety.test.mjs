@@ -45,13 +45,17 @@ test("pause and resume accumulate multiple persisted pauses", () => {
   assert.equal(activeWorkoutSecondsAt(secondResume, new Date("2026-07-24T11:00:00.000Z").getTime()), 45 * 60);
 });
 
-test("the workout flow renders a desktop rail and pause review", () => {
+test("the workout flow renders a desktop rail, compact mobile sets, and pause review", () => {
   const source = readFileSync(new URL("../src/App.tsx", import.meta.url), "utf8");
   const styles = readFileSync(new URL("../src/styles.css", import.meta.url), "utf8");
+  const mobileStyles = readFileSync(new URL("../src/styles/runtime-05.css", import.meta.url), "utf8");
+  const signatureStyles = readFileSync(new URL("../src/styles/runtime-08.css", import.meta.url), "utf8");
   assert.match(source, /desktopOnly=\{screen === "workout"\}/);
   assert.match(source, /screen === "workout" \? " workout-topbar" : ""/);
-  assert.match(source, /setWorkoutTopbarHidden\(window\.scrollY > 8\)/);
-  assert.match(styles, /\.workout-topbar-hidden \.topbar\{height:0/);
+  assert.doesNotMatch(source, /workoutTopbarHidden|setWorkoutTopbarHidden/);
+  assert.match(signatureStyles, /\.member-shell\.workout-shell \.topbar\.workout-topbar\{position:static!important\}/);
+  assert.match(mobileStyles, /grid-template-areas:"num weight reps done"/);
+  assert.doesNotMatch(mobileStyles, /grid-template-areas:"num weight done" "num reps done"/);
   assert.match(source, /className="exercise-header-metrics"/);
   assert.doesNotMatch(source, /<p className="lead">\{current\.target\}<\/p>/);
   assert.ok(source.indexOf('<section className="cue"') < source.indexOf('className="sets-table"'));
@@ -78,7 +82,11 @@ test("mobile workout actions use the real safe-area bottom and deliberate swipes
   assert.match(source, /Math\.abs\(swipeDistance\) > Math\.abs\(verticalDistance\) \* 1\.5/);
   assert.match(styles, /\.workout-mobile-dock \{[\s\S]*?bottom: 0;[\s\S]*?env\(safe-area-inset-bottom\)/);
   assert.doesNotMatch(styles, /\.workout-mobile-dock \{[\s\S]*?bottom: calc\(76px/);
-  assert.match(styles, /@media \(max-width: 640px\) \{[\s\S]*?\.workout-screen \.set-row \{ grid-template-columns: 24px minmax\(90px, 1\.2fr\) minmax\(74px, 1fr\) 26px; gap: 4px;[\s\S]*?\.set-check \{ width: 26px; min-width: 26px; height: 26px; min-height: 26px; \}/);
+  const signatureStyles = readFileSync(new URL("../src/styles/runtime-08.css", import.meta.url), "utf8");
+  assert.match(signatureStyles, /\.member-shell\.workout-shell \.workout-mobile-dock\{position:fixed!important;z-index:100!important;right:0!important;bottom:0!important;left:0!important/);
+  assert.match(signatureStyles, /workout-shell:has\(\.note-field textarea:focus\) \.workout-mobile-dock\{transform:translateY/);
+  assert.match(signatureStyles, /\.member-shell\.workout-shell\{backdrop-filter:none!important\}/);
+  assert.match(styles, /@media \(max-width: 640px\) \{[\s\S]*?\.workout-screen \.set-row \{ grid-template-columns: 24px minmax\(90px, 1\.2fr\) minmax\(74px, 1fr\) 44px; gap: 4px;[\s\S]*?\.set-check \{ width: 44px; min-width: 44px; height: 44px; min-height: 44px; \}/);
 });
 
 test("the active workout keeps the phone awake and reacquires after returning", () => {

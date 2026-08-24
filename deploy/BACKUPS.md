@@ -1,6 +1,6 @@
 # North backups
 
-North creates an encrypted PostgreSQL custom-format dump every night at 03:10 UTC. Each dump is decrypted to a temporary file and checked with `pg_restore --list` before it is accepted.
+North creates an encrypted PostgreSQL custom-format dump every night at 03:10 UTC. Each dump is decrypted to a temporary file and checked with `pg_restore --list` before it is accepted. The `verified_at` field remains empty until that encrypted dump has also completed a real isolated database restore.
 
 ## Retention
 
@@ -14,7 +14,7 @@ One file can satisfy more than one tier, so 28 files is the hard maximum. Cleanu
 
 ## Restore testing
 
-`verify-north-restore.sh` restores the newest backup into an isolated temporary database and validates its migrations. Cron runs this on the first day of every month at 04:10 UTC.
+`verify-north-restore.sh` restores the newest backup into a uniquely named isolated temporary database and validates its migrations and core account tables. Cron runs this on the first day of every month at 04:10 UTC. A release must also run this rehearsal against its fresh pre-release backup before changing the application or applying a migration.
 
 ## Offsite activation
 

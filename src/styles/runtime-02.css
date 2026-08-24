@@ -157,6 +157,7 @@
 .template-open > strong { display: block; font: 700 16px "Manrope"; }
 .template-open > p { margin: 7px 0; color: var(--muted); font-size: 14px; }
 .template-open > small { color: var(--muted); font-size: 12px; line-height: 1.45; }
+.template-duplicate-note,.template-saved-date{display:flex!important;align-items:center;gap:5px;margin-top:6px;color:var(--muted)!important}.template-duplicate-note{color:var(--blue)!important;font-weight:800}
 .template-card-meta { display: flex; align-items: center; justify-content: space-between; gap: 10px; color: var(--muted); font-size: 12px; line-height: 1.45; }
 .template-card-meta small:last-child { display: inline-flex; flex: 0 0 auto; align-items: center; gap: 4px; font-size: 9px; font-weight: 700; white-space: nowrap; }
 .community-template-card { border-color: color-mix(in srgb, var(--teal) 52%, var(--line)) !important; }

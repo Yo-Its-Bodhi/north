@@ -12,9 +12,9 @@ const guideStyles = readFileSync(new URL("../src/destination-reliability.css", i
 
 test("the North Guide is owned by Account settings rather than You", () => {
   assert.match(appSource, /"you" \| "guide" \| "account"/);
-  assert.match(appSource, /className="account-menu-grid settings-account-actions"[\s\S]*<strong>North Guide<\/strong>/);
+  assert.match(appSource, /className="account-menu-grid settings-account-actions settings-support-actions"[\s\S]*<strong>North Guide<\/strong>/);
   assert.match(appSource, /settings-account-hero[\s\S]*settings-account-session-actions[\s\S]*onClick=\{signOutAccount\}[\s\S]*Log out/);
-  assert.match(appSource, /settings-account-actions[\s\S]*<strong>Account &amp; devices<\/strong>[\s\S]*<strong>North Guide<\/strong>/);
+  assert.match(appSource, /settings-account-primary[\s\S]*<strong>Your account<\/strong>[\s\S]*settings-section-menu[\s\S]*settings-support-actions[\s\S]*<strong>North Guide<\/strong>/);
   assert.match(appSource, /function exitPreview\(\)[\s\S]*setEntryComplete\(false\)/);
   assert.match(appSource, /className="settings-signout-button" onClick=\{exitPreview\}[\s\S]*<strong>Exit preview<\/strong>/);
   assert.match(appSource, /screen === "guide" && <NorthGuide/);
@@ -122,7 +122,7 @@ test("Guide distinguishes observations, plan changes, and active workout evidenc
 
 test("Guide explains You evidence windows and device-wipe prerequisites", () => {
   const youArticle = guideArticles.find((article) => article.id === "understand-you-signals-and-trends");
-  const dataArticle = guideArticles.find((article) => article.id === "local-data-and-sync-conflicts");
+  const dataArticle = guideArticles.find((article) => article.id === "account-saving-and-local-data");
   assert.ok(youArticle?.steps.some((step) => /latest 14 saved check-ins/i.test(step.body)));
   assert.ok(youArticle?.steps.some((step) => /does not delete the workouts or check-ins/i.test(step.body)));
   assert.ok(dataArticle?.steps.some((step) => /Unsynced local changes can be lost/i.test(step.body)));

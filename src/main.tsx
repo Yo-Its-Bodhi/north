@@ -6,7 +6,6 @@ import "@fontsource/dm-sans/latin-600.css";
 import "@fontsource/dm-sans/latin-700.css";
 import "@fontsource/manrope/latin-600.css";
 import "@fontsource/manrope/latin-700.css";
-import "@fontsource/barlow-condensed/latin-600.css";
 import "@fontsource/barlow-condensed/latin-700.css";
 import "@fontsource/barlow-condensed/latin-800.css";
 import App from "./App";
@@ -22,6 +21,22 @@ import "./styles/runtime-07.css";
 import "./trophy-room.css";
 import "./destination-reliability.css";
 import "./product-tour.css";
+import "./styles/runtime-08.css";
+
+// Local-network previews use plain HTTP, where browsers may omit randomUUID
+// even though cryptographically secure random bytes remain available.
+if (typeof globalThis.crypto !== "undefined" && typeof globalThis.crypto.randomUUID !== "function") {
+  Object.defineProperty(globalThis.crypto, "randomUUID", {
+    configurable: true,
+    value: () => {
+      const bytes = globalThis.crypto.getRandomValues(new Uint8Array(16));
+      bytes[6] = (bytes[6] & 0x0f) | 0x40;
+      bytes[8] = (bytes[8] & 0x3f) | 0x80;
+      const value = Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
+      return `${value.slice(0, 8)}-${value.slice(8, 12)}-${value.slice(12, 16)}-${value.slice(16, 20)}-${value.slice(20)}`;
+    },
+  });
+}
 
 const Admin = lazy(() => import("./Admin"));
 const MuscleMapPreview = lazy(() => import("./components/MuscleMapPreview"));
@@ -56,6 +71,14 @@ if ("serviceWorker" in navigator && import.meta.env.PROD) {
   window.addEventListener("load", async () => {
     try {
       const registration = await navigator.serviceWorker.register("/sw.js", { updateViaCache: "none" });
+      const activateWaitingWorker = () => registration.waiting?.postMessage({ type: "NORTH_ACTIVATE_UPDATE" });
+      registration.addEventListener("updatefound", () => {
+        const installingWorker = registration.installing;
+        installingWorker?.addEventListener("statechange", () => {
+          if (installingWorker.state === "installed") activateWaitingWorker();
+        });
+      });
+      activateWaitingWorker();
       void registration.update();
     } catch (error) {
       console.warn("North offline support could not start", error);

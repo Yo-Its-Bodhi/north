@@ -40,6 +40,7 @@
 :root[data-palette="plum"]{--ink:#f5ecf5;--muted:#c0a9bf;--blue:#e68dca;--navy:#573058;--surface:rgba(53,33,56,.76);--surface-solid:#352238;--line:rgba(247,210,245,.13);--shadow:0 24px 70px rgba(0,0,0,.42);--energy-gradient:linear-gradient(120deg,#573058,#e68dca);--nova-gradient:linear-gradient(110deg,#e68dca,#9e8cdb)}
 :root[data-palette="pine"]{--ink:#ebf4ea;--muted:#a8bda9;--blue:#84c87c;--navy:#234e37;--surface:rgba(22,48,34,.76);--surface-solid:#173324;--line:rgba(201,235,200,.13);--shadow:0 24px 70px rgba(0,0,0,.42);--energy-gradient:linear-gradient(120deg,#234e37,#84c87c);--nova-gradient:linear-gradient(110deg,#84c87c,#66b9bb)}
 /* Journey is North's record room: ordered evidence, earned moments, and no dashboard noise. */
+/* Superseded by the approved Journey destination layer in destination-reliability.css and runtime-08.css.
 .journey-destination{--journey-accent:var(--blue)}
 .journey-destination .journey-page-header{margin-bottom:18px}
 .journey-destination .journey-page-header{padding-top:18px}
@@ -97,7 +98,9 @@
   .journey-destination .journey-tabs{margin-bottom:22px}
   .journey-destination .timeline.unified-timeline h3{font-size:19px}
 }
+*/
 /* Nova is a private working conversation, not a floating chatbot. */
+/* Superseded by the deliberate coaching-workspace layer in runtime-08.css.
 .nova-screen .nova-page-heading h1{max-width:700px;font:800 clamp(38px,7vw,56px)/.94 "Barlow Condensed",sans-serif;letter-spacing:0;text-transform:uppercase}
 .nova-screen .nova-page-heading>div:first-child>p:last-child{font-size:13px;line-height:1.55}
 .nova-screen .nova-heading-actions button{border-radius:10px}
@@ -119,6 +122,7 @@
   .nova-intelligence-hub{width:min(calc(100vw - 112px),960px)!important;padding:28px!important}
   .nova-intelligence-hub .nova-hub-grid{grid-template-columns:minmax(0,1fr) minmax(300px,.7fr)}
 }
+*/
 /* North 1.0 primitives: calm structure, one clear command, and evidence before decoration. */
 :root{--north-space-1:4px;--north-space-2:8px;--north-space-3:12px;--north-space-4:16px;--north-space-5:24px;--north-space-6:32px;--north-radius-control:8px;--north-radius-workspace:12px;--north-radius-modal:16px;--north-divider:var(--line);--north-active-divider:color-mix(in srgb,var(--blue) 52%,var(--line));--north-danger-divider:rgba(168,81,81,.48)}
 .primary-button{border-radius:var(--north-radius-control)}
@@ -126,6 +130,7 @@
 .text-button{border-radius:var(--north-radius-control)}
 .journey-destination .milestone-summary,.journey-destination .four-week-chart,.journey-destination .insight-next-step,.journey-destination .insight-muscles,.journey-destination .exercise-trend-list,.journey-destination .activity-trend-list,.journey-destination .recovery-evidence,.journey-destination .pr-list,.journey-destination .learned-list{border-radius:var(--north-radius-workspace)}
 /* Recognition is a quiet record: title, measure, and distance remaining. */
+/* Superseded by the current Journey record hierarchy.
 .journey-destination .chapter-progress{margin:0 0 var(--north-space-5);padding-bottom:var(--north-space-3);border-bottom:1px solid var(--north-divider)}
 .journey-destination .chapter-progress button{border-radius:var(--north-radius-control)}
 .journey-destination .milestone-summary{--score-color:var(--journey-accent)}
@@ -150,7 +155,9 @@
 .journey-destination .milestone-explanation{margin-top:11px;padding:11px 12px;border-left:2px solid var(--journey-accent);background:color-mix(in srgb,var(--journey-accent) 7%,transparent)}
 .journey-destination .milestone-explanation p{margin:0;color:var(--ink);font-size:12px;line-height:1.45}
 .journey-destination .milestone-explanation span{display:block;margin-top:5px;color:var(--muted);font-size:10px;line-height:1.4}
+*/
 /* Insights read as a small evidence desk, not an all-data report. */
+/* Superseded by the current Journey evidence hierarchy.
 .journey-destination .four-week-chart{margin-bottom:20px}
 .journey-destination .insight-next-step{border:1px solid var(--north-active-divider);background:color-mix(in srgb,var(--blue) 5%,var(--surface-solid))}
 .journey-destination .insight-muscles>div,.journey-destination .exercise-trend-list article,.journey-destination .activity-trend-list>div,.journey-destination .pr-list article{border-radius:0;box-shadow:none}
@@ -164,7 +171,9 @@
   .journey-destination .activity-trend-list,.journey-destination .recovery-evidence{width:calc(50% - 14px);display:inline-block;vertical-align:top}
   .journey-destination .recovery-evidence{margin-left:24px}
 }
+*/
 /* Nova is coaching work: a single clear conversation and contextual controls on demand. */
+/* Superseded by the North Signature Nova workspace.
 .nova-screen .nova-page-heading{align-items:end;padding-top:var(--north-space-4);border-bottom:1px solid var(--north-divider)}
 .nova-screen .nova-page-heading h1{margin:0;font-size:clamp(38px,10vw,56px);line-height:.9}
 .nova-screen .nova-heading-actions button{min-height:40px;padding:0 var(--north-space-3);border:1px solid var(--north-divider);border-radius:var(--north-radius-control);background:var(--surface-solid);box-shadow:none}
@@ -176,6 +185,7 @@
 .nova-input{border-radius:var(--north-radius-workspace);box-shadow:0 12px 28px color-mix(in srgb,var(--navy) 12%,transparent)}
 .nova-input button{border-radius:var(--north-radius-control)}
 .nova-intelligence-hub{border:1px solid var(--north-active-divider)!important;border-radius:var(--north-radius-modal)!important;background:var(--surface-solid)!important}
+*/
 /* You is a personal record: identity, present signals, then accumulated work. */
 .you-screen{display:block;padding-top:var(--north-space-5)}
 .you-screen .you-profile-header{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:var(--north-space-4);padding-bottom:var(--north-space-5);border-bottom:1px solid var(--north-divider)}
@@ -233,24 +243,12 @@
 .memory-observation>summary{min-height:68px;padding:12px 0;display:grid;grid-template-columns:30px minmax(0,1fr) 18px;gap:10px;align-items:center;list-style:none;cursor:pointer}
 .memory-observation>summary::-webkit-details-marker{display:none}
 .memory-observation>summary>span{font-size:18px}
-.memory-observation>summary strong,.memory-observation>summary small{display:block}
-.memory-observation>summary strong{font-size:11px}
-.memory-observation>summary small{margin-top:4px;color:var(--muted);font-size:9px;line-height:1.4}
-.memory-observation>summary>svg{color:var(--muted);transition:transform .18s ease}
-.memory-observation[open]>summary>svg{transform:rotate(180deg)}
-.memory-observation-detail{padding:0 0 16px 40px}
-.memory-observation-detail>p{margin:0 0 12px;color:var(--muted);font-size:10px;line-height:1.5}
-.memory-observation-detail label>span{display:block;margin-bottom:6px;color:var(--muted);font-size:8px;font-weight:800;text-transform:uppercase}
-.memory-observation-detail input{width:100%;height:40px;padding:0 10px;border:1px solid var(--north-divider);border-radius:var(--north-radius-control);color:var(--ink);background:var(--surface-solid);outline:0}
-.memory-observation-detail>button{min-height:38px;margin-top:10px;padding:0;border:0;color:#b75555;background:transparent;font-size:9px;font-weight:800;cursor:pointer}
 /* Account is operational: compact identity, device rows, and decisive dangerous actions. */
 .account-screen{padding-top:var(--north-space-5)}
 .account-screen .account-screen-header{padding-bottom:var(--north-space-5);border-bottom:1px solid var(--north-divider)}
 .account-screen .account-screen-header>span{border-radius:var(--north-radius-workspace);box-shadow:none}
 .account-screen .account-panel{margin-top:var(--north-space-5);padding:0;border:0;border-radius:0;background:transparent;box-shadow:none}
 .account-screen .account-identity{padding:var(--north-space-4);border:1px solid var(--north-divider);border-radius:var(--north-radius-workspace);background:var(--surface-solid)}
-.account-screen .account-device-list{margin-top:var(--north-space-4);border-top:1px solid var(--north-divider)}
-.account-screen .account-device-list article{min-height:72px;padding:var(--north-space-3) 0;border-radius:0;background:transparent;box-shadow:none}
 .account-screen .account-menu-grid{gap:0;margin-top:var(--north-space-5);border-top:1px solid var(--north-divider);border-bottom:1px solid var(--north-divider)}
 .account-screen .account-menu-grid button{padding:var(--north-space-4) 0;border:0;border-radius:0;background:transparent;box-shadow:none}
 .account-screen .account-menu-grid button+button{border-top:1px solid var(--north-divider)}
@@ -505,7 +503,6 @@
 .settings-group>summary small{grid-column:2;margin-top:3px;color:var(--muted);font-size:10px}
 .settings-group[open]>summary>svg{transform:rotate(180deg)}
 .settings-group-body{padding:0 14px 14px;border-top:1px solid var(--line)}
-.settings-group-body .account-device-list{margin:0 -14px}
 .settings-group-body .theme-picker{margin:14px 0 0}
 .settings-sync-check{width:100%;min-height:58px;margin-top:12px;padding:10px 12px;border:1px solid var(--line);border-radius:14px;display:grid;grid-template-columns:28px 1fr;gap:9px;align-items:center;color:var(--ink);background:var(--surface);text-align:left;cursor:pointer}
 .settings-sync-check>svg{color:var(--blue)}

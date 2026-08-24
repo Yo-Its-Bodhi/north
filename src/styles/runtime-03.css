@@ -253,15 +253,6 @@ html[data-theme="night"] .choice-grid button, html[data-theme="night"] .number-c
 .account-identity strong{font-size:14px}
 .account-identity small{margin-top:3px;color:var(--muted);font-size:12px}
 .account-identity a{padding:8px 10px;border-radius:10px;color:var(--blue);background:rgba(37,99,235,.08);font-size:11px;font-weight:700;text-decoration:none}
-.account-device-list article{min-height:64px;padding:12px 15px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
-.account-device-list article>span{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;color:var(--muted);background:var(--surface-solid)}
-.account-device-list article>span.current{color:#19845e;background:rgba(25,132,94,.1)}
-.account-device-list article>div{min-width:0;flex:1}
-.account-device-list strong,.account-device-list small{display:block}
-.account-device-list strong{font-size:13px}
-.account-device-list small{margin-top:4px;color:var(--muted);font-size:11px}
-.account-device-list button{min-height:34px;padding:0 9px;border:1px solid var(--line);border-radius:9px;color:#a24755;background:transparent;font-size:11px;cursor:pointer}
-.account-device-list b{color:var(--muted);font-size:10px}
 .account-status{margin:0;padding:10px 15px;color:var(--blue);font-size:12px!important}
 .account-signout{width:100%;min-height:45px;border:0;color:#a24755;background:transparent;font-weight:700;cursor:pointer}
 .install-app-card{margin:0 0 30px;padding:20px;border:1px solid rgba(8,124,240,.2);border-radius:20px;display:grid;grid-template-columns:48px minmax(0,1fr) auto;gap:14px;align-items:center;background:linear-gradient(120deg,rgba(0,184,233,.08),rgba(118,87,245,.08));box-shadow:0 14px 38px rgba(20,58,101,.07)}
@@ -646,31 +637,6 @@ body::before { content:""; position:fixed; inset:0; pointer-events:none; opacity
 .calendar-backfill-groups section>button>svg{grid-column:2;grid-row:1/3;color:var(--muted)}
 .calendar-backfill-groups section>p{margin:0;padding:12px 0;color:var(--muted);font-size:9px}
 @media(max-width:620px){.calendar-backfill-picker{padding:13px}.calendar-backfill-picker>header{align-items:flex-start;flex-direction:column}.calendar-backfill-groups{grid-template-columns:1fr}.calendar-backfill-launch{grid-template-columns:40px minmax(0,1fr) 18px;padding:12px}.calendar-backfill-launch>span{width:40px;height:40px}}
-.sync-centre{width:calc(100% - 40px);margin:0 20px 18px;border:1px solid rgba(37,99,235,.2);border-radius:17px;background:rgba(37,99,235,.055);overflow:hidden}
-.sync-centre>header{min-height:68px;padding:13px 14px;display:flex;align-items:center;gap:11px}
-.sync-centre>header>span{width:38px;height:38px;display:grid;place-items:center;border-radius:12px;color:var(--blue);background:var(--surface-solid)}
-.sync-centre>header>div{min-width:0;flex:1}
-.sync-centre strong,.sync-centre small{display:block}
-.sync-centre>header strong{font-size:13px}
-.sync-centre>header small{margin-top:4px;color:var(--muted);font-size:11px}
-.sync-centre>header button{min-height:40px;padding:0 11px;border:1px solid rgba(37,99,235,.22);border-radius:11px;display:flex;align-items:center;gap:6px;color:var(--blue);background:var(--surface-solid);font-weight:700;cursor:pointer}
-.sync-centre>header button:disabled{opacity:.5}
-.sync-centre>p{margin:0;padding:10px 14px;border-top:1px solid var(--line);color:#a45d28;background:rgba(238,150,60,.08);font-size:12px!important}
-.sync-centre.offline{border-color:rgba(124,137,154,.3);background:rgba(124,137,154,.07)}
-.sync-centre.offline>header>span{color:var(--muted)}
-.sync-centre.compact{margin-bottom:10px}
-.sync-facts{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--line)}
-.sync-facts span{padding:12px;border-right:1px solid var(--line);color:var(--muted);font-size:10px;text-align:center}
-.sync-facts span:last-child{border:0}
-.sync-facts strong{margin-bottom:3px;color:var(--ink);font-size:14px}
-.member-conflicts{padding:15px;border-top:1px solid var(--line)}
-.member-conflicts>p{margin:0 0 8px}
-.member-conflicts article{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:7px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
-.member-conflicts article strong{text-transform:capitalize}
-.member-conflicts article small{margin-top:4px;color:var(--muted);font-size:10px}
-.member-conflicts article button{min-height:38px;padding:0 10px;border:1px solid var(--line);border-radius:10px;color:var(--blue);background:var(--surface-solid);font-size:11px;font-weight:700;cursor:pointer}
-.member-conflicts article button:last-child{color:var(--muted)}
-@media(max-width:520px){.sync-centre{width:calc(100% - 24px);margin-left:12px;margin-right:12px}.sync-centre>header{align-items:flex-start;flex-wrap:wrap}.sync-centre>header>div{width:calc(100% - 50px)}.sync-centre>header button{width:100%;justify-content:center}.sync-facts{grid-template-columns:1fr 1fr}.member-conflicts article{grid-template-columns:1fr 1fr}.member-conflicts article>div{grid-column:1/-1}.member-conflicts article button{width:100%}}
 /* North premium product system ------------------------------------------------ */
 .release-notes-backdrop{position:fixed;z-index:200;inset:0;display:flex;align-items:center;justify-content:center;padding:32px;background:rgba(12,25,30,.48);backdrop-filter:blur(8px)}
 .release-notes{width:min(100%,620px);max-height:calc(100vh - 64px);overflow:auto;padding:32px;border:1px solid var(--line);border-radius:12px;color:var(--ink);background:var(--surface-solid);box-shadow:0 28px 80px rgba(0,0,0,.28)}

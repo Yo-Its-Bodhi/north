@@ -251,9 +251,40 @@ app.patch("/v1/me/timezone", { preHandler: app.authenticate }, async (request, r
   return result.rows[0] ? publicUser(result.rows[0]) : reply.code(404).send({ error: "Account not found." });
 });
 
-app.delete("/v1/me", { preHandler: app.authenticate }, async (request, reply) => {
-  await pool.query("delete from app_users where id=$1", [request.user.sub]);
-  return reply.code(204).send();
+app.patch("/v1/me/password", { preHandler: app.authenticate, config: { rateLimit: { max: 6, timeWindow: "30 minutes" } } }, async (request, reply) => {
+  const { currentPassword, newPassword } = request.body ?? {};
+  if (!currentPassword || !newPassword || String(newPassword).length < 10) return reply.code(400).send({ error: "Enter your current password and a new password of at least 10 characters." });
+  const client = await pool.connect();
+  try {
+    await client.query("begin");
+    const credential = (await client.query("select password_hash from local_credentials where owner_user_id=$1 for update", [request.user.sub])).rows[0];
+    if (!credential || !(await bcrypt.compare(String(currentPassword), credential.password_hash))) { await client.query("rollback"); return reply.code(401).send({ error: "Current password is incorrect." }); }
+    await client.query("update local_credentials set password_hash=$1,updated_at=now() where owner_user_id=$2", [await bcrypt.hash(String(newPassword), 12), request.user.sub]);
+    await client.query("update refresh_tokens set revoked_at=now() where owner_user_id=$1 and revoked_at is null", [request.user.sub]);
+    await client.query("commit");
+    return reply.code(204).send();
+  } catch (error) { await client.query("rollback"); throw error; }
+  finally { client.release(); }
+});
+
+app.post("/v1/me/sign-out-all", { preHandler: app.authenticate }, async (request) => {
+  const result = await pool.query("update refresh_tokens set revoked_at=now() where owner_user_id=$1 and revoked_at is null returning id", [request.user.sub]);
+  return { signedOutSessions: result.rowCount };
+});
+
+app.delete("/v1/me", { preHandler: app.authenticate, config: { rateLimit: { max: 3, timeWindow: "1 hour" } } }, async (request, reply) => {
+  const password = request.body?.password;
+  if (!password) return reply.code(400).send({ error: "Enter your password to permanently delete this account." });
+  const client = await pool.connect();
+  try {
+    await client.query("begin");
+    const credential = (await client.query("select password_hash from local_credentials where owner_user_id=$1 for update", [request.user.sub])).rows[0];
+    if (!credential || !(await bcrypt.compare(String(password), credential.password_hash))) { await client.query("rollback"); return reply.code(401).send({ error: "Password is incorrect." }); }
+    await client.query("delete from app_users where id=$1", [request.user.sub]);
+    await client.query("commit");
+    return reply.code(204).send();
+  } catch (error) { await client.query("rollback"); throw error; }
+  finally { client.release(); }
 });
 
 app.get("/v1/me/devices", { preHandler: app.authenticate }, async (request) => ({
@@ -844,18 +875,12 @@ app.post("/v1/sync/mutations", { preHandler: app.authenticate, config: { rateLim
   try {
     await client.query("begin");
     const previous = await client.query("select response from document_mutations where owner_user_id=$1 and idempotency_key=$2", [request.user.sub, idempotencyKey]);
-    if (previous.rows[0]) { await client.query("commit"); return previous.rows[0].response; }
-    const current = await client.query("select * from sync_documents where owner_user_id=$1 and document_key=$2 for update", [request.user.sub, mutation.documentKey]);
-    const remote = current.rows[0];
-    if (remote && Number(mutation.baseVersion ?? 0) !== Number(remote.version)) {
-      const mutationTime = new Date(mutation.createdAt).getTime();
-      const remoteTime = new Date(remote.updated_at).getTime();
-      if (!Number.isFinite(mutationTime) || mutationTime <= remoteTime) {
-        const response = { status: "superseded", document: mapDocument(remote) };
-        await client.query("insert into document_mutations(owner_user_id,idempotency_key,response) values($1,$2,$3)", [request.user.sub, idempotencyKey, response]);
-        await client.query("commit");
-        return response;
-      }
+    if (previous.rows[0]) {
+      const previousResponse = previous.rows[0].response;
+      await client.query("commit");
+      return previousResponse?.status === "conflict" || previousResponse?.status === "superseded"
+        ? reply.code(409).send(previousResponse)
+        : previousResponse;
     }
     const result = await client.query(
       `insert into sync_documents(owner_user_id,document_key,collection,data,version,deleted_at)
@@ -864,6 +889,7 @@ app.post("/v1/sync/mutations", { preHandler: app.authenticate, config: { rateLim
        version=sync_documents.version+1,updated_at=now(),deleted_at=excluded.deleted_at returning *`,
       [request.user.sub, mutation.documentKey, mutation.collection, JSON.stringify(mutation.operation === "delete" ? null : mutation.data), mutation.operation],
     );
+    await client.query("update sync_conflicts set status='kept_local',resolved_by=$1,resolved_at=now() where owner_user_id=$1 and document_key=$2 and status='open'", [request.user.sub, mutation.documentKey]);
     const response = { status: "applied", document: mapDocument(result.rows[0]) };
     await client.query("insert into document_mutations(owner_user_id,idempotency_key,response) values($1,$2,$3)", [request.user.sub, idempotencyKey, response]);
     await client.query("commit");

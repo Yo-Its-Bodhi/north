@@ -31,4 +31,4 @@ pg_restore --list "$VERIFY" >/dev/null
 SIZE="$(stat -c %s "$TARGET")"
 NORTH_BACKUP_DIR="$BACKUP_DIR" "$(dirname "$0")/prune-north-backups.sh"
 NORTH_BACKUP_DIR="$BACKUP_DIR" "$(dirname "$0")/sync-north-backups.sh"
-runuser -u postgres -- psql -d "$DB_NAME" -c "update backup_runs set status='complete',size_bytes=$SIZE,verified_at=now(),finished_at=now() where id='$RUN_ID'" >/dev/null
+runuser -u postgres -- psql -d "$DB_NAME" -c "update backup_runs set status='complete',size_bytes=$SIZE,verified_at=null,finished_at=now() where id='$RUN_ID'" >/dev/null

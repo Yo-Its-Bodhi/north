@@ -82,6 +82,25 @@ try {
   page.on("pageerror", (error) => consoleErrors.push(`pageerror: ${error.message}`));
   page.on("console", (message) => { if (message.type() === "error" && !message.text().includes("ERR_INTERNET_DISCONNECTED")) consoleErrors.push(`console: ${message.text()}`); });
 
+  await check("Nova suggestion opens a complete editable routine", async () => {
+    await page.setViewportSize({ width: 430, height: 932 });
+    await page.goto(base);
+    await page.locator(".today-screen").waitFor();
+    await page.getByRole("button", { name: "Training", exact: true }).last().click();
+    await page.getByRole("button", { name: /Build with Nova/ }).click();
+    await page.locator(".nova-workout-builder-screen").waitFor();
+    await page.getByLabel("Workout name").fill("Nova complete routine test");
+    await page.locator(".nova-builder-form label").filter({ hasText: "How much work time?" }).locator("select").selectOption("60");
+    await page.getByRole("button", { name: /Use Nova's suggestion/ }).click();
+    await page.locator(".workout-template-screen").waitFor();
+    const suggestedExercises = page.locator(".template-exercises > article");
+    assert.equal(await suggestedExercises.count(), 6, "A 60-minute Nova suggestion should contain six exercises");
+    assert.equal(await page.locator(".template-exercise-editor").count(), 6, "Every suggested exercise should open in the editable review state");
+    assert.match(await page.locator(".routine-save-state").innerText(), /Nova suggested 6 exercises/);
+    assert.equal(await page.locator(".template-metrics").getByText(/^~(?:58|59|60|61|62) min$/).isVisible(), true, "The suggested prescriptions should total about 60 minutes");
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1), true, "Nova suggestion review overflows horizontally");
+  });
+
   await check("primary destinations are reachable and free of horizontal overflow", async () => {
     await page.goto(base);
     await page.locator(".today-screen").waitFor();
@@ -168,7 +187,11 @@ try {
       const subheading = header.locator(".destination-subheading");
       const detail = header.locator(".destination-header-detail");
       assert.match(await subheading.innerText(), /Good (morning|afternoon|evening), Browser Test\.|Still up\? Browser Test\./);
-      assert.equal(await detail.innerText(), "It’s good to have you here. We’ll find the right pace together.");
+      assert.match(
+        await detail.innerText(),
+        /^(You’ve already made a start\.|You showed up for yourself today\.|It’s good to see you\.|There’s room to slow down today\.|It’s good to have you here\.|Good to see you(?: again)?\.|It’s good to have you back\.)/,
+        "Today should show one of the supported state-aware welcome messages",
+      );
       assert.doesNotMatch(await header.innerText(), /is ready when you are/i);
       const geometry = await detail.evaluate((element) => ({
         clipsHorizontally: element.scrollWidth > element.clientWidth + 1,
@@ -244,9 +267,10 @@ try {
     ];
     await page.getByRole("button", { name: "Journey", exact: true }).last().click();
     for (const [palette, mode] of palettes) {
-      const metrics = await page.evaluate(({ palette, mode }) => {
+      const metrics = await page.evaluate(async ({ palette, mode }) => {
         document.documentElement.dataset.palette = palette;
         document.documentElement.dataset.theme = mode;
+        await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
         const box = (selector) => document.querySelector(selector)?.getBoundingClientRect();
         const header = box(".destination-brand-header");
         const nav = box(".primary-nav");
@@ -270,12 +294,8 @@ try {
           const values = rgb.map((value) => { const channel = value / 255; return channel <= .03928 ? channel / 12.92 : ((channel + .055) / 1.055) ** 2.4; });
           return .2126 * values[0] + .7152 * values[1] + .0722 * values[2];
         };
-        const surfaceProbe = document.createElement("span");
-        surfaceProbe.style.backgroundColor = "var(--north-rail-surface)";
-        document.body.append(surfaceProbe);
-        const surfaceColor = parse(getComputedStyle(surfaceProbe).backgroundColor);
+        const surfaceColor = parse(getComputedStyle(document.querySelector(".primary-nav")).backgroundColor);
         const surfaceLuminance = luminance(surfaceColor);
-        surfaceProbe.remove();
         const labelContrast = visibleButtons.map((button) => {
           const textLuminance = luminance(parse(getComputedStyle(button).color, surfaceColor));
           return (Math.max(surfaceLuminance, textLuminance) + .05) / (Math.min(surfaceLuminance, textLuminance) + .05);
@@ -286,6 +306,8 @@ try {
           minimumTargetHeight: Math.min(...visibleButtons.map((button) => button.getBoundingClientRect().height)),
           minimumLabelSize: Math.min(...visibleButtons.map((button) => Number.parseFloat(getComputedStyle(button).fontSize))),
           minimumLabelContrast: Math.min(...labelContrast),
+          navSurfaceColor: getComputedStyle(document.querySelector(".primary-nav")).backgroundColor,
+          navLabelColors: visibleButtons.map((button) => getComputedStyle(button).color),
           topbarHeight: topbar?.height,
           headerHeight: header?.height,
           titleSize: title.fontSize,
@@ -294,16 +316,16 @@ try {
           overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
         };
       }, { palette, mode });
-      assert.deepEqual(metrics.destinations, ["today", "journey", "training", "together", "nova-workout-builder", "nova", "you"], `${palette} nav identity drifted`);
+      assert.deepEqual(metrics.destinations, ["today", "journey", "training", "nova-workout-builder", "nova", "together", "you"], `${palette} nav identity drifted`);
       assert.deepEqual(metrics.visibleDestinations, ["today", "journey", "training", "nova", "you"], `${palette} mobile nav composition drifted`);
-      assert.equal(metrics.topbarHeight, 78, `${palette} topbar height drifted`);
-      assert.ok(metrics.headerHeight >= 148 && metrics.headerHeight <= 156, `${palette} destination header height drifted to ${metrics.headerHeight}px`);
-      assert.equal(metrics.titleSize, "42px", `${palette} destination title size drifted`);
-      assert.equal(metrics.navHeight, 76, `${palette} dock height drifted`);
+      assert.equal(metrics.topbarHeight, 64, `${palette} topbar height drifted`);
+      assert.ok(metrics.headerHeight >= 152 && metrics.headerHeight <= 162, `${palette} destination header height drifted to ${metrics.headerHeight}px`);
+      assert.equal(metrics.titleSize, "45px", `${palette} destination title size drifted`);
+      assert.equal(metrics.navHeight, 68, `${palette} dock height drifted`);
       assert.equal(metrics.navBottom, 932, `${palette} dock detached from the viewport`);
       assert.ok(metrics.minimumTargetHeight >= 56, `${palette} dock target is ${metrics.minimumTargetHeight}px high`);
       assert.ok(metrics.minimumLabelSize >= 10, `${palette} dock label is ${metrics.minimumLabelSize}px`);
-      assert.ok(metrics.minimumLabelContrast >= 4.5, `${palette} dock label contrast is ${metrics.minimumLabelContrast.toFixed(2)}:1`);
+      assert.ok(metrics.minimumLabelContrast >= 4.5, `${palette} dock label contrast is ${metrics.minimumLabelContrast.toFixed(2)}:1 (${metrics.navLabelColors.join(", ")} on ${metrics.navSurfaceColor})`);
       assert.ok(metrics.overflow <= 1, `${palette} shell overflows by ${metrics.overflow}px`);
     }
   });
@@ -426,6 +448,8 @@ try {
 
   await check("Journey progressively discloses secondary analysis on mobile only", async () => {
     await page.setViewportSize({ width: 430, height: 932 });
+    await page.goto(base);
+    await page.locator(".today-screen").waitFor();
     await page.getByRole("button", { name: "Journey", exact: true }).last().click();
     await page.getByLabel("Journey views").getByRole("button", { name: "Atlas", exact: true }).click();
     const atlasDisclosure = page.getByRole("button", { name: /Explore chart and evidence/ });
@@ -685,7 +709,7 @@ try {
   await check("Today compact and expanded anatomy keep SVG paint servers isolated", async () => {
     await page.goto(base);
     await page.getByRole("button", { name: "Today", exact: true }).last().click();
-    await page.getByRole("button", { name: "Open today’s muscle explorer" }).click();
+    await page.locator(".today-muscle-focus-mobile:visible, .today-muscle-focus .anatomy-expand:visible").first().click();
     await page.locator(".anatomy-explorer .holo-silhouette path").waitFor();
     const paintServers = await page.evaluate(() => {
       const gradientIds = [...document.querySelectorAll(".holo-anatomy linearGradient")].map((gradient) => gradient.id);
@@ -712,7 +736,7 @@ try {
       await page.setViewportSize(viewport);
       await page.goto(base);
       await page.getByRole("button", { name: "Today", exact: true }).last().click();
-      await page.getByRole("button", { name: "Open today’s muscle explorer" }).click();
+      await page.locator(".today-muscle-focus-mobile:visible, .today-muscle-focus .anatomy-expand:visible").first().click();
       await page.locator(".anatomy-explorer-muscles button").first().waitFor();
       await page.locator('.anatomy-explorer-muscles button[data-muscle-id="vastus_lateralis"]').click();
       const longList = await page.locator(".anatomy-explorer-muscles").evaluate((list) => {
@@ -992,7 +1016,15 @@ try {
       await page.setViewportSize({ width, height: width < 600 ? 900 : 1000 });
       await page.goto(base);
       await page.locator(".today-screen").waitFor();
-      assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1), true, `${width}px layout overflows`);
+      const responsiveGeometry = await page.evaluate(() => ({
+        clientWidth: document.documentElement.clientWidth,
+        scrollWidth: document.documentElement.scrollWidth,
+        offenders: [...document.querySelectorAll("body *")].map((element) => {
+          const box = element.getBoundingClientRect();
+          return { tag: element.tagName, className: String(element.className).slice(0, 100), left: box.left, right: box.right, width: box.width };
+        }).filter((box) => box.left < -1 || box.right > document.documentElement.clientWidth + 1).sort((left, right) => right.right - left.right).slice(0, 8),
+      }));
+      assert.equal(responsiveGeometry.scrollWidth <= responsiveGeometry.clientWidth + 1, true, `${width}px layout overflows: ${JSON.stringify(responsiveGeometry)}`);
       if ([320, 768, 1440].includes(width)) await page.screenshot({ path: `artifacts/visual/today-${width}.png`, fullPage: true });
     }
   });
@@ -1011,6 +1043,8 @@ try {
 
   await check("an interrupted workout survives a full page reload", async () => {
     await page.goto(base);
+    await page.evaluate(() => localStorage.removeItem("north-active-session-v1"));
+    await page.reload();
     await page.getByRole("button", { name: "Training", exact: true }).last().click();
     const editWorkout = page.getByRole("button", { name: /Edit workout|Plan a workout/ });
     if (!await page.locator(".training-details-drawer .kind-picker").isVisible().catch(() => false)) {
@@ -1019,9 +1053,15 @@ try {
       await editWorkout.click();
     }
     await page.locator(".training-details-drawer .kind-picker button").filter({ hasText: /^strength$/i }).click();
-    await page.getByRole("button", { name: /Start workout|Continue setup/ }).click();
-    await page.getByRole("heading", { name: /Ready when you are|Record what happened/ }).waitFor();
-    await page.locator(".prepare-save-actions").getByRole("button", { name: /Start workout/ }).click();
+    const startSetup = page.getByRole("button", { name: "Start workout", exact: true });
+    if (await startSetup.isVisible().catch(() => false)) await startSetup.click();
+    else await page.getByRole("button", { name: "Continue setup", exact: true }).click();
+    const replaceActiveWorkout = page.getByRole("button", { name: /Cancel current & start/ });
+    if (await replaceActiveWorkout.isVisible().catch(() => false)) await replaceActiveWorkout.click();
+    await page.waitForFunction(() => document.querySelector(".workout-screen") || [...document.querySelectorAll("h1,h2")].some((heading) => /Ready when you are|Record what happened/.test(heading.textContent ?? "")));
+    if (!await page.locator(".workout-screen").isVisible().catch(() => false)) {
+      await page.locator(".prepare-save-actions").getByRole("button", { name: /Start workout/ }).click();
+    }
     await page.locator(".workout-screen").waitFor();
     const firstInput = page.locator(".simple-set-logger input, .set-row:not(.set-head) input").first();
     await firstInput.fill("77");

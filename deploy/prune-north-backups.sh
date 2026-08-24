@@ -42,6 +42,8 @@ keep_tier() {
     kept=$((kept + 1))
     (( kept >= limit )) && break
   done
+
+  return 0
 }
 
 keep_tier day "$DAILY_COPIES"

@@ -238,6 +238,8 @@
   padding: 14px 24px 20px;
   overflow-y: auto;
   overscroll-behavior-y: contain;
+  scroll-snap-type: y mandatory;
+  scroll-padding-block: 11px var(--anatomy-list-bottom, 20px);
   scrollbar-color: var(--blue) color-mix(in srgb, var(--muted) 12%, transparent);
   scrollbar-gutter: stable;
   scrollbar-width: auto;
@@ -285,6 +287,7 @@
   text-align: center;
   touch-action: pan-y;
   cursor: pointer;
+  scroll-snap-align: start;
 }
 
 .anatomy-explorer-muscles button.selected {

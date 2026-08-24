@@ -11,6 +11,9 @@ export type WorkoutTemplateExercise = {
   sets: number;
   reps: string;
   rest: number;
+  supersetId?: string;
+  supersetOrder?: number;
+  supersetRest?: number;
 };
 
 export type WorkoutTemplate = {
@@ -24,6 +27,9 @@ export type WorkoutTemplate = {
   equipment: string[];
   location: "Gym" | "Home" | "Anywhere";
   preferredDay?: WorkoutDay;
+  createdAt?: string;
+  updatedAt?: string;
+  duplicatedFromId?: string;
   exercises: WorkoutTemplateExercise[];
   source?: "north" | "personal" | "community";
   community?: {
@@ -129,6 +135,30 @@ export const workoutLevels = ["All", ...levels];
 export function estimatedWorkoutMinutes(template: WorkoutTemplate) {
   const seconds = template.exercises.reduce((total, exercise) => total + exercise.sets * (45 + exercise.rest), 0);
   return Math.max(10, Math.round(seconds / 60 + 5));
+}
+
+export function fitWorkoutToDuration(exercises: WorkoutTemplateExercise[], targetMinutes: number) {
+  const fitted = structuredClone(exercises);
+  const targetSeconds = Math.max(10, targetMinutes) * 60;
+  const totalSeconds = () => 300 + fitted.reduce((total, exercise) => total + exercise.sets * (45 + exercise.rest), 0);
+
+  for (let adjustment = 0; adjustment < 100; adjustment += 1) {
+    const currentSeconds = totalSeconds();
+    const direction = currentSeconds < targetSeconds ? 1 : -1;
+    const eligibleSetCount = direction > 0
+      ? Math.min(...fitted.filter((exercise) => exercise.sets < 10).map((exercise) => exercise.sets))
+      : Math.max(...fitted.filter((exercise) => exercise.sets > 1).map((exercise) => exercise.sets));
+    const candidates = fitted
+      .map((exercise, index) => ({ exercise, index }))
+      .filter(({ exercise }) => direction > 0 ? exercise.sets < 10 && exercise.sets === eligibleSetCount : exercise.sets > 1 && exercise.sets === eligibleSetCount)
+      .map(({ exercise, index }) => ({ index, nextSeconds: currentSeconds + direction * (45 + exercise.rest) }))
+      .sort((left, right) => Math.abs(targetSeconds - left.nextSeconds) - Math.abs(targetSeconds - right.nextSeconds));
+    const best = candidates[0];
+    if (!best || Math.abs(targetSeconds - best.nextSeconds) >= Math.abs(targetSeconds - currentSeconds)) break;
+    fitted[best.index].sets += direction;
+  }
+
+  return fitted;
 }
 
 export function workoutDisplayName(name: string) {
