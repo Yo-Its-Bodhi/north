@@ -96,6 +96,8 @@ test("the existing product tour is resumable and Guide-launched", () => {
   assert.match(appSource, />Save & close<\/button>/);
   assert.match(appSource, /if \(action\.intent === "start-product-tour"\) \{ startOrResumeProductTour\(\); return; \}/);
   assert.match(appSource, /const step = progress && !progress\.completed/);
+  assert.match(appSource, /const \[tourStep, setTourStep\] = useState\(-1\)/);
+  assert.doesNotMatch(appSource, /const \[screen, setCurrentScreen\][\s\S]{0,500}readProductTourProgress/);
 });
 
 test("Guide explains Journey ordering, This Day, and current preference limits", () => {

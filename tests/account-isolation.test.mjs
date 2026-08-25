@@ -67,7 +67,7 @@ test("new-account onboarding starts from clean defaults while synchronization is
   assert.match(appSource, /const nextPlan = initialWeekPlan\(\)\.map/);
   assert.doesNotMatch(appSource, /function completeOnboarding[\s\S]{0,1000}setWeeklyPlan\(\(days\)/);
   assert.match(appSource, /setTourStep\(-1\)/);
-  assert.match(appSource, /setUpdateNoticeOpen\(false\)/);
+  assert.doesNotMatch(appSource, /updateNoticeOpen|release-update-notice/);
 });
 
 test("account hydration releases local data before remote restoration", () => {

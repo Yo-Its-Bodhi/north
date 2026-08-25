@@ -757,24 +757,13 @@ function App() {
   const releaseNotesV4Open = false;
   const [releaseHistoryOpen, setReleaseNotesOpen] = useState(false);
   const [releaseNotes, setReleaseNotes] = useState<ReleaseNote[]>([]);
-  const [releaseNotesError, setReleaseNotesError] = useState("");
-  const [updateNoticeOpen, setUpdateNoticeOpen] = useState(() => localStorage.getItem(RELEASE_NOTES_DISMISSAL_KEY) !== RELEASE_NOTES_ID);
   const [dismissReleaseNotes, setDismissReleaseNotes] = useState(false);
   const [releaseNotesVersion, setReleaseNotesVersion] = useState<ReleaseNotesVersion>("0.8");
-  const [tourStep, setTourStep] = useState(() => {
-    if (!readNorthSession()) return -1;
-    const progress = readProductTourProgress();
-    if (!progress) return 0;
-    return progress.completed ? -1 : Math.max(0, Math.min(productTourSteps.length - 1, progress.step));
-  });
+  // Tours are opened deliberately from Guide. Signing in must never interrupt the member.
+  const [tourStep, setTourStep] = useState(-1);
   const [screen, setCurrentScreen] = useState<Screen>(() => {
     const requestedScreen = new URLSearchParams(location.search).get("open");
     if (requestedScreen === "training" || requestedScreen === "together") return requestedScreen;
-    const progress = readNorthSession() ? readProductTourProgress() : null;
-    if (progress && !progress.completed) {
-      const step = Math.max(0, Math.min(productTourSteps.length - 1, progress.step));
-      return productTourSteps[step].screen;
-    }
     return "today";
   });
   const [trainingDetailsOpen, setTrainingDetailsOpen] = useState(false);
@@ -3551,7 +3540,6 @@ function App() {
     void northRepository.put("onboarding", "primary", { completedAt: new Date().toISOString(), ...result });
     setEntryComplete(true);
     setLoginReveal(true);
-    setUpdateNoticeOpen(false);
     setScreen("today");
     setTourStep(-1);
   }
@@ -3572,7 +3560,6 @@ function App() {
   }
 
   async function openReleaseNotes(version: ReleaseNotesVersion = "0.8") {
-    setReleaseNotesError("");
     try {
       let loadedReleaseNotes = releaseNotes;
       if (!loadedReleaseNotes.length) {
@@ -3585,17 +3572,11 @@ function App() {
       }
       if (!loadedReleaseNotes.some((release) => release.version === version)) throw new Error("Release notes version was unavailable.");
       localStorage.setItem(RELEASE_NOTES_DISMISSAL_KEY, RELEASE_NOTES_ID);
-      setUpdateNoticeOpen(false);
       setReleaseNotesVersion(version);
       setReleaseNotesOpen(true);
     } catch {
-      setReleaseNotesError("Updates could not be loaded. Try again when North is online.");
+      setReleaseNotes([]);
     }
-  }
-
-  function dismissUpdateNotice() {
-    localStorage.setItem(RELEASE_NOTES_DISMISSAL_KEY, RELEASE_NOTES_ID);
-    setUpdateNoticeOpen(false);
   }
 
   function advanceProductTour() {
@@ -4729,7 +4710,6 @@ function App() {
       {screen !== "workout" && screen !== "test-log" && <NorthGuideAgent onOpenAction={openGuideAction} onOpenArticle={openGuideArticle} onOpenFullGuide={() => setScreen("guide")} onReportIssue={() => openTestLog(screen)}/>}
 
       {progressionTransaction?.appliedAt && !progressionTransaction.undoneAt && !progressionTransaction.dismissedAt && <aside className="recommendation-undo" role="status"><span><Check size={16} /></span><div><strong>Recommendation applied</strong><small>{progressionTransaction.suggestion.title}</small></div><button onClick={undoProgressionTransaction}><RotateCcw size={14} /> Undo</button><button aria-label="Dismiss undo" onClick={() => setProgressionTransaction((transaction) => transaction ? { ...transaction, dismissedAt: new Date().toISOString() } : transaction)}><X size={15} /></button></aside>}
-      {updateNoticeOpen && !activeTourStep && screen !== "workout" && screen !== "prepare" && createPortal(<aside className="release-update-notice" role={releaseNotesError ? "alert" : "status"}><span><Sparkles size={18}/></span><button className="release-update-copy" onClick={() => openReleaseNotes()}><small>NEW UPDATE</small><strong>North 0.8 is here</strong><em>{releaseNotesError || "Together messaging, sharing and community rooms"}</em></button><button className="release-update-dismiss" onClick={dismissUpdateNotice} aria-label="Dismiss North 0.8 update"><X size={16}/></button></aside>, document.body)}
       {workoutCancelOpen && createPortal(<div className="exercise-finish-overlay" role="presentation"><section className="exercise-finish-dialog" role="dialog" aria-modal="true" aria-labelledby="cancel-workout-title"><p className="eyebrow">CURRENT WORKOUT</p><h2 id="cancel-workout-title">Cancel this workout?</h2><p>{sessionSetCount(session)} completed set{sessionSetCount(session) === 1 ? "" : "s"} will be discarded. No workout record will be created.{session.planDayId ? " The planned workout will remain available to start again." : ""}</p><footer><button className="secondary-button" onClick={() => setWorkoutCancelOpen(false)}>Keep training</button><button className="danger-confirm-button" onClick={() => cancelActiveWorkout()}><Trash2 size={15} /> Cancel workout</button></footer></section></div>, document.body)}
       {screen === "workout" && session.pausedAt && !workoutCancelOpen && createPortal(<div className="exercise-finish-overlay workout-pause-overlay" role="presentation"><section className="exercise-finish-dialog" role="dialog" aria-modal="true" aria-labelledby="paused-workout-title"><p className="eyebrow">WORKOUT PAUSED · {pausedWorkoutLabel}</p><h2 id="paused-workout-title">{longWorkoutPause ? "Is this still the same workout?" : "Take the time you need."}</h2><p>{longWorkoutPause ? "This pause crossed a day or lasted more than six hours. Resume only if you are continuing the same session." : "Workout time and the rest countdown are stopped. Paused time will not be included in your workout duration."}</p><footer><button className="secondary-button" onClick={() => setWorkoutCancelOpen(true)}>Cancel workout</button><button className="primary-button" onClick={resumeWorkout}><Play size={15} /> Resume workout</button></footer></section></div>, document.body)}
       {pendingWorkoutChange && createPortal(<div className="exercise-finish-overlay" role="presentation"><section className="exercise-finish-dialog" role="dialog" aria-modal="true" aria-labelledby="workout-conflict-title"><p className="eyebrow">WORKOUT IN PROGRESS</p><h2 id="workout-conflict-title">Keep your current workout?</h2><p>Your current workout has {sessionSetCount(session)} completed set{sessionSetCount(session) === 1 ? "" : "s"}, plus any values you have entered. To {pendingWorkoutChange.actionLabel} {pendingWorkoutChange.title}, you must explicitly cancel the current workout.</p><footer><button className="secondary-button" onClick={() => { setPendingWorkoutChange(null); setScreen(session.startedAt ? "workout" : "prepare"); }}>Resume current</button><button className="danger-confirm-button" onClick={() => void confirmPendingWorkoutChange()}><Trash2 size={15} /> Cancel current &amp; {pendingWorkoutChange.actionLabel}</button></footer></section></div>, document.body)}

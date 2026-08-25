@@ -39,13 +39,13 @@ test("North 0.8 introduces Together while preserving release history", () => {
   }
 });
 
-test("updates begin as a compact notice and remain available in Settings", () => {
+test("updates stay available in Settings without an automatic login notice", () => {
   assert.match(appSource, /const \[releaseHistoryOpen, setReleaseNotesOpen\] = useState\(false\)/);
   assert.match(appSource, /const \[releaseNotes, setReleaseNotes\] = useState<ReleaseNote\[]>\(\[\]\)/);
   assert.match(appSource, /fetch\("\/release-notes\.json"\)/);
   assert.match(appSource, /if \(!Array\.isArray\(payload\)\)/);
   assert.match(appSource, /if \(!release\) return null/);
-  assert.match(appSource, /North 0\.8 is here/);
+  assert.doesNotMatch(appSource, /North 0\.8 is here|release-update-notice|updateNoticeOpen/);
   assert.match(appSource, /className="whats-new-card"/);
   assert.match(appSource, /North 0\.8 · Together/);
   assert.match(appSource, /View updates/);
