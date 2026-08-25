@@ -86,6 +86,8 @@ test("mobile workout actions use the real safe-area bottom and deliberate swipes
   assert.match(signatureStyles, /\.member-shell\.workout-shell \.workout-mobile-dock\{position:fixed!important;z-index:100!important;right:0!important;bottom:0!important;left:0!important/);
   assert.match(signatureStyles, /workout-shell:has\(\.note-field textarea:focus\) \.workout-mobile-dock\{transform:translateY/);
   assert.match(signatureStyles, /\.member-shell\.workout-shell\{backdrop-filter:none!important\}/);
+  assert.match(styles, /\.routine-sheet-overlay \{[\s\S]*?z-index: 109;/);
+  assert.match(styles, /\.routine-checklist-sheet \{[\s\S]*?z-index: 110;/);
   assert.match(styles, /@media \(max-width: 640px\) \{[\s\S]*?\.workout-screen \.set-row \{ grid-template-columns: 24px minmax\(90px, 1\.2fr\) minmax\(74px, 1fr\) 44px; gap: 4px;[\s\S]*?\.set-check \{ width: 44px; min-width: 44px; height: 44px; min-height: 44px; \}/);
 });
 

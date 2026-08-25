@@ -2797,14 +2797,14 @@
 .routine-sheet-overlay {
   position: fixed;
   inset: 0;
-  z-index: 97;
+  z-index: 109;
   background: rgba(0, 0, 0, .52);
   animation: north-routine-fade-in .2s ease both;
 }
 
 .routine-checklist-sheet {
   position: fixed;
-  z-index: 98;
+  z-index: 110;
   right: auto;
   bottom: 0;
   left: 50%;
