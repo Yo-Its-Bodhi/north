@@ -1,5 +1,6 @@
 import { northRepository, type NorthDocument, type OutboxMutation } from "./northDb";
 import { northDeviceHeaders } from "./account";
+import { mergeAccountData } from "./mergeAccountData";
 
 export type SyncResult = { sent: number; conflicts: number; failed: number; pending: number };
 export type PullResult = { restored: number; serverTime: string };
@@ -11,7 +12,7 @@ async function pushLatest(apiBase: string, accessToken: string, mutation: Outbox
   for (let attempt = 0; attempt < 4; attempt += 1) {
     const response = await fetch(`${apiBase.replace(/\/$/, "")}/v1/sync/mutations`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${accessToken}`, "Idempotency-Key": candidate.mutationId, ...northDeviceHeaders() },
+      headers: { "Content-Type": "application/json", "X-North-Sync-Protocol": "2", Authorization: `Bearer ${accessToken}`, "Idempotency-Key": candidate.mutationId, ...northDeviceHeaders() },
       body: JSON.stringify(candidate),
     });
     if (response.status === 429) throw Object.assign(new Error("Sync paused by server rate limit"), { status: 429, retryAfter: Math.max(5, Number.parseInt(response.headers.get("retry-after") || "60", 10) || 60) });
@@ -20,20 +21,23 @@ async function pushLatest(apiBase: string, accessToken: string, mutation: Outbox
     if (result.status === "applied") return result;
     const latest = result.remote ?? result.document;
     if (!latest) throw new Error("Account save did not return its latest version");
-    candidate = { ...candidate, mutationId: crypto.randomUUID(), baseVersion: latest.version, createdAt: new Date().toISOString() };
+    if (candidate.operation === "delete") throw new Error("Account changed before deletion. Refresh before trying again.");
+    candidate = { ...candidate, data: mergeAccountData(candidate.baseData, candidate.data, latest.data), baseData: latest.data, mutationId: crypto.randomUUID(), baseVersion: latest.version, createdAt: new Date().toISOString() };
   }
   throw new Error("Account changed repeatedly while saving; North will retry the latest save");
 }
 
 export async function syncNorth(apiBase: string, accessToken: string): Promise<SyncResult> {
+  await northRepository.preserveLegacySync();
   const mutations = (await northRepository.pendingMutations()).filter((mutation) => new Date(mutation.nextAttemptAt).getTime() <= Date.now()).slice(0,12);
   let sent = 0;
   const conflicts = 0;
   let failed = 0;
   for (const mutation of mutations) {
     try {
+      if (mutation.protocol !== 2) throw new Error("Older device save is preserved for recovery; reload North.");
       const result = await pushLatest(apiBase, accessToken, mutation);
-      if (result.document) await northRepository.acceptRemote(result.document, true);
+      if (result.document) await northRepository.acceptMutation(result.document, mutation);
       else await northRepository.acknowledge(mutation.mutationId);
       sent += 1;
     } catch (error) {
@@ -75,23 +79,14 @@ export async function pullNorth(apiBase: string, accessToken: string, since = "1
   }
   if (!response.ok) throw Object.assign(new Error(`Restore returned ${response.status}`), { status: response.status });
   const result = await response.json() as { documents: NorthDocument[]; serverTime: string };
-  const pendingDocumentKeys = new Set((await northRepository.pendingMutations()).map((mutation) => mutation.documentKey));
+  const pendingDocumentKeys = new Set((await northRepository.pendingMutations()).filter((mutation) => !preferAccount || mutation.protocol === 2).map((mutation) => mutation.documentKey));
   let restored = 0;
-  const now = Date.now();
-  const recentlyModifiedWindow = 30_000; // 30 seconds - grace period for recently modified documents
   
   for (const document of result.documents) {
     // Skip if there's a pending mutation for this document
-    if (!preferAccount && pendingDocumentKeys.has(document.key)) continue;
+    if (pendingDocumentKeys.has(document.key)) continue;
     
-    // Skip if this document was modified locally in the last 30 seconds (avoid race conditions)
-    const local = await northRepository.get(document.collection, document.id);
-    if (!preferAccount && local && (now - new Date(local.updatedAt).getTime()) < recentlyModifiedWindow) {
-      // Local version is recent, skip pulling the older server version
-      continue;
-    }
-    
-    await northRepository.acceptRemote(document, preferAccount);
+    if (!await northRepository.acceptRemote(document, preferAccount)) continue;
     restored += 1;
     if (document.collection === "settings" && document.id === "theme") { if (document.deletedAt) localStorage.removeItem("north-theme"); else localStorage.setItem("north-theme", String(document.data)); continue; }
     if (document.collection === "settings" && document.id === "calorie-estimates") { if (document.deletedAt) localStorage.removeItem("north-calorie-estimates"); else localStorage.setItem("north-calorie-estimates", document.data ? "on" : "off"); continue; }

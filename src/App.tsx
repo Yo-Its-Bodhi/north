@@ -280,7 +280,7 @@ const PROFILE_KEY = "north-profile-v1";
 const NOVA_MESSAGES_KEY = "north-nova-conversation-v1";
 const PROGRESSION_TRANSACTION_KEY = "north-progression-transaction-v1";
 const LAST_PULL_KEY = "north-last-account-pull-v1";
-const SYNC_BOOTSTRAP_VERSION = "north-account-hydrated-v3";
+const SYNC_BOOTSTRAP_VERSION = "north-account-hydrated-v4";
 
 function canonicalJson(value: unknown): string {
   if (Array.isArray(value)) return `[${value.map(canonicalJson).join(",")}]`;
@@ -290,7 +290,7 @@ function canonicalJson(value: unknown): string {
   return JSON.stringify(value) ?? "null";
 }
 
-async function persistAccountJson(storageKey: string, collection: string, data: unknown, force = false) {
+async function persistAccountDocument(storageKey: string, collection: string, data: unknown, force = false) {
   const serialized = JSON.stringify(data);
   const stored = localStorage.getItem(storageKey);
   if (stored !== serialized && !setLocalStorageItem(storageKey, serialized)) return false;
@@ -948,6 +948,26 @@ function App() {
   const [draftTestNote, setDraftTestNote] = useState<{ category: TestNote["category"]; text: string }>({ category: "bug", text: "" });
   const [reportStatus, setReportStatus] = useState("");
   const [reportSending, setReportSending] = useState(false);
+  const persistedViews = useRef(new Map([
+    [STORAGE_KEY, canonicalJson(session)], [HISTORY_KEY, canonicalJson(history)], [PLAN_KEY, canonicalJson(storedWeeklyPlan)],
+    [ACTIVITIES_KEY, canonicalJson(activities)], [CHECK_INS_KEY, canonicalJson(checkIns)], [REVIEWS_KEY, canonicalJson(weeklyReviews)],
+    [TEST_NOTES_KEY, canonicalJson(testNotes)], [PERSONAL_TEMPLATES_KEY, canonicalJson(personalTemplates)],
+    [JOURNEY_PHOTOS_KEY, canonicalJson(journeyPhotos)], [PROFILE_KEY, canonicalJson(profile)], [NOVA_MESSAGES_KEY, canonicalJson(novaMessages)],
+    ["north-favorite-workouts-v1", canonicalJson(favoriteTemplateIds)], ["north-favorite-exercises-v1", canonicalJson(favoriteExerciseNames)],
+    [ACTIVE_PROGRAM_KEY, canonicalJson(activeProgram)], [PROGRESSION_TRANSACTION_KEY, canonicalJson(progressionTransaction)],
+    ["north-theme", canonicalJson(themeName)], ["north-calorie-estimates", canonicalJson(calorieEstimates)],
+  ]));
+  function rememberAccountView<T>(key: string, value: T): T {
+    persistedViews.current.set(key, canonicalJson(value));
+    return value;
+  }
+  async function persistAccountJson(key: string, collection: string, value: unknown, force = false) {
+    const serialized = canonicalJson(value);
+    if (!force && persistedViews.current.get(key) === serialized) return false;
+    const changed = await persistAccountDocument(key, collection, value, force);
+    if (changed) persistedViews.current.set(key, serialized);
+    return changed;
+  }
 
   useEffect(() => { sessionRef.current = session; }, [session]);
 
@@ -1105,6 +1125,7 @@ function App() {
     void (async () => {
       try {
         await migrateLegacyStorage();
+        await northRepository.preserveLegacySync();
         await northRepository.clearConflicts();
       } catch {
         if (!cancelled) {
@@ -1113,7 +1134,6 @@ function App() {
         return;
       }
       if (cancelled) return;
-      setAccountDataReady(true);
       try {
         await ensureNorthTimezone();
         const account = readNorthSession();
@@ -1124,7 +1144,8 @@ function App() {
         localStorage.setItem(`${LAST_PULL_KEY}:${account.user.id}`, restored.serverTime);
         localStorage.setItem(bootstrapKey, new Date().toISOString());
         if (!cancelled) reloadSyncedAccountState();
-      } catch { /* Background account restore retries automatically. */ }
+      } catch { setPlanSaveStatus("Account unavailable · changes stay on this device until connected"); }
+      finally { if (!cancelled) setAccountDataReady(true); }
     })();
     return () => { cancelled = true; };
   }, [entryComplete]);
@@ -1133,8 +1154,8 @@ function App() {
     const theme = themeOptions.find((option) => option.id === themeName) ?? themeOptions[0];
     document.documentElement.dataset.theme = theme.mode === "dark" ? "night" : "morning";
     document.documentElement.dataset.palette = theme.id;
-    if (localStorage.getItem("north-theme") !== theme.id) { localStorage.setItem("north-theme", theme.id); void northRepository.put("settings", "theme", theme.id); }
-  }, [themeName]);
+    if (accountDataReady && persistedViews.current.get("north-theme") !== canonicalJson(theme.id)) { rememberAccountView("north-theme", theme.id); localStorage.setItem("north-theme", theme.id); void northRepository.put("settings", "theme", theme.id); }
+  }, [themeName, accountDataReady]);
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
@@ -1146,7 +1167,7 @@ function App() {
 
   useEffect(() => { if (accountDataReady) void persistAccountJson(STORAGE_KEY, "active-session", session); }, [session, accountDataReady]);
   useEffect(() => { if (accountDataReady) void persistAccountJson(HISTORY_KEY, "workouts", history); }, [history, accountDataReady]);
-  useEffect(() => { if (accountDataReady) void persistAccountJson(PLAN_KEY, "week-plan", weeklyPlan).then((changed) => { if (changed) setPlanSaveStatus(navigator.onLine ? "Saved on this device · syncing" : "Saved offline · syncs when connected"); }); }, [weeklyPlan, accountDataReady]);
+  useEffect(() => { if (accountDataReady) void persistAccountJson(PLAN_KEY, "week-plan", storedWeeklyPlan).then((changed) => { if (changed) setPlanSaveStatus(navigator.onLine ? "Saved on this device · syncing" : "Saved offline · syncs when connected"); }); }, [storedWeeklyPlan, accountDataReady]);
   useEffect(() => { if (accountDataReady) void persistAccountJson(ACTIVITIES_KEY, "activities", activities); }, [activities, accountDataReady]);
   useEffect(() => { localStorage.setItem(ACTIVITY_DRAFT_KEY, JSON.stringify(draftActivity)); }, [draftActivity]);
   useEffect(() => { if (accountDataReady) void persistAccountJson(CHECK_INS_KEY, "check-ins", checkIns); }, [checkIns, accountDataReady]);
@@ -1157,7 +1178,7 @@ function App() {
   useEffect(() => { if (accountDataReady) void persistAccountJson("north-favorite-exercises-v1", "favorite-exercises", favoriteExerciseNames); }, [favoriteExerciseNames, accountDataReady]);
   useEffect(() => { localStorage.setItem("north-recent-workouts-v1", JSON.stringify(recentTemplateIds)); }, [recentTemplateIds]);
   useEffect(() => { if (!accountDataReady) return; if (activeProgram) void persistAccountJson(ACTIVE_PROGRAM_KEY, "active-program", activeProgram); else if (localStorage.getItem(ACTIVE_PROGRAM_KEY) !== null) { localStorage.removeItem(ACTIVE_PROGRAM_KEY); void northRepository.remove("active-program", "primary"); } }, [activeProgram, accountDataReady]);
-  useEffect(() => { localStorage.setItem("north-calorie-estimates", calorieEstimates ? "on" : "off"); void northRepository.put("settings", "calorie-estimates", calorieEstimates); }, [calorieEstimates]);
+  useEffect(() => { if (!accountDataReady || persistedViews.current.get("north-calorie-estimates") === canonicalJson(calorieEstimates)) return; rememberAccountView("north-calorie-estimates", calorieEstimates); localStorage.setItem("north-calorie-estimates", calorieEstimates ? "on" : "off"); void northRepository.put("settings", "calorie-estimates", calorieEstimates); }, [calorieEstimates, accountDataReady]);
   useEffect(() => { if (accountDataReady) void persistAccountJson(JOURNEY_PHOTOS_KEY, "journey-photos", journeyPhotos); }, [journeyPhotos, accountDataReady]);
   useEffect(() => { if (accountDataReady) void persistAccountJson(NOVA_MESSAGES_KEY, "nova-conversations", novaMessages); }, [novaMessages, accountDataReady]);
   useEffect(() => {
@@ -1190,11 +1211,12 @@ function App() {
       syncTimer.current = window.setTimeout(() => { syncTimer.current = null; void runAccountSync(); }, 1500);
     };
     const initial = window.setTimeout(() => { void runAccountSync(); }, 1500);
+    const retry = window.setInterval(() => { if (document.visibilityState === "visible" && navigator.onLine) void runAccountSync(); }, 30_000);
     const handleOnline = () => { setOnline(true); scheduleSync(); };
     const handleOffline = () => { setOnline(false); };
     const handleVisibility = () => { if (document.visibilityState === "visible" && navigator.onLine) void runAccountSync(); };
     window.addEventListener("north:account-change", scheduleSync); window.addEventListener("online", handleOnline); window.addEventListener("offline", handleOffline); document.addEventListener("visibilitychange", handleVisibility);
-    return () => { if (syncTimer.current !== null) window.clearTimeout(syncTimer.current); window.clearTimeout(initial); window.removeEventListener("north:account-change", scheduleSync); window.removeEventListener("online", handleOnline); window.removeEventListener("offline", handleOffline); document.removeEventListener("visibilitychange", handleVisibility); };
+    return () => { window.clearInterval(retry); if (syncTimer.current !== null) window.clearTimeout(syncTimer.current); window.clearTimeout(initial); window.removeEventListener("north:account-change", scheduleSync); window.removeEventListener("online", handleOnline); window.removeEventListener("offline", handleOffline); document.removeEventListener("visibilitychange", handleVisibility); };
   }, [entryComplete, accountDataReady]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
@@ -2112,7 +2134,7 @@ function App() {
       setWeeklyPlan(nextPlan);
       await persistAccountJson(PLAN_KEY, "week-plan", nextPlan, true);
     }
-    if (navigator.onLine && readNorthSession()) { await runAccountSync(); setRecorderStatus("Workout saved to your North account. You can continue on another device."); }
+    if (navigator.onLine && readNorthSession()) { const saved = await runAccountSync(); setRecorderStatus(saved ? "Workout saved to your North account. You can continue on another device." : "Workout saved on this device · account save pending."); }
   }
 
   function moveExercise(index: number, direction: -1 | 1) {
@@ -3603,35 +3625,35 @@ function App() {
   }
 
   function reloadSyncedAccountState() {
-    const restoredPlan = readPlan();
-    const restoredSession = readSession();
+    const restoredPlan = rememberAccountView(PLAN_KEY, readPlan());
+    const restoredSession = rememberAccountView(STORAGE_KEY, readSession());
     setWeeklyPlan(restoredPlan);
     setSelectedPlanDayId((current) => restoredPlan.some((day) => day.id === current) ? current : restoredPlan.find((day) => day.date === isoDate(new Date()))?.id ?? restoredPlan[0].id);
     setSession(restoredSession); sessionRef.current = restoredSession;
-    setHistory(readHistory());
-    setActivities(readActivities());
-    setCheckIns(readCheckIns());
-    setWeeklyReviews(readWeeklyReviews());
-    setTestNotes(readTestNotes());
-    setPersonalTemplates(readPersonalTemplates());
-    setActiveProgram(readActiveProgram());
-    setJourneyPhotos(readJourneyPhotos());
-    setProfile(readProfile());
-    setNovaMessages(readNovaMessages());
-    setProgressionTransaction(readProgressionTransaction());
+    setHistory(rememberAccountView(HISTORY_KEY, readHistory()));
+    setActivities(rememberAccountView(ACTIVITIES_KEY, readActivities()));
+    setCheckIns(rememberAccountView(CHECK_INS_KEY, readCheckIns()));
+    setWeeklyReviews(rememberAccountView(REVIEWS_KEY, readWeeklyReviews()));
+    setTestNotes(rememberAccountView(TEST_NOTES_KEY, readTestNotes()));
+    setPersonalTemplates(rememberAccountView(PERSONAL_TEMPLATES_KEY, readPersonalTemplates()));
+    setActiveProgram(rememberAccountView(ACTIVE_PROGRAM_KEY, readActiveProgram()));
+    setJourneyPhotos(rememberAccountView(JOURNEY_PHOTOS_KEY, readJourneyPhotos()));
+    setProfile(rememberAccountView(PROFILE_KEY, readProfile()));
+    setNovaMessages(rememberAccountView(NOVA_MESSAGES_KEY, readNovaMessages()));
+    setProgressionTransaction(rememberAccountView(PROGRESSION_TRANSACTION_KEY, readProgressionTransaction()));
     try { const ids = JSON.parse(localStorage.getItem("north-favorite-workouts-v1") ?? "[]"); setFavoriteTemplateIds(Array.isArray(ids) ? ids : []); } catch { setFavoriteTemplateIds([]); }
     try { const names = JSON.parse(localStorage.getItem("north-favorite-exercises-v1") ?? "[]"); setFavoriteExerciseNames(Array.isArray(names) ? names : []); } catch { setFavoriteExerciseNames([]); }
-    setThemeName(readThemeName());
+    setThemeName(rememberAccountView("north-theme", readThemeName()));
   }
 
   async function runAccountSync() {
-    if (syncLock.current) { syncRequested.current = true; return; }
+    if (syncLock.current) { syncRequested.current = true; return false; }
     const account = readNorthSession();
-    if (!account) return;
+    if (!account) return false;
     const backoffUntil = Number(localStorage.getItem("north-sync-backoff-until") || 0);
-    if (backoffUntil > Date.now()) return;
+    if (backoffUntil > Date.now()) return false;
     setOnline(navigator.onLine);
-    if (!navigator.onLine) return;
+    if (!navigator.onLine) return false;
     syncLock.current = true; setSyncing(true);
     try {
       const pullKey = `${LAST_PULL_KEY}:${account.user.id}`;
@@ -3641,13 +3663,19 @@ function App() {
         if (restored.restored > 0) reloadSyncedAccountState();
       }
       const result = await withFreshAccess((token) => syncNorth(NORTH_API_BASE, token));
-      if (result.failed === 0) {
-        const restored = await withFreshAccess((token) => pullNorth(NORTH_API_BASE, token, localStorage.getItem(pullKey) || "1970-01-01T00:00:00.000Z"));
+      if (result.failed === 0 && result.pending === 0) {
+        // A full read revisits documents previously skipped for pending edits.
+        const restored = await withFreshAccess((token) => pullNorth(NORTH_API_BASE, token));
         localStorage.setItem(pullKey, restored.serverTime);
         if (restored.restored > 0) reloadSyncedAccountState();
         localStorage.setItem("north-last-sync-at", new Date().toISOString()); localStorage.removeItem("north-sync-backoff-until"); setPlanSaveStatus("Saved to your North account");
+        return true;
+      } else {
+        setPlanSaveStatus("Saved on this device · account save pending");
+        syncRequested.current = true;
+        return false;
       }
-    } catch (reason) { const message = reason instanceof Error ? reason.message : ""; if (message.includes("429")) localStorage.setItem("north-sync-backoff-until", String(Date.now() + 60_000)); }
+    } catch (reason) { setPlanSaveStatus("Account save pending · retrying when connected"); const message = reason instanceof Error ? reason.message : ""; if (message.includes("429")) localStorage.setItem("north-sync-backoff-until", String(Date.now() + 60_000)); return false; }
     finally {
       syncLock.current = false; setSyncing(false);
       if (syncRequested.current) { syncRequested.current = false; if (syncTimer.current !== null) window.clearTimeout(syncTimer.current); syncTimer.current = window.setTimeout(() => { syncTimer.current = null; if (navigator.onLine) void runAccountSync(); }, 3000); }

@@ -164,11 +164,11 @@ test("pull cannot erase a queued local workout plan with a remote deletion", asy
   assert.equal((await northRepository.pendingMutations()).length, 1);
 });
 
-test("first-device hydration replaces queued UI defaults with the real account plan", async () => {
+test("first-device hydration replaces a saved default without discarding a new pending edit", async () => {
   useOwner("sync-first-hydration");
   const defaultPlan = [{ id: "monday", title: "Default workout" }];
   const accountPlan = [{ id: "monday", title: "PC workout", workout: [{ name: "Back squat" }] }];
-  await northRepository.put("week-plan", "primary", defaultPlan);
+  await northRepository.put("week-plan", "primary", defaultPlan, false);
   localStorage.setItem("north-week-plan-v1", JSON.stringify(defaultPlan));
   globalThis.fetch = async () => Response.json({
     documents: [{ key: "week-plan:primary", collection: "week-plan", id: "primary", data: accountPlan, version: 7, updatedAt: "2026-07-17T12:00:00.000Z" }],

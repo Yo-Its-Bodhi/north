@@ -30,7 +30,7 @@ test("local writes are versioned and queue one current idempotent mutation", asy
   assert.equal(pending.length, 1);
   assert.equal(pending[0].documentKey, "workouts:primary");
   assert.notEqual(pending[0].mutationId, "workouts:primary");
-  assert.equal(pending[0].baseVersion, 1);
+  assert.equal(pending[0].baseVersion, 0);
 });
 
 test("each new document revision receives a fresh idempotency key while superseding its unsent predecessor", async () => {
@@ -61,7 +61,7 @@ test("retry preserves a mutation and applies bounded exponential backoff", async
 test("remote acknowledgement replaces local state and clears its outbox entry", async () => {
   useOwner("test-remote");
   await northRepository.put("profile", "primary", { name: "Local" });
-  await northRepository.acceptRemote({ key: "profile:primary", collection: "profile", id: "primary", data: { name: "Remote" }, version: 7, updatedAt: new Date().toISOString() });
+  await northRepository.acceptMutation({ key: "profile:primary", collection: "profile", id: "primary", data: { name: "Remote" }, version: 7, updatedAt: new Date().toISOString() }, (await northRepository.pendingMutations())[0]);
   assert.deepEqual((await northRepository.get("profile", "primary")).data, { name: "Remote" });
   assert.equal((await northRepository.pendingMutations()).length, 0);
 });

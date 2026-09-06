@@ -70,10 +70,10 @@ test("new-account onboarding starts from clean defaults while synchronization is
   assert.doesNotMatch(appSource, /updateNoticeOpen|release-update-notice/);
 });
 
-test("account hydration releases local data before remote restoration", () => {
+test("account hydration releases saving after remote restoration", () => {
   assert.match(
     appSource,
-    /await migrateLegacyStorage\(\);[\s\S]{0,500}setAccountDataReady\(true\);[\s\S]{0,100}await ensureNorthTimezone\(\)/,
+    /if \(!cancelled\) reloadSyncedAccountState\(\);[\s\S]{0,200}finally \{ if \(!cancelled\) setAccountDataReady\(true\)/,
   );
 });
 

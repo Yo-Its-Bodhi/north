@@ -82,6 +82,49 @@ try {
   page.on("pageerror", (error) => consoleErrors.push(`pageerror: ${error.message}`));
   page.on("console", (message) => { if (message.type() === "error" && !message.text().includes("ERR_INTERNET_DISCONNECTED")) consoleErrors.push(`console: ${message.text()}`); });
 
+  await check("Account plan restoration does not upload stale phone defaults", async () => {
+    const isolated = await browser.newContext({ viewport: { width: 430, height: 932 }, serviceWorkers: "block" });
+    try {
+      const monday = new Date(`${testDate}T12:00:00`);
+      monday.setDate(monday.getDate() - (monday.getDay() + 6) % 7);
+      let remotePlan = Array.from({ length: 84 }, (_, index) => {
+        const date = new Date(monday); date.setDate(date.getDate() + index);
+        const key = date.toISOString().slice(0, 10);
+        return { id: key, date: key, label: "Mon", kind: "rest", title: `Account day ${index}`, note: "Planned in browser", status: "planned", sessions: [] };
+      });
+      const writes = [];
+      let reads = 0;
+      await isolated.addInitScript(({ account, plan }) => {
+        localStorage.setItem("north-account-session-v1", JSON.stringify(account));
+        localStorage.setItem(`north-onboarding-complete:${account.user.id}`, "yes");
+        localStorage.setItem("north-week-plan-v1", JSON.stringify(plan.map((day) => ({ ...day, title: "Stale phone default" }))));
+      }, { account, plan: remotePlan });
+      await isolated.route("**/v1/**", async (route) => {
+        const path = new URL(route.request().url()).pathname;
+        if (path.endsWith("/sync/documents")) {
+          reads++;
+          await new Promise((resolve) => setTimeout(resolve, 300));
+          return route.fulfill({ json: { documents: [{ key: "week-plan:primary", collection: "week-plan", id: "primary", version: reads + 10, updatedAt: new Date().toISOString(), data: remotePlan }], serverTime: new Date().toISOString() } });
+        }
+        if (path.endsWith("/sync/mutations")) {
+          writes.push(route.request().postDataJSON());
+          return route.fulfill({ json: { status: "applied" } });
+        }
+        return route.fulfill({ json: { user: account.user, connections: [], types: [], activities: [], daily: [], rooms: [], documents: [], serverTime: new Date().toISOString() } });
+      });
+      const phone = await isolated.newPage();
+      await phone.goto(base);
+      await phone.locator(".today-screen").waitFor();
+      await phone.waitForFunction(() => JSON.parse(localStorage.getItem("north-week-plan-v1"))[0].title === "Account day 0");
+      await phone.waitForTimeout(4000);
+      assert.equal(writes.filter((item) => item.collection === "week-plan").length, 0, "Hydrating and rendering must not generate plan writes");
+      remotePlan = remotePlan.map((day, index) => index === 2 ? { ...day, title: "New browser edit" } : day);
+      await phone.evaluate(() => document.dispatchEvent(new Event("visibilitychange")));
+      await phone.waitForFunction(() => JSON.parse(localStorage.getItem("north-week-plan-v1"))[2].title === "New browser edit");
+      assert.equal(writes.filter((item) => item.collection === "week-plan").length, 0, "Account refresh must not echo the plan back as a new edit");
+    } finally { await isolated.close(); }
+  });
+
   await check("Nova suggestion opens a complete editable routine", async () => {
     await page.setViewportSize({ width: 430, height: 932 });
     await page.goto(base);

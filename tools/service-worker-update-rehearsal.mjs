@@ -123,7 +123,7 @@ try {
       const transaction = database.transaction(["documents", "outbox"], "readwrite");
       const updatedAt = new Date().toISOString();
       transaction.objectStore("documents").put({ key: "active-session:primary", collection: "active-session", id: "primary", data: activeSession, version: 1, updatedAt });
-      transaction.objectStore("outbox").put({ mutationId: "update-rehearsal-mutation", documentKey: "active-session:primary", collection: "active-session", operation: "put", data: activeSession, baseVersion: 0, createdAt: updatedAt, attempts: 0, nextAttemptAt: updatedAt });
+      transaction.objectStore("outbox").put({ mutationId: "update-rehearsal-mutation", documentKey: "active-session:primary", collection: "active-session", operation: "put", protocol: 2, data: activeSession, baseVersion: 0, createdAt: updatedAt, attempts: 0, nextAttemptAt: updatedAt });
       transaction.oncomplete = resolve;
       transaction.onerror = () => reject(transaction.error);
       transaction.onabort = () => reject(transaction.error);

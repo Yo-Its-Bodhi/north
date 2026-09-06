@@ -21,7 +21,7 @@ if (required.length) throw new Error(`Missing environment variables: ${required.
 const app = Fastify({ logger: true, bodyLimit: 2_000_000, trustProxy: true });
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const OWNER_USERNAME = String(process.env.NORTH_OWNER_USERNAME || "druwbi").trim().toLowerCase();
-await app.register(cors, { origin: process.env.CORS_ORIGIN?.split(",") ?? true, methods: ["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"], allowedHeaders: ["Content-Type", "Authorization", "Idempotency-Key", "X-North-Device-Id", "X-North-Device-Name"] });
+await app.register(cors, { origin: process.env.CORS_ORIGIN?.split(",") ?? true, methods: ["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"], allowedHeaders: ["Content-Type", "Authorization", "Idempotency-Key", "X-North-Device-Id", "X-North-Device-Name", "X-North-Sync-Protocol"] });
 await app.register(jwt, { secret: process.env.JWT_SECRET });
 await app.register(rateLimit, { global: true, max: 180, timeWindow: "1 minute" });
 
@@ -860,12 +860,14 @@ app.delete("/v1/admin/content/:id", { preHandler: app.requireAdmin }, async (req
 });
 
 app.post("/v1/sync/mutations", { preHandler: app.authenticate, config: { rateLimit: { max: 600, timeWindow: "1 minute" } } }, async (request, reply) => {
+  if (request.headers["x-north-sync-protocol"] !== "2") return reply.code(426).send({ error: "Reload North to update account saving. Your device copy is preserved." });
   const idempotencyKey = request.headers["idempotency-key"];
   const mutation = request.body ?? {};
   if (!idempotencyKey || !mutation.documentKey || !mutation.collection || !["put", "delete"].includes(mutation.operation)) return reply.code(400).send({ error: "Invalid mutation." });
   const client = await pool.connect();
   try {
     await client.query("begin");
+    await client.query("select pg_advisory_xact_lock(hashtextextended($1,0))", [`${request.user.sub}:${mutation.documentKey}`]);
     const previous = await client.query("select response from document_mutations where owner_user_id=$1 and idempotency_key=$2", [request.user.sub, idempotencyKey]);
     if (previous.rows[0]) {
       const previousResponse = previous.rows[0].response;
@@ -873,6 +875,11 @@ app.post("/v1/sync/mutations", { preHandler: app.authenticate, config: { rateLim
       return previousResponse?.status === "conflict" || previousResponse?.status === "superseded"
         ? reply.code(409).send(previousResponse)
         : previousResponse;
+    }
+    const current = (await client.query("select * from sync_documents where owner_user_id=$1 and document_key=$2", [request.user.sub, mutation.documentKey])).rows[0];
+    if (Number(mutation.baseVersion) !== Number(current?.version ?? 0)) {
+      await client.query("commit");
+      return reply.code(409).send({ status: "conflict", remote: current ? mapDocument(current) : { key: mutation.documentKey, collection: mutation.collection, id: mutation.documentKey.split(":").slice(1).join(":"), version: 0, data: null, updatedAt: new Date().toISOString() } });
     }
     const result = await client.query(
       `insert into sync_documents(owner_user_id,document_key,collection,data,version,deleted_at)
@@ -900,8 +907,9 @@ app.post("/v1/sync/conflicts/:id/resolve", { preHandler: app.authenticate }, asy
 
 app.get("/v1/sync/documents", { preHandler: app.authenticate, config: { rateLimit: { max: 600, timeWindow: "1 minute" } } }, async (request) => {
   const since = request.query?.since || "1970-01-01T00:00:00.000Z";
+  const serverTime = new Date().toISOString();
   const result = await pool.query("select * from sync_documents where owner_user_id=$1 and updated_at > $2 order by updated_at", [request.user.sub, since]);
-  return { documents: result.rows.map(mapDocument), serverTime: new Date().toISOString() };
+  return { documents: result.rows.map(mapDocument), serverTime };
 });
 
 function mapDocument(row) {
