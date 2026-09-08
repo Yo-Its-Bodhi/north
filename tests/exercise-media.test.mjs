@@ -17,5 +17,7 @@ test("only form-approved exercise media can be published", () => {
     const record = getExerciseMedia(name);
     assert.equal(Boolean(getApprovedExerciseDemo(name)), record?.status === "approved");
   }
+  assert.ok(getApprovedExerciseDemo("Dumbbell Bench Press"));
+  assert.equal(getExerciseMedia("Dumbbell Bench Press")?.name, "Flat dumbbell press");
   assert.equal(getApprovedExerciseDemo("Incline dumbbell press"), undefined);
 });

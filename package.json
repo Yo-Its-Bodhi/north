@@ -1,19 +1,32 @@
 {
   "name": "north",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.8.9",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
-    "lint": "eslint .",
+    "build": "npm run typecheck && vite build && node tools/prepare-dist.mjs && node tools/check-performance-budget.mjs",
+    "typecheck": "tsc -b --clean && node --stack_size=12288 node_modules/typescript/lib/tsc.js -b --pretty false",
+    "lint": "eslint src server tools tests vite.config.ts",
     "test": "node --import tsx --test tests/*.test.mjs",
     "test:live": "node tools/live-smoke.mjs",
     "test:browser": "node tools/browser-smoke.mjs",
+    "test:together:field": "node tools/together-field-test.mjs",
+    "test:pwa-update": "npm run build && node tools/service-worker-update-rehearsal.mjs",
+    "audit:workout-flow": "node tools/workout-day-flow-audit.mjs",
     "test:visual": "node tools/visual-regression.mjs",
     "test:visual:update": "set UPDATE_VISUALS=1&& node tools/visual-regression.mjs",
-    "validate": "npm run lint && npm test && npm run build",
-    "validate:release": "npm run validate && npm run test:browser && npm run test:visual && npm run test:live",
+    "test:performance": "node tools/check-performance-budget.mjs",
+    "test:secrets": "node tools/check-secrets.mjs",
+    "validate:exercises": "node --import tsx tools/validate-exercise-database.mjs",
+    "exercises:stage": "node --import tsx tools/stage-exercise-import.mjs",
+    "exercises:review": "node --import tsx tools/review-exercise-library.mjs",
+    "exercises:duplicates": "node --import tsx tools/check-exercise-duplicates.mjs",
+    "exercises:stats": "node --import tsx tools/exercise-library-stats.mjs",
+    "audit:exercises": "node --import tsx tools/audit-exercise-system.mjs",
+    "build:nova-index": "node --import tsx tools/build-nova-exercise-index.mjs",
+    "validate": "npm run test:secrets && npm run validate:exercises && npm run lint && npm test && npm run build",
+    "validate:release": "npm run validate && node tools/service-worker-update-rehearsal.mjs && npm run test:browser && npm run test:visual && npm run test:live",
     "preview": "vite preview",
     "server": "node server/index.mjs"
   },
@@ -31,8 +44,8 @@
     "pg": "latest",
     "react": "latest",
     "react-dom": "latest",
-    "typescript": "latest",
-    "vite": "latest"
+    "vite": "latest",
+    "web-push": "^3.6.7"
   },
   "devDependencies": {
     "@eslint/js": "latest",
@@ -45,6 +58,7 @@
     "globals": "latest",
     "playwright-core": "^1.61.1",
     "tsx": "^4.23.1",
+    "typescript": "^5.9.3",
     "typescript-eslint": "latest"
   }
 }

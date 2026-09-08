@@ -2,6 +2,32 @@
 
 All meaningful changes to North will be recorded here.
 
+## 0.7.0 - Find Your Way
+
+- Added the desktop AI North Guide wayfinder with grounded answers, verified in-app routes, full-article links, a read-only server boundary, and a reliable local fallback.
+- Kept the complete searchable text Guide in Account with 29 structured articles, contextual actions, shared product-tour content, accessibility coverage, and a dated factual-claim source register.
+- Deepened Training Atlas with clearer controls, current-versus-previous chart comparison, readable point details, metric switching, and stronger visual depth.
+- Upgraded Atlas recap exports to Trophy Room-level presentation with square and landscape formats, period storytelling, and contextual timestamped PNG filenames.
+- Moved Trophy Room and Weekly Review under Journey, removed duplicate personal-best reporting from Atlas, and made submenu highlighting mutually exclusive.
+- Expanded planning into a truthful 12-week block with editable day and session stacks, explicit rest completion, historical-week reconstruction, and immediate schedule persistence.
+- Separated personal and operational surfaces: You owns direction, signals, records, health context, and learned patterns; Account owns devices, sync, preferences, privacy, services, recovery, backup, and app controls.
+- Added contextual Health Connect daily reporting and reconciled workouts, purposeful activities, rest, and imported movement across Today, Training, Journey, You, and the calendar without double counting.
+- Strengthened the live workout with pause/resume timing, Wake Lock recovery, interruption persistence, safer cancellation, and clearer one-hand controls.
+- Made timed-hold assistance optional and off by default, preserving direct manual duration entry, previous-result comparison, and a current-workout dismiss control.
+- Refined desktop navigation, compact mobile destination headers, route states, disclosures, themes, contrast, keyboard access, touch targets, and responsive composition from 320 to 1440 pixels.
+- Hardened the browser release gate with isolated test servers and 27 end-to-end product checks covering online, offline, reload, account, planning, health, Nova, Guide, and accessibility flows.
+
+## 0.6.0 - The Whole Picture
+
+- Introduced Training Atlas with multi-range trends, period comparisons, metric switching, drill-down evidence, streaks, personal highs, composition, and private-safe recap exports.
+- Released the first seven days of NORTH: ORIGINALS workouts.
+- Connected Samsung Health through Android Health Connect for activity and recovery context.
+- Streamlined the workout tracker with updated rest controls and built-in timers for hold exercises.
+- Added the training calendar for date-based history and manual backfilling of missed sessions and activities.
+- Overhauled the Trophy Room to make personal records and their evidence easier to explore.
+- Rebuilt You around personal direction, current signals, connected health, training history, and North memory.
+- Upgraded desktop navigation, workspace layouts, responsive behavior, themes, and accessibility across the app.
+
 ## 0.1.0 - First Usable Loop
 
 - Created the mobile-first Morning and Night application shell.

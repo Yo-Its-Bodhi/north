@@ -3,8 +3,37 @@
 The API provides owner-scoped accounts and local-first document synchronization.
 
 1. Create a PostgreSQL database.
-2. Run `db/migrations/0001_initial.sql`, then `0002_auth_and_document_sync.sql`.
-3. Copy `.env.example` values into your environment.
-4. Run `npm run server`.
+2. Run every SQL file in `db/migrations` in filename order. Migrations are additive and `0012_nova_intelligence_hub.sql` adds the private Nova store.
+3. Set `DATABASE_URL` and a strong `JWT_SECRET` in the server environment.
+4. To enable live Nova locally, set `OPENAI_API_KEY`. `NOVA_MODEL` and `NOVA_AI_BASE_URL` are optional overrides; the API key must never be placed in Vite or browser environment variables. To show per-account estimated provider cost, also set `NOVA_INPUT_COST_MICROS_PER_TOKEN`, `NOVA_CACHED_INPUT_COST_MICROS_PER_TOKEN`, and `NOVA_OUTPUT_COST_MICROS_PER_TOKEN` from the active provider/model pricing. These values remain server-only; leave them unset to track replies and tokens without a dollar estimate.
+5. To send immediate issue alerts outside the owner console, set `NORTH_ISSUE_WEBHOOK_URL` to a private Slack, Discord, or compatible incoming webhook. Reports are always retained in the owner inbox even when the webhook is unavailable.
+6. Run `npm run server` and `npm run dev` in separate terminals.
+
+PowerShell example for the current terminal:
+
+```powershell
+$env:DATABASE_URL='postgresql://north_app:password@127.0.0.1:5432/north'
+$env:JWT_SECRET='replace-with-a-long-random-secret'
+$env:OPENAI_API_KEY='your-local-provider-key'
+npm.cmd run server
+```
+
+Nova remains account-scoped when the provider is unavailable. Goals, approved memory, messages, proposals and action receipts are stored server-side; the model is never given a caller-supplied user ID.
+
+## Together field test
+
+Use two disposable accounts on a database-backed test instance. The test reads credentials from the process environment, never prints them, and intentionally disconnects and blocks the accounts at the end.
+
+```powershell
+$env:NORTH_FIELD_BASE_URL='https://staging.example'
+$env:NORTH_FIELD_A_USERNAME='disposable-a'
+$env:NORTH_FIELD_A_PASSWORD='set-in-the-terminal'
+$env:NORTH_FIELD_B_USERNAME='disposable-b'
+$env:NORTH_FIELD_B_PASSWORD='set-in-the-terminal'
+$env:NORTH_TOGETHER_FIELD_DESTRUCTIVE='true'
+npm.cmd run test:together:field
+```
+
+Do not use production member accounts. Run against staging or an isolated local PostgreSQL instance after all migrations, including `0023_together_account_deletion.sql`, are applied.
 
 Access tokens expire after 15 minutes. Refresh tokens rotate on every refresh and are stored only as SHA-256 hashes. Sync writes require an `Idempotency-Key`; stale document versions return a 409 conflict instead of silently overwriting another device.

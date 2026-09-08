@@ -1,80 +1,165 @@
 package io.bodhix.north.health
 
-import android.os.Bundle
+import android.annotation.SuppressLint
+import android.content.ComponentName
 import android.content.Intent
+import android.content.pm.ShortcutInfo
+import android.content.pm.ShortcutManager
+import android.graphics.Color
+import android.graphics.drawable.Icon
 import android.net.Uri
-import android.view.inputmethod.InputMethodManager
-import android.text.InputType
+import android.os.Build
+import android.os.Bundle
 import android.view.ViewGroup
-import android.widget.*
+import android.webkit.CookieManager
+import android.webkit.WebResourceRequest
+import android.webkit.WebSettings
+import android.webkit.WebView
+import android.webkit.WebViewClient
+import android.webkit.JavascriptInterface
+import android.widget.FrameLayout
 import androidx.activity.ComponentActivity
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.health.connect.client.HealthConnectClient
-import androidx.health.connect.client.PermissionController
-import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.util.UUID
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 
+/** Installable North shell with an Android identity separate from the production bridge. */
 class MainActivity : ComponentActivity() {
-    private lateinit var health: HealthReader
-    private lateinit var status: TextView
-    private lateinit var username: EditText
-    private lateinit var password: EditText
-    private lateinit var permissionButton: Button
-    private lateinit var syncButton: Button
-    private lateinit var openNorthButton: Button
-    private val api = NorthApi()
-    private val preferences by lazy { getSharedPreferences("north-health", MODE_PRIVATE) }
-    private val deviceId by lazy { preferences.getString("device-id", null) ?: UUID.randomUUID().toString().also { preferences.edit().putString("device-id", it).apply() } }
-    private val permissionLauncher = registerForActivityResult(PermissionController.createRequestPermissionResultContract()) { refreshStatus() }
+    private lateinit var root: FrameLayout
+    private lateinit var webView: WebView
+    private val sessionStore by lazy { SecureSessionStore(this) }
 
+    @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (intent?.data?.scheme != "northhealth") {
-            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://north.bodhix.io")))
-            finish()
-            return
+        HealthSyncScheduler.schedule(this)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        root = FrameLayout(this).apply {
+            layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
         }
-        health = HealthReader(this)
-        val content = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setPadding(48, 72, 48, 48) }
-        content.addView(TextView(this).apply { text = "NORTH"; textSize = 14f })
-        content.addView(TextView(this).apply { text = "Connect Samsung Health"; textSize = 30f; setPadding(0, 22, 0, 8) })
-        content.addView(TextView(this).apply { text = "Galaxy Watch data flows through Samsung Health into Health Connect. North reads only the categories you approve."; textSize = 16f })
-        username = EditText(this).apply { hint = "North username" }
-        password = EditText(this).apply { hint = "North password"; inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD }
-        status = TextView(this).apply { textSize = 15f; setPadding(0, 28, 0, 20) }
-        permissionButton = Button(this).apply { text = "Choose Health Connect access"; setOnClickListener { permissionLauncher.launch(health.permissions) } }
-        syncButton = Button(this).apply { text = "Sign in and sync now"; setOnClickListener { sync() } }
-        openNorthButton = Button(this).apply { text = "Open North"; visibility = android.view.View.GONE; setOnClickListener { startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://north.bodhix.io"))) } }
-        listOf(username, password, status, permissionButton, syncButton, openNorthButton).forEach { content.addView(it, ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)) }
-        content.addView(TextView(this).apply { text = "Before syncing: Samsung Health → Settings → Health Connect → allow Samsung Health, then Sync now. You can revoke North in Health Connect at any time."; textSize = 13f; setPadding(0, 28, 0, 0) })
-        setContentView(ScrollView(this).apply { addView(content) }); refreshStatus()
+        ViewCompat.setOnApplyWindowInsetsListener(root) { view, insets ->
+            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout())
+            view.setPadding(bars.left, bars.top, bars.right, bars.bottom)
+            WindowInsetsCompat.CONSUMED
+        }
+        webView = WebView(this).apply {
+            layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+            settings.javaScriptEnabled = true
+            settings.domStorageEnabled = true
+            settings.databaseEnabled = true
+            settings.cacheMode = WebSettings.LOAD_DEFAULT
+            settings.allowFileAccess = false
+            settings.allowContentAccess = false
+            settings.mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
+            settings.setSupportZoom(false)
+            settings.userAgentString = "${settings.userAgentString} NorthBeta/${BuildConfig.VERSION_NAME}"
+            webViewClient = NorthWebViewClient()
+            addJavascriptInterface(NorthChromeBridge(), "NorthNativeChrome")
+        }
+        CookieManager.getInstance().apply {
+            setAcceptCookie(true)
+            setAcceptThirdPartyCookies(webView, false)
+        }
+        root.addView(webView)
+        setContentView(root)
+        ViewCompat.requestApplyInsets(root)
+        updateSystemChrome(false)
+        requestHomeShortcut()
+        if (savedInstanceState == null) webView.loadUrl(BuildConfig.NORTH_WEB_URL) else webView.restoreState(savedInstanceState)
     }
 
-    private fun refreshStatus() = lifecycleScope.launch {
-        status.text = when (HealthConnectClient.getSdkStatus(this@MainActivity)) {
-            HealthConnectClient.SDK_AVAILABLE -> if (health.granted()) "Health Connect access granted. Ready to sync." else "Health Connect is available. Permission is still required."
-            HealthConnectClient.SDK_UNAVAILABLE_PROVIDER_UPDATE_REQUIRED -> "Health Connect needs to be installed or updated."
-            else -> "Health Connect is unavailable on this phone. Android 9 or newer with Google Play is required."
+    private fun requestHomeShortcut() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
+        val preferences = getSharedPreferences("north-beta-launcher", MODE_PRIVATE)
+        if (preferences.getBoolean("home-shortcut-requested", false)) return
+        val manager = getSystemService(ShortcutManager::class.java)
+        if (!manager.isRequestPinShortcutSupported) return
+        val shortcut = ShortcutInfo.Builder(this, "north-beta-home")
+            .setShortLabel("North Beta")
+            .setLongLabel("Open North Beta")
+            .setIcon(Icon.createWithResource(this, R.drawable.north_beta_icon))
+            .setIntent(Intent(Intent.ACTION_MAIN).setComponent(ComponentName(this, MainActivity::class.java)))
+            .build()
+        if (manager.requestPinShortcut(shortcut, null)) {
+            preferences.edit().putBoolean("home-shortcut-requested", true).apply()
         }
     }
 
-    private fun sync() = lifecycleScope.launch {
-        if (!health.granted()) { status.text = "Choose Health Connect access first."; return@launch }
-        if (username.text.isBlank() || password.text.isBlank()) { status.text = "Enter your North username and password."; return@launch }
-        status.text = "Reading today and yesterday from Health Connect…"
-        runCatching {
-            val records = health.read(30)
-            status.text = "Uploading ${records.length()} records securely…"
-            withContext(Dispatchers.IO) { val token = api.login(username.text.toString(), password.text.toString(), deviceId); api.importAll(token, deviceId, records) }
-        }.onSuccess { count ->
-            password.text.clear(); username.visibility = android.view.View.GONE; password.visibility = android.view.View.GONE
-            permissionButton.visibility = android.view.View.GONE; syncButton.text = "Sync again"; openNorthButton.visibility = android.view.View.VISIBLE
-            status.text = "Connected to North\n\n$count Samsung Health records synced successfully."
-            (getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager).hideSoftInputFromWindow(status.windowToken, 0)
+    override fun onSaveInstanceState(outState: Bundle) {
+        webView.saveState(outState)
+        super.onSaveInstanceState(outState)
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onBackPressed() {
+        if (webView.canGoBack()) webView.goBack() else super.onBackPressed()
+    }
+
+    override fun onDestroy() {
+        webView.stopLoading()
+        webView.destroy()
+        super.onDestroy()
+    }
+
+    private inner class NorthWebViewClient : WebViewClient() {
+        override fun onPageFinished(view: WebView, url: String) {
+            super.onPageFinished(view, url)
+            val deviceId = org.json.JSONObject.quote(sessionStore.deviceId)
+            view.evaluateJavascript("localStorage.setItem('north-device-id-v1', $deviceId);", null)
+            view.evaluateJavascript(
+                """
+                (() => {
+                  const syncNorthChrome = () => window.NorthNativeChrome?.setDarkTheme(document.documentElement.dataset.theme === 'night');
+                  syncNorthChrome();
+                  if (!window.__northChromeObserver) {
+                    window.__northChromeObserver = new MutationObserver(syncNorthChrome);
+                    window.__northChromeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+                  }
+                })();
+                """.trimIndent(),
+                null,
+            )
         }
-            .onFailure { status.text = "Sync failed: ${it.message ?: "Unknown error"}" }
+
+        override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean = open(request.url.toString())
+
+        @Deprecated("Deprecated in Java")
+        override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean = open(url)
+
+        private fun open(url: String): Boolean {
+            if (url.startsWith("northhealth://") || url.startsWith("intent://connect")) {
+                startActivity(Intent(this@MainActivity, HealthConnectActivity::class.java))
+                return true
+            }
+            val uri = runCatching { Uri.parse(url) }.getOrNull() ?: return true
+            if (uri.scheme == "https" && uri.host == Uri.parse(BuildConfig.NORTH_WEB_URL).host) return false
+            if (uri.scheme == "http" || uri.scheme == "https") startActivity(Intent(Intent.ACTION_VIEW, uri))
+            return true
+        }
+    }
+
+    private inner class NorthChromeBridge {
+        @JavascriptInterface
+        fun setDarkTheme(isDark: Boolean) {
+            updateSystemChrome(isDark)
+        }
+    }
+
+    private fun updateSystemChrome(isDark: Boolean) {
+        runOnUiThread {
+            val chromeColor = Color.parseColor(if (isDark) "#091522" else "#F1F5F2")
+            root.setBackgroundColor(chromeColor)
+            window.statusBarColor = chromeColor
+            window.navigationBarColor = chromeColor
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                window.navigationBarDividerColor = chromeColor
+                window.isNavigationBarContrastEnforced = false
+                window.isStatusBarContrastEnforced = false
+            }
+            WindowCompat.getInsetsController(window, window.decorView).apply {
+                isAppearanceLightStatusBars = !isDark
+                isAppearanceLightNavigationBars = !isDark
+            }
+        }
     }
 }

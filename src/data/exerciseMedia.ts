@@ -2,6 +2,7 @@ const dumbbellBenchDemo = new URL("../assets/exercises/dumbbell-bench-press-bott
 
 export type ExerciseMedia = {
   name: string;
+  aliases?: string[];
   status: "approved" | "review-required";
   image?: string;
   alt: string;
@@ -27,13 +28,15 @@ export const priorityExerciseProfiles = [
 
 const media: ExerciseMedia[] = priorityExerciseProfiles.map((name) => ({
   name,
+  aliases: name === "Flat dumbbell press" ? ["Dumbbell Bench Press", "DB bench"] : undefined,
   status: name === "Flat dumbbell press" ? "approved" : "review-required",
   image: name === "Flat dumbbell press" ? dumbbellBenchDemo : undefined,
   alt: `Start and finish demonstration for ${name}`,
 }));
 
 export function getExerciseMedia(name: string) {
-  return media.find((item) => item.name.toLowerCase() === name.toLowerCase());
+  const normalized = name.trim().toLowerCase();
+  return media.find((item) => [item.name, ...(item.aliases ?? [])].some((candidate) => candidate.toLowerCase() === normalized));
 }
 
 export function getApprovedExerciseDemo(name: string) {

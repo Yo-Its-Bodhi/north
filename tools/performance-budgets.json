@@ -1,0 +1,12 @@
+{
+  "memberEntryRawBytes": 850000,
+  "memberEntryGzipBytes": 245000,
+  "stylesheetRawBytes": 625000,
+  "stylesheetGzipBytes": 110000,
+  "allJavaScriptRawBytes": 900000,
+  "allJavaScriptGzipBytes": 260000,
+  "allFontsRawBytes": 340000,
+  "largestImageBytes": 2000000,
+  "androidApkBytes": 13000000,
+  "distributionBytes": 62000000
+}

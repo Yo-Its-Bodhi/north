@@ -2,6 +2,16 @@ node_modules/
 dist/
 .env
 .env.local
+.env.*
+!server/.env.example
+OPENAI_API_KEY=*
+*.key
+*.pem
+*.p12
+*.pfx
+credentials.json
+service-account*.json
+*.tar.gz
 *.log
 *.tsbuildinfo
 vite.config.js
@@ -9,6 +19,7 @@ vite.config.d.ts
 .analysis/
 
 # Local workspace and Android build artifacts
+.vscode/
 mobile/android/.gradle/
 mobile/android/.idea/
 mobile/android/build/

@@ -1,0 +1,99 @@
+.trophy-room-screen{--trophy-accent:var(--blue);padding-bottom:96px!important}
+.trophy-room-screen>.back-button{margin-bottom:22px}
+.trophy-room-hero{position:relative;isolation:isolate;min-height:330px;margin:0 0 18px;padding:42px;display:grid;grid-template-columns:minmax(0,1fr) 210px;gap:36px;align-items:center;overflow:hidden;border:1px solid color-mix(in srgb,var(--trophy-accent) 48%,var(--line));border-radius:8px;color:#fff;background:linear-gradient(115deg,color-mix(in srgb,var(--navy) 94%,#000),color-mix(in srgb,var(--navy) 78%,var(--trophy-accent)) 58%,color-mix(in srgb,var(--trophy-accent) 58%,#111));box-shadow:0 28px 70px color-mix(in srgb,var(--navy) 36%,transparent)}
+.trophy-room-hero::before{position:absolute;z-index:-1;inset:0;content:"";opacity:.24;background:repeating-linear-gradient(90deg,transparent 0 47px,rgba(255,255,255,.12) 48px),repeating-linear-gradient(0deg,transparent 0 47px,rgba(255,255,255,.08) 48px);mask-image:linear-gradient(90deg,transparent,black)}
+.trophy-room-hero::after{position:absolute;z-index:-1;right:-76px;bottom:-130px;width:360px;height:360px;content:"";border:38px solid rgba(255,255,255,.1);border-radius:50%;box-shadow:0 0 0 28px rgba(255,255,255,.035),0 0 0 76px rgba(255,255,255,.025)}
+.trophy-room-copy{min-width:0}
+.trophy-room-copy .eyebrow{margin:0 0 14px;color:color-mix(in srgb,var(--trophy-accent) 58%,#fff);font-size:11px}
+.trophy-room-copy h1{max-width:560px;margin:0;color:#fff;font:800 clamp(54px,7.2vw,86px)/.82 "Barlow Condensed",sans-serif;letter-spacing:0;text-wrap:balance}
+.trophy-room-copy>p:not(.eyebrow){max-width:560px;margin:22px 0 0;color:rgba(255,255,255,.78);font-size:15px;line-height:1.55}
+.trophy-share-status{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+.trophy-room-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:27px}
+.trophy-room-actions button{min-height:46px;padding:0 15px;display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(255,255,255,.28);border-radius:7px;color:#fff;background:rgba(255,255,255,.1);font-size:12px;font-weight:850;backdrop-filter:blur(12px);cursor:pointer}
+.trophy-room-actions button:first-child{border-color:transparent;color:color-mix(in srgb,var(--navy) 86%,#000);background:#fff}
+.trophy-room-actions button:hover{background:rgba(255,255,255,.18)}
+.trophy-room-actions button:first-child:hover{background:color-mix(in srgb,#fff 88%,var(--trophy-accent))}
+.trophy-room-emblem{justify-self:end;width:188px;height:218px;display:grid;grid-template-rows:1fr auto auto;place-items:center;position:relative;border:1px solid rgba(255,255,255,.24);clip-path:polygon(14% 0,86% 0,100% 12%,100% 78%,50% 100%,0 78%,0 12%);background:linear-gradient(160deg,rgba(255,255,255,.2),rgba(255,255,255,.045));box-shadow:inset 0 0 42px rgba(255,255,255,.08)}
+.trophy-room-emblem span{width:92px;height:92px;display:grid;place-items:center;align-self:end;color:#fff;filter:drop-shadow(0 13px 18px rgba(0,0,0,.3))}
+.trophy-room-emblem svg{width:72px;height:72px;stroke-width:1.35}
+.trophy-room-emblem b{font:800 42px/.9 "Barlow Condensed",sans-serif}
+.trophy-room-emblem small{margin:6px 0 27px;font-size:11px;font-weight:900;letter-spacing:.2em}
+.trophy-room-stats{margin:0 0 46px;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));border:1px solid var(--line);border-radius:8px;background:var(--north-panel);box-shadow:var(--north-shadow-panel)}
+.trophy-room-stats div{min-width:0;padding:19px 16px;border-right:1px solid var(--line);text-align:center}
+.trophy-room-stats div:last-child{border-right:0}
+.trophy-room-stats strong,.trophy-room-stats span{display:block}
+.trophy-room-stats strong{font:800 30px/1 "Barlow Condensed",sans-serif}
+.trophy-room-stats span{margin-top:6px;color:var(--muted);font-size:11px;font-weight:850;letter-spacing:.09em;text-transform:uppercase}
+.trophy-room-heading{margin:0 0 18px;display:flex;align-items:end;justify-content:space-between;gap:20px}
+.trophy-room-heading .eyebrow{margin:0 0 7px;color:var(--trophy-accent)}
+.trophy-room-heading h2{margin:0;font:800 38px/.95 "Barlow Condensed",sans-serif;letter-spacing:0;text-transform:uppercase}
+.trophy-room-heading>span{color:var(--muted);font-size:12px;font-weight:750}
+.trophy-room-search{height:48px;margin:0 0 18px;padding:0 14px;display:grid;grid-template-columns:20px minmax(0,1fr) auto;gap:10px;align-items:center;border:1px solid var(--line);border-radius:8px;color:var(--muted);background:var(--surface-solid)}
+.trophy-room-search>svg{color:var(--trophy-accent)}
+.trophy-room-search input{width:100%;height:46px;padding:0;border:0;outline:0;color:var(--ink);background:transparent;font:700 13px "DM Sans",sans-serif}
+.trophy-room-search input::placeholder{color:var(--muted)}
+.trophy-room-search>span{font-size:10px;font-weight:850;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+.trophy-masonry{columns:3 250px;column-gap:14px}
+.trophy-masonry article{--trophy-tone:color-mix(in srgb,var(--trophy-accent) calc(62% + var(--trophy-index) * 7%),var(--ink));min-height:330px;margin:0 0 14px;display:flex;flex-direction:column;position:relative;isolation:isolate;overflow:hidden;break-inside:avoid;border:1px solid color-mix(in srgb,var(--trophy-tone) 42%,var(--line));border-radius:8px;color:var(--ink);background:linear-gradient(155deg,color-mix(in srgb,var(--trophy-tone) 14%,var(--surface-solid)),var(--surface-solid) 58%);box-shadow:0 16px 38px color-mix(in srgb,var(--navy) 18%,transparent);transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease}
+.trophy-masonry article:nth-child(5n+2),.trophy-masonry article:nth-child(5n+5){min-height:382px}
+.trophy-masonry article:nth-child(5n+3){min-height:352px}
+.trophy-masonry article:hover{z-index:2;border-color:color-mix(in srgb,var(--trophy-tone) 76%,var(--line));box-shadow:0 23px 48px color-mix(in srgb,var(--navy) 28%,transparent);transform:translateY(-3px)}
+.trophy-card-share{position:absolute;z-index:3;top:12px;right:12px;width:38px;height:38px;padding:0;display:grid;place-items:center;border:1px solid color-mix(in srgb,var(--trophy-tone) 34%,transparent);border-radius:50%;color:var(--trophy-tone);background:color-mix(in srgb,var(--surface-solid) 82%,transparent);box-shadow:0 7px 18px color-mix(in srgb,var(--navy) 14%,transparent);backdrop-filter:blur(10px);cursor:pointer}
+.trophy-card-share:hover{color:var(--surface-solid);background:var(--trophy-tone)}
+.trophy-card-share:focus-visible{outline:3px solid color-mix(in srgb,var(--trophy-tone) 48%,transparent);outline-offset:2px}
+.trophy-card-art{height:148px;display:grid;place-items:center;position:relative;overflow:hidden;background:linear-gradient(180deg,color-mix(in srgb,var(--trophy-tone) 22%,transparent),transparent)}
+.trophy-card-art::before{position:absolute;top:18px;width:112px;height:112px;content:"";border:1px solid color-mix(in srgb,var(--trophy-tone) 44%,transparent);transform:rotate(45deg);box-shadow:0 0 0 15px color-mix(in srgb,var(--trophy-tone) 5%,transparent)}
+.trophy-card-art>span{z-index:1;width:82px;height:82px;display:grid;place-items:center;color:var(--trophy-tone);filter:drop-shadow(0 12px 16px color-mix(in srgb,var(--trophy-tone) 28%,transparent))}
+.trophy-card-art svg{width:58px;height:58px;stroke-width:1.45}
+.trophy-card-art>i{position:absolute;right:18%;bottom:16px;left:18%;height:8px;border-radius:50%;background:color-mix(in srgb,var(--trophy-tone) 22%,transparent);filter:blur(4px)}
+.trophy-card-copy{padding:3px 20px 0}
+.trophy-card-copy small{color:var(--trophy-tone);font-size:11px;font-weight:900;letter-spacing:.13em}
+.trophy-card-copy h3{margin:8px 0 0;color:var(--ink);font:800 25px/.95 "Barlow Condensed",sans-serif;letter-spacing:0;text-transform:uppercase}
+.trophy-card-copy p{margin:10px 0 0;color:var(--muted);font-size:12px;line-height:1.45}
+.trophy-card-copy time{display:block;margin-top:10px;color:color-mix(in srgb,var(--ink) 72%,transparent);font-size:11px;font-weight:700}
+.trophy-card-value{margin-top:auto;padding:19px 20px 20px;display:flex;align-items:baseline;gap:7px}
+.trophy-card-value strong{max-width:100%;overflow-wrap:anywhere;color:var(--ink);font:800 42px/.88 "Barlow Condensed",sans-serif}
+.trophy-card-value span{color:var(--trophy-tone);font-size:11px;font-weight:900;text-transform:uppercase}
+.trophy-masonry article.locked{min-height:285px;border-style:dashed;background:color-mix(in srgb,var(--surface-solid) 94%,var(--trophy-accent) 3%);box-shadow:none}
+.trophy-masonry article.locked .trophy-card-art{height:118px;opacity:.62;filter:grayscale(1)}
+.trophy-masonry article.locked .trophy-card-art>span{color:var(--muted)}
+.trophy-masonry article.locked .trophy-card-copy small,.trophy-masonry article.locked .trophy-card-copy p{color:var(--muted)}
+.trophy-masonry article.locked .trophy-card-value strong{color:var(--muted);font-size:31px;letter-spacing:.08em}
+.trophy-masonry article.locked:hover{border-color:var(--line);transform:none}
+.trophy-room-empty{margin-top:18px;padding:22px;display:grid;grid-template-columns:48px 1fr;gap:15px;align-items:center;border:1px solid var(--line);border-radius:8px;background:var(--north-panel)}
+.trophy-room-empty>svg{width:46px;height:46px;padding:10px;color:var(--trophy-accent)}
+.trophy-room-empty strong{font-size:16px}
+.trophy-room-empty p{margin:5px 0 0;color:var(--muted);font-size:12px;line-height:1.5}
+@media(max-width:760px){
+  .trophy-room-hero{min-height:0;padding:28px;grid-template-columns:1fr 132px;gap:20px}
+  .trophy-room-copy h1{font-size:58px}
+  .trophy-room-emblem{width:126px;height:156px}
+  .trophy-room-emblem span{width:62px;height:62px}
+  .trophy-room-emblem svg{width:50px;height:50px}
+  .trophy-room-emblem b{font-size:31px}
+  .trophy-room-emblem small{margin-bottom:18px}
+  .trophy-room-stats{grid-template-columns:repeat(2,1fr)}
+  .trophy-room-stats div:nth-child(even){border-right:0}
+  .trophy-room-stats div:nth-child(-n+4){border-bottom:1px solid var(--line)}
+  .trophy-room-stats div:last-child{grid-column:1/-1}
+  .trophy-room-heading{align-items:start;flex-direction:column}
+  .trophy-masonry{columns:2 220px}
+}
+@media(max-width:520px){
+  .trophy-room-screen{padding-bottom:76px!important}
+  .trophy-room-hero{margin-inline:0;padding:26px 20px 30px;display:block;border-radius:0}
+  .trophy-room-copy h1{font-size:54px}
+  .trophy-room-copy>p:not(.eyebrow){font-size:13px}
+  .trophy-room-actions{display:grid}
+  .trophy-room-actions button{justify-content:center}
+  .trophy-room-emblem{display:none}
+  .trophy-room-stats{margin-bottom:36px}
+  .trophy-room-stats div{padding:16px 8px}
+  .trophy-room-heading h2{font-size:32px}
+  .trophy-room-search{grid-template-columns:20px minmax(0,1fr)}
+  .trophy-room-search>span{display:none}
+  .trophy-masonry{columns:1}
+  .trophy-masonry article,.trophy-masonry article:nth-child(n){min-height:330px}
+  .trophy-masonry article.locked{min-height:270px}
+}
+@media(prefers-reduced-motion:reduce){.trophy-masonry article{transition:none}.trophy-masonry article:hover{transform:none}}

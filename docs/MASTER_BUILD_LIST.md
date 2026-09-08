@@ -1,6 +1,6 @@
 # North — Master Build List
 
-Last updated: 2026-07-14
+Last updated: 2026-08-05
 
 This is North's authoritative implementation queue. Work proceeds from top to
 bottom because later phases depend on the data and interaction loops created by
@@ -224,9 +224,21 @@ visual placeholders do not count as complete.
 - [x] Build PR, streak, return, and completed-set celebration treatments without obstructing gym-floor use
 - [x] Complete exercise-card, profile, recorder, result, light/dark, 320px, and reduced-motion visual QA
 
+### 16. North 0.8 — Together
+
+- [ ] Build persistent one-to-one conversations with an inbox, unread state, message history, offline delivery, retry, and multi-device resume
+- [ ] Add explicit connection requests, acceptance, decline, disconnect, block, report, and per-conversation mute controls
+- [ ] Allow deliberate conversation sharing of workouts, milestones, recaps, selected photos, updates, encouragement, and invitations
+- [ ] Keep connections completely separate from Journey timelines, private records, health data, Nova context, recommendations, and analytics
+- [ ] Add optional read receipts, typing, presence, and notification previews without making surveillance the default
+- [ ] Complete the owner announcement composer and deliver signed, read-only North Updates for bugs, incidents, fixes, releases, and features
+- [ ] Prove participant authorization, notification privacy, offline ordering, deduplication, retention, export, deletion, abuse reporting, accessibility, and recovery
+
+Detailed product contract and release checklist: [North 0.8 — Together](product/NORTH_0_8_TOGETHER.md).
+
 ## Parked until the core is earned
 
 - Nutrition and cookbook systems
 - Community/The Trail
-- Coach, family, and team modes
+- Coach and team modes
 - Public social profiles and launch mechanics

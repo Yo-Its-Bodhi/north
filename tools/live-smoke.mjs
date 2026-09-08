@@ -63,8 +63,8 @@ await check("live service worker excludes private routes and authorization-beari
   const response = await fetch(`${base}/sw.js`, { headers: { "Cache-Control": "no-cache" } });
   assert.equal(response.status, 200);
   const source = await response.text();
-  assert.match(source, /pathname\.startsWith\("\/v1\/"\)/);
-  assert.match(source, /pathname\.startsWith\("\/admin"\)/);
+  assert.match(source, /(?:pathname\.startsWith\("\/v1\/"\)|\.includes\("\/v1\/"\))/);
+  assert.match(source, /(?:pathname\.startsWith\("\/admin"\)|\.includes\("\/admin"\))/);
   assert.match(source, /headers\.has\("authorization"\)/);
 });
 

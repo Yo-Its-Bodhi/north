@@ -3,11 +3,32 @@ package io.bodhix.north.health
 import java.net.HttpURLConnection
 import java.net.URL
 
+data class NorthSession(val accessToken: String, val refreshToken: String)
+
 class NorthApi(private val baseUrl: String = "https://north.bodhix.io") {
-    fun login(username: String, password: String, deviceId: String): String {
+    fun login(username: String, password: String, deviceId: String): NorthSession {
         val body = org.json.JSONObject().put("username", username).put("password", password).toString()
-        val result = request("/v1/auth/login", "POST", body, null, deviceId)
-        return org.json.JSONObject(result).getString("accessToken")
+        return session(request("/v1/auth/login", "POST", body, null, deviceId))
+    }
+
+    fun refresh(refreshToken: String, deviceId: String): NorthSession {
+        val body = org.json.JSONObject().put("refreshToken", refreshToken).toString()
+        return session(request("/v1/auth/refresh", "POST", body, null, deviceId))
+    }
+
+    fun connect(token: String, deviceId: String): org.json.JSONObject {
+        val scopes = org.json.JSONArray(listOf("workouts", "daily_movement", "sleep_recovery", "body_measurements"))
+        val preferences = org.json.JSONObject()
+            .put("workouts", true)
+            .put("dailyMovement", true)
+            .put("sleepRecovery", true)
+            .put("bodyMeasurements", false)
+        val body = org.json.JSONObject()
+            .put("status", "connected")
+            .put("scopes", scopes)
+            .put("preferences", preferences)
+            .toString()
+        return org.json.JSONObject(request("/v1/health/connections/health_connect", "PUT", body, token, deviceId))
     }
 
     fun importAll(token: String, deviceId: String, records: org.json.JSONArray): Int {
@@ -28,6 +49,11 @@ class NorthApi(private val baseUrl: String = "https://north.bodhix.io") {
             offset = end
         }
         return uploaded
+    }
+
+    private fun session(response: String): NorthSession {
+        val result = org.json.JSONObject(response)
+        return NorthSession(result.getString("accessToken"), result.getString("refreshToken"))
     }
 
     private fun request(path: String, method: String, body: String, token: String?, deviceId: String): String {

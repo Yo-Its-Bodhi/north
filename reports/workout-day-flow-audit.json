@@ -1,0 +1,1200 @@
+{
+  "generatedAt": "2026-08-23T14:38:23.740Z",
+  "flow": [
+    "Opened Training",
+    "Selected next week's first strength day",
+    "Renamed the day and edited its first prescription",
+    "Added 45-degree back extension",
+    "Saved the edited day workout",
+    "Opened workout preparation with the edited plan",
+    "Adjusted and saved workout setup",
+    "Started the active workout",
+    "Completed the first set and opened the rest timer"
+  ],
+  "steps": [
+    {
+      "name": "training landing",
+      "width": 320,
+      "viewport": {
+        "width": 320,
+        "height": 932
+      },
+      "horizontalOverflow": 0,
+      "documentHeight": 2849,
+      "targetViolations": [
+        {
+          "label": "27",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "28",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "29",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "30",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "31",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "1",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "2",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "3",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "4",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "5",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "6",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "7",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "8",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "9",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "10",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "11",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "12",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "13",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "14",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "15",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "16",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "17",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "18",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "19",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "20",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "21",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "22",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "23",
+          "tag": "BUTTON",
+          "width": 38.1,
+          "height": 38.1
+        },
+        {
+          "label": "24",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "25",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "26",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "27",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "28",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "29",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "30",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "31",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "1",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "2",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "3",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "4",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "5",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "6",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        }
+      ],
+      "textViolations": [],
+      "keyAction": {
+        "width": 260,
+        "height": 50,
+        "bottom": 761.890625
+      },
+      "navigationTop": 864,
+      "keyActionOverlapsDock": false
+    },
+    {
+      "name": "training landing",
+      "width": 430,
+      "viewport": {
+        "width": 430,
+        "height": 932
+      },
+      "horizontalOverflow": 0,
+      "documentHeight": 2872,
+      "targetViolations": [],
+      "textViolations": [],
+      "keyAction": {
+        "width": 350,
+        "height": 50,
+        "bottom": 760.890625
+      },
+      "navigationTop": 864,
+      "keyActionOverlapsDock": false
+    },
+    {
+      "name": "day editor opened",
+      "width": 320,
+      "viewport": {
+        "width": 320,
+        "height": 932
+      },
+      "horizontalOverflow": 0,
+      "documentHeight": 5188,
+      "targetViolations": [
+        {
+          "label": "27",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "28",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "29",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "30",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "31",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "1",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "2",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "3",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "4",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "5",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "6",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "7",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "8",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "9",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "10",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "11",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "12",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "13",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "14",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "15",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "16",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "17",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "18",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "19",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "20",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "21",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "22",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "23",
+          "tag": "BUTTON",
+          "width": 38.1,
+          "height": 38.1
+        },
+        {
+          "label": "24",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "25",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "26",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "27",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "28",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "29",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "30",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "31",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "1",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "2",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "3",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "4",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "5",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "6",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        }
+      ],
+      "textViolations": [],
+      "keyAction": {
+        "width": 258,
+        "height": 48,
+        "bottom": 3173.328125
+      },
+      "navigationTop": 864,
+      "keyActionOverlapsDock": false
+    },
+    {
+      "name": "day editor opened",
+      "width": 430,
+      "viewport": {
+        "width": 430,
+        "height": 932
+      },
+      "horizontalOverflow": 0,
+      "documentHeight": 5026,
+      "targetViolations": [],
+      "textViolations": [],
+      "keyAction": {
+        "width": 360,
+        "height": 48,
+        "bottom": 2988.890625
+      },
+      "navigationTop": 864,
+      "keyActionOverlapsDock": false
+    },
+    {
+      "name": "day editor changed",
+      "width": 320,
+      "viewport": {
+        "width": 320,
+        "height": 932
+      },
+      "horizontalOverflow": 0,
+      "documentHeight": 5420,
+      "targetViolations": [
+        {
+          "label": "27",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "28",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "29",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "30",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "31",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "1",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "2",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "3",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "4",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "5",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "6",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "7",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "8",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "9",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "10",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "11",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "12",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "13",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "14",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "15",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "16",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "17",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "18",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "19",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "20",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "21",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "22",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "23",
+          "tag": "BUTTON",
+          "width": 38.1,
+          "height": 38.1
+        },
+        {
+          "label": "24",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "25",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "26",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "27",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "28",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "29",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "30",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "31",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "1",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "2",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "3",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "4",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "5",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        },
+        {
+          "label": "6",
+          "tag": "BUTTON",
+          "width": 36.3,
+          "height": 36.3
+        }
+      ],
+      "textViolations": [],
+      "keyAction": {
+        "width": 179.296875,
+        "height": 46,
+        "bottom": 3317.828125
+      },
+      "navigationTop": 864,
+      "keyActionOverlapsDock": false
+    },
+    {
+      "name": "day editor changed",
+      "width": 430,
+      "viewport": {
+        "width": 430,
+        "height": 932
+      },
+      "horizontalOverflow": 0,
+      "documentHeight": 5259,
+      "targetViolations": [],
+      "textViolations": [],
+      "keyAction": {
+        "width": 179.296875,
+        "height": 46,
+        "bottom": 3158.328125
+      },
+      "navigationTop": 864,
+      "keyActionOverlapsDock": false
+    },
+    {
+      "name": "workout preparation",
+      "width": 320,
+      "viewport": {
+        "width": 320,
+        "height": 932
+      },
+      "horizontalOverflow": 0,
+      "documentHeight": 2049,
+      "targetViolations": [],
+      "textViolations": [],
+      "keyAction": {
+        "width": 274,
+        "height": 48,
+        "bottom": 1801.046875
+      },
+      "navigationTop": 864,
+      "keyActionOverlapsDock": false
+    },
+    {
+      "name": "workout preparation",
+      "width": 430,
+      "viewport": {
+        "width": 430,
+        "height": 932
+      },
+      "horizontalOverflow": 0,
+      "documentHeight": 1991,
+      "targetViolations": [],
+      "textViolations": [],
+      "keyAction": {
+        "width": 376,
+        "height": 48,
+        "bottom": 1743.5
+      },
+      "navigationTop": 864,
+      "keyActionOverlapsDock": false
+    },
+    {
+      "name": "workout setup adjusted",
+      "width": 320,
+      "viewport": {
+        "width": 320,
+        "height": 932
+      },
+      "horizontalOverflow": 0,
+      "documentHeight": 2293,
+      "targetViolations": [],
+      "textViolations": [],
+      "keyAction": {
+        "width": 274,
+        "height": 48,
+        "bottom": 2002.796875
+      },
+      "navigationTop": 864,
+      "keyActionOverlapsDock": false
+    },
+    {
+      "name": "workout setup adjusted",
+      "width": 430,
+      "viewport": {
+        "width": 430,
+        "height": 932
+      },
+      "horizontalOverflow": 0,
+      "documentHeight": 2211,
+      "targetViolations": [],
+      "textViolations": [],
+      "keyAction": {
+        "width": 376,
+        "height": 48,
+        "bottom": 1920.5
+      },
+      "navigationTop": 864,
+      "keyActionOverlapsDock": false
+    },
+    {
+      "name": "active workout start",
+      "width": 320,
+      "viewport": {
+        "width": 320,
+        "height": 932
+      },
+      "horizontalOverflow": 0,
+      "documentHeight": 1583,
+      "targetViolations": [],
+      "textViolations": [],
+      "keyAction": {
+        "width": 204,
+        "height": 54,
+        "bottom": 1509.4375
+      },
+      "navigationTop": null,
+      "keyActionOverlapsDock": false
+    },
+    {
+      "name": "active workout start",
+      "width": 430,
+      "viewport": {
+        "width": 430,
+        "height": 932
+      },
+      "horizontalOverflow": 0,
+      "documentHeight": 1478,
+      "targetViolations": [],
+      "textViolations": [],
+      "keyAction": {
+        "width": 314,
+        "height": 54,
+        "bottom": 1403.890625
+      },
+      "navigationTop": null,
+      "keyActionOverlapsDock": false
+    },
+    {
+      "name": "first set completed",
+      "width": 320,
+      "viewport": {
+        "width": 320,
+        "height": 932
+      },
+      "horizontalOverflow": 0,
+      "documentHeight": 1625,
+      "targetViolations": [],
+      "textViolations": [],
+      "keyAction": {
+        "width": 204,
+        "height": 54,
+        "bottom": 1550.640625
+      },
+      "navigationTop": null,
+      "keyActionOverlapsDock": false
+    },
+    {
+      "name": "first set completed",
+      "width": 430,
+      "viewport": {
+        "width": 430,
+        "height": 932
+      },
+      "horizontalOverflow": 0,
+      "documentHeight": 1536,
+      "targetViolations": [],
+      "textViolations": [],
+      "keyAction": {
+        "width": 314,
+        "height": 54,
+        "bottom": 1461.890625
+      },
+      "navigationTop": null,
+      "keyActionOverlapsDock": false
+    }
+  ],
+  "consoleErrors": [],
+  "pageErrors": [],
+  "addedExercise": "45-degree back extension",
+  "activeState": {
+    "title": "Incline dumbbell press",
+    "completedSets": 1,
+    "restTimerVisible": true,
+    "activeSessionStored": true
+  },
+  "summary": {
+    "flowCompleted": true,
+    "screenshots": 14,
+    "zeroHorizontalOverflow": true,
+    "noKeyActionDockOverlap": true,
+    "targetViolationsByStep": [
+      {
+        "name": "training landing",
+        "width": 320,
+        "count": 42
+      },
+      {
+        "name": "training landing",
+        "width": 430,
+        "count": 0
+      },
+      {
+        "name": "day editor opened",
+        "width": 320,
+        "count": 42
+      },
+      {
+        "name": "day editor opened",
+        "width": 430,
+        "count": 0
+      },
+      {
+        "name": "day editor changed",
+        "width": 320,
+        "count": 42
+      },
+      {
+        "name": "day editor changed",
+        "width": 430,
+        "count": 0
+      },
+      {
+        "name": "workout preparation",
+        "width": 320,
+        "count": 0
+      },
+      {
+        "name": "workout preparation",
+        "width": 430,
+        "count": 0
+      },
+      {
+        "name": "workout setup adjusted",
+        "width": 320,
+        "count": 0
+      },
+      {
+        "name": "workout setup adjusted",
+        "width": 430,
+        "count": 0
+      },
+      {
+        "name": "active workout start",
+        "width": 320,
+        "count": 0
+      },
+      {
+        "name": "active workout start",
+        "width": 430,
+        "count": 0
+      },
+      {
+        "name": "first set completed",
+        "width": 320,
+        "count": 0
+      },
+      {
+        "name": "first set completed",
+        "width": 430,
+        "count": 0
+      }
+    ],
+    "textViolationsByStep": [
+      {
+        "name": "training landing",
+        "width": 320,
+        "count": 0
+      },
+      {
+        "name": "training landing",
+        "width": 430,
+        "count": 0
+      },
+      {
+        "name": "day editor opened",
+        "width": 320,
+        "count": 0
+      },
+      {
+        "name": "day editor opened",
+        "width": 430,
+        "count": 0
+      },
+      {
+        "name": "day editor changed",
+        "width": 320,
+        "count": 0
+      },
+      {
+        "name": "day editor changed",
+        "width": 430,
+        "count": 0
+      },
+      {
+        "name": "workout preparation",
+        "width": 320,
+        "count": 0
+      },
+      {
+        "name": "workout preparation",
+        "width": 430,
+        "count": 0
+      },
+      {
+        "name": "workout setup adjusted",
+        "width": 320,
+        "count": 0
+      },
+      {
+        "name": "workout setup adjusted",
+        "width": 430,
+        "count": 0
+      },
+      {
+        "name": "active workout start",
+        "width": 320,
+        "count": 0
+      },
+      {
+        "name": "active workout start",
+        "width": 430,
+        "count": 0
+      },
+      {
+        "name": "first set completed",
+        "width": 320,
+        "count": 0
+      },
+      {
+        "name": "first set completed",
+        "width": 430,
+        "count": 0
+      }
+    ]
+  }
+}

@@ -1,0 +1,1247 @@
+[
+  {
+    "id": "guided-north-tour",
+    "topic": "Getting set up",
+    "title": "Take or resume the guided North tour",
+    "summary": "Walk through Today, Journey, Training, Nova, and You, then return later if you stop.",
+    "searchTerms": [
+      "tour",
+      "walkthrough",
+      "guided",
+      "resume",
+      "restart",
+      "skip",
+      "learn north",
+      "navigation"
+    ],
+    "introduction": "North’s guided tour visits the five main destinations using the real product underneath. Closing it saves the current step so the same account can resume later.",
+    "steps": [
+      {
+        "title": "Begin on Today",
+        "body": "Start the walkthrough from this Guide article or replay it from Help and support in Settings."
+      },
+      {
+        "title": "Move at your pace",
+        "body": "Continue through Journey, Training, Nova, and You. Back returns to the previous destination without erasing progress."
+      },
+      {
+        "title": "Save your place",
+        "body": "Use Save and close when you need to stop. North stores the current step for this account rather than marking the walkthrough complete."
+      },
+      {
+        "title": "Finish or restart",
+        "body": "The final action marks the walkthrough complete. You can still deliberately replay it from the beginning later."
+      }
+    ],
+    "remember": "The tour is orientation, not a requirement. Your plans and records do not change while you view it.",
+    "action": {
+      "label": "Start or resume the guided tour",
+      "destination": "today",
+      "intent": "start-product-tour"
+    }
+  },
+  {
+    "id": "set-up-north",
+    "topic": "Getting set up",
+    "title": "Set North up around your life",
+    "summary": "Choose a direction, schedule, equipment, activities, and units without locking yourself in.",
+    "searchTerms": [
+      "onboarding",
+      "direction",
+      "experience",
+      "days",
+      "duration",
+      "equipment",
+      "activities",
+      "units",
+      "setup"
+    ],
+    "introduction": "North’s first questions shape useful starting suggestions. They are preferences you can revisit, not a test you have to pass.",
+    "steps": [
+      {
+        "title": "Choose a direction",
+        "body": "Build strength and consistency emphasizes repeatable strength work; Build muscle emphasizes muscle-focused training; Move more and feel better keeps general movement central; Improve fitness and endurance emphasizes conditioning; Return to training steadily favors a gradual return. These are planning directions, not promised outcomes, and you can change yours later in You."
+      },
+      {
+        "title": "Describe your current rhythm",
+        "body": "Experience changes the starting suggestions, not your worth or ability. Suggested or custom weekly days and usual session length help North fit the plan to your real week, and you can edit them later."
+      },
+      {
+        "title": "Choose what is available",
+        "body": "Select every equipment option you can realistically use. More than one option can be selected, and the choice narrows suggestions rather than blocking later edits."
+      },
+      {
+        "title": "Include the movement you enjoy",
+        "body": "Choose strength, walking, running, cycling, or mobility when each belongs in your week. These are planning preferences, not completed activity records."
+      },
+      {
+        "title": "Set familiar units",
+        "body": "Choose the weight and distance units you want to read and enter. Changing display units later does not turn an old record into a new session."
+      },
+      {
+        "title": "Choose whether North remembers patterns",
+        "body": "Turn this on if you want North to notice useful things across your records. You can still use planning, recording, Journey, and the Guide without it, and you can review, correct, pause, or forget anything it notices."
+      }
+    ],
+    "remember": "Setup gives North a useful starting point. It is allowed to change when your life changes.",
+    "action": {
+      "label": "Open your preferences",
+      "destination": "settings"
+    }
+  },
+  {
+    "id": "find-and-keep-workouts",
+    "topic": "Workouts",
+    "title": "Find, favourite and keep workouts",
+    "summary": "Search your library, North Originals, and Community, then keep the routines that suit you.",
+    "searchTerms": [
+      "library",
+      "search",
+      "filter",
+      "favorite",
+      "favourite",
+      "community",
+      "original",
+      "copy",
+      "workout"
+    ],
+    "introduction": "The workout library brings together routines you made, routines supplied by North, and routines shared through Community. The source label tells you which is which.",
+    "steps": [
+      {
+        "title": "Choose a source",
+        "body": "Use My Workouts, North Originals, or Community to narrow the library before searching by name or description."
+      },
+      {
+        "title": "Refine the list",
+        "body": "Focus, goal, level, and duration filters help reduce the list. Clear a filter when it hides something you expected to see."
+      },
+      {
+        "title": "Favourite useful items",
+        "body": "Favourite exercises or workouts to make them easier to return to. Removing a favourite does not delete the item."
+      },
+      {
+        "title": "Keep your own copy",
+        "body": "Copy a shared workout into My Workouts before changing it. Your private copy can then change independently of the shared source."
+      }
+    ],
+    "remember": "A source label explains where a workout came from. Your completed session remains your own record.",
+    "action": {
+      "label": "Open the workout library",
+      "destination": "workout-library"
+    }
+  },
+  {
+    "id": "share-a-community-workout",
+    "topic": "Workouts",
+    "title": "Share a workout with Community",
+    "summary": "Understand what publishing changes and what stays private in your personal record.",
+    "searchTerms": [
+      "publish",
+      "share",
+      "community",
+      "public",
+      "copy",
+      "author",
+      "workout"
+    ],
+    "introduction": "Community sharing is for a workout template, not your completed sessions, check-ins, health information, or private notes.",
+    "steps": [
+      {
+        "title": "Review the template",
+        "body": "Check the workout name, description, exercises, targets, and other visible template details before publishing."
+      },
+      {
+        "title": "Publish deliberately",
+        "body": "Use the Community action from a personal workout only when you intend other members to discover and copy it."
+      },
+      {
+        "title": "Keep records separate",
+        "body": "Publishing the template does not publish the sessions you performed from it or the reflections attached to those sessions."
+      },
+      {
+        "title": "Edit the right version",
+        "body": "A copied or published version and your personal working copy may have different ownership. Check the source label before changing one."
+      },
+      {
+        "title": "Remove only the public version",
+        "body": "Remove from Community unpublishes the public version. Your private workout remains in My Workouts, and copies other members already saved remain their independent workouts."
+      }
+    ],
+    "remember": "Share the reusable plan, not the private story of how your body or day felt.",
+    "action": {
+      "label": "Open My Workouts",
+      "destination": "workout-library"
+    }
+  },
+  {
+    "id": "use-a-training-program",
+    "topic": "Planning",
+    "title": "Use a multi-week training program",
+    "summary": "Inspect a program’s weeks, start it deliberately, and adjust future work when life changes.",
+    "searchTerms": [
+      "program",
+      "programme",
+      "multi week",
+      "start",
+      "adjust",
+      "skip",
+      "leave",
+      "replace"
+    ],
+    "introduction": "A program is a reusable multi-week structure. Starting one shapes future planning; it does not rewrite sessions already completed.",
+    "steps": [
+      {
+        "title": "Read the whole structure",
+        "body": "Open program detail to inspect its length, weekly rhythm, workouts, and the level or focus shown by North."
+      },
+      {
+        "title": "Start with confirmation",
+        "body": "Choose to start only after reviewing how the program will fit the plan. Future days remain plans until work is recorded."
+      },
+      {
+        "title": "Adjust a difficult week",
+        "body": "Change or skip future program work when needed. An adjustment changes what comes next rather than pretending an unfinished session was completed."
+      },
+      {
+        "title": "Leave history alone",
+        "body": "Replacing or leaving a program changes future direction. Completed workouts remain in Journey as performed evidence."
+      }
+    ],
+    "remember": "Following a program does not require pretending every planned week happened exactly as written.",
+    "action": {
+      "label": "Browse programs",
+      "destination": "programs"
+    }
+  },
+  {
+    "id": "adjust-an-active-workout",
+    "topic": "Workouts",
+    "title": "Adjust a workout while recording it",
+    "summary": "Add or remove unfinished sets, substitute, pass, pause, or cancel without inventing work.",
+    "searchTerms": [
+      "extra set",
+      "remove set",
+      "substitute",
+      "alternative",
+      "pass",
+      "cancel",
+      "pause",
+      "active workout"
+    ],
+    "introduction": "A live session can change. North separates changing the work in front of you from claiming that unfinished work was completed.",
+    "steps": [
+      {
+        "title": "Change unfinished sets",
+        "body": "Add an extra set when you choose to do more, or remove an incomplete set that no longer belongs in the session."
+      },
+      {
+        "title": "Use an alternative",
+        "body": "North offers related movements using editorial movement-pattern, primary-muscle, and equipment relationships. A listed option is not identical, medically suitable, or guaranteed to train you the same way. Choosing one replaces the movement and rebuilds its prescription from the replacement’s starting values while preserving your exercise note, so review sets, target, load, and rest before continuing."
+      },
+      {
+        "title": "Pass or pause",
+        "body": "Pass leaves the exercise unfinished so you can move on. Pause preserves the session and stops paused time from counting as active workout time."
+      },
+      {
+        "title": "Cancel deliberately",
+        "body": "Cancellation requires confirmation because it discards the active session instead of saving it as completed history."
+      }
+    ],
+    "remember": "Adapting a session is honest. Marking work complete when it was not done is not.",
+    "action": {
+      "label": "Open Training",
+      "destination": "training"
+    }
+  },
+  {
+    "id": "correct-your-record",
+    "topic": "Your record",
+    "title": "Correct or remove a Journey record",
+    "summary": "Edit the fields North allows, understand deletion, and keep performed evidence distinct from plans.",
+    "searchTerms": [
+      "edit",
+      "delete",
+      "remove",
+      "history",
+      "session",
+      "energy",
+      "difficulty",
+      "reflection",
+      "notes"
+    ],
+    "introduction": "Journey is meant to be truthful, not untouchable. North provides correction controls while keeping a clear distinction between a plan and a performed record.",
+    "steps": [
+      {
+        "title": "Open the full record",
+        "body": "Choose a timeline item to inspect its performed date, completed sets or activity details, ratings, notes, and source."
+      },
+      {
+        "title": "Edit supported context",
+        "body": "Where editing is available, correct energy, difficulty, reflection, or exercise notes and save the revised record."
+      },
+      {
+        "title": "Delete only with intent",
+        "body": "Deletion removes the session from history and can change totals, milestones, calendar status, and summaries derived from it."
+      },
+      {
+        "title": "Check the result",
+        "body": "Return to Journey or the relevant Training date to confirm that the corrected evidence now appears where expected."
+      }
+    ],
+    "remember": "Correction improves the record. Deletion removes evidence and may change every summary built from it.",
+    "action": {
+      "label": "Open Journey",
+      "destination": "journey"
+    }
+  },
+  {
+    "id": "use-journey-photos",
+    "topic": "Your record",
+    "title": "Add context with a Journey photo",
+    "summary": "Attach a dated image and caption to your private timeline, then remove it when it no longer belongs.",
+    "searchTerms": [
+      "photo",
+      "picture",
+      "image",
+      "caption",
+      "progress",
+      "form",
+      "journey",
+      "date"
+    ],
+    "introduction": "A Journey photo is dated context beside your record. It is not automatically published to Community or included in a training recap.",
+    "steps": [
+      {
+        "title": "Choose a supported image",
+        "body": "Select an image under 2 MB. North keeps Journey photos privately in this browser and includes them in North backups; it does not publish them to Community."
+      },
+      {
+        "title": "Know the 20-photo limit",
+        "body": "Journey keeps the newest 20 photos. Adding another photo removes the oldest photo from this list, so export a North backup or retain the original elsewhere before reaching the limit."
+      },
+      {
+        "title": "Add useful context",
+        "body": "Use the optional caption for the detail you will want later, such as the movement, setup, or reason for keeping the image."
+      },
+      {
+        "title": "Review before keeping it",
+        "body": "Check that the image and date are correct and that the frame does not reveal information you did not intend to retain."
+      },
+      {
+        "title": "Remove it deliberately",
+        "body": "Delete the photo when it no longer belongs in the record. Removing an image does not delete workouts from the same date."
+      }
+    ],
+    "remember": "A private record can still contain sensitive information. Keep only the image you meant to keep.",
+    "action": {
+      "label": "Open Journey",
+      "destination": "journey"
+    }
+  },
+  {
+    "id": "find-and-revisit-journey-records",
+    "topic": "Your record",
+    "title": "Find and revisit a moment in Journey",
+    "summary": "Filter, sort, choose a date, or use This Day without changing the records underneath.",
+    "searchTerms": [
+      "journey",
+      "timeline",
+      "sort",
+      "oldest",
+      "newest",
+      "date",
+      "this day",
+      "memory",
+      "anniversary"
+    ],
+    "introduction": "Journey can rearrange or narrow what you see while leaving the saved record unchanged. Use its controls to find evidence rather than rewriting it.",
+    "steps": [
+      {
+        "title": "Narrow the timeline",
+        "body": "Choose a record type or a date to show the matching workouts, activities, check-ins, reflections, photos, and supported imported records. An empty result means nothing matches that view; it does not delete anything."
+      },
+      {
+        "title": "Change the reading order",
+        "body": "Sort newest first or oldest first depending on where you want to begin. Sorting changes only the order on screen."
+      },
+      {
+        "title": "Open a complete day",
+        "body": "A date can contain planned work, completed workouts, manual activities, and imported purposeful activities. Open each item to check its source and details."
+      },
+      {
+        "title": "Use This Day",
+        "body": "This Day looks for saved moments at supported intervals such as one week, one month, six months, or one year ago. When no interval matches, North shows an honest empty state rather than inventing a memory."
+      }
+    ],
+    "remember": "Filtering, sorting, and This Day change the view. Correction or deletion requires a separate record action.",
+    "action": {
+      "label": "Open Journey",
+      "destination": "journey"
+    }
+  },
+  {
+    "id": "export-a-training-recap",
+    "topic": "Your record",
+    "title": "Create and export a Training recap",
+    "summary": "Choose a period and format, preview the summary, and decide where the exported file goes.",
+    "searchTerms": [
+      "recap",
+      "export",
+      "share",
+      "square",
+      "landscape",
+      "atlas",
+      "download",
+      "summary"
+    ],
+    "introduction": "A Training recap turns selected record totals into an image you control. Exporting creates a file; it does not post anything for you.",
+    "steps": [
+      {
+        "title": "Choose the evidence window",
+        "body": "Set the Training Atlas range and metric before opening the recap so the summary reflects the period you intend."
+      },
+      {
+        "title": "Inspect included information",
+        "body": "Preview the totals and labels. The recap is a summary, so use Journey when you need the individual records behind it."
+      },
+      {
+        "title": "Choose the shape",
+        "body": "Square and landscape formats arrange the same recap for different spaces. Select the one that fits where you intend to use the file."
+      },
+      {
+        "title": "Export, then decide",
+        "body": "Download or share the generated file using the controls available on your device. North does not choose its audience."
+      }
+    ],
+    "remember": "Export creates a file under your control. It is not the same action as publishing to Community.",
+    "action": {
+      "label": "Open Journey",
+      "destination": "journey"
+    }
+  },
+  {
+    "id": "appearance-and-accessibility",
+    "topic": "Settings & access",
+    "title": "Change appearance and accessibility",
+    "summary": "Choose a theme, larger text, stronger contrast, or reduced motion without changing your records.",
+    "searchTerms": [
+      "theme",
+      "dark",
+      "light",
+      "large text",
+      "contrast",
+      "reduced motion",
+      "accessibility",
+      "appearance"
+    ],
+    "introduction": "Appearance settings change how North is presented on your devices. They do not alter workouts, plans, health imports, or Journey records.",
+    "steps": [
+      {
+        "title": "Choose an appearance",
+        "body": "Open Appearance to select an available visual theme. North saves the selected appearance for later visits."
+      },
+      {
+        "title": "Make text easier to read",
+        "body": "Large text increases interface text and may move controls onto additional lines or farther down the page."
+      },
+      {
+        "title": "Strengthen visual separation",
+        "body": "High contrast increases distinction between interface elements. Check it with the theme you use most often."
+      },
+      {
+        "title": "Reduce movement",
+        "body": "Reduced motion shortens or removes supported animation while preserving the action and its result."
+      }
+    ],
+    "remember": "Choose the presentation that makes North easier to use. Your underlying record stays the same.",
+    "action": {
+      "label": "Open app settings",
+      "destination": "settings"
+    }
+  },
+  {
+    "id": "personal-details-and-preferences",
+    "topic": "Settings & access",
+    "title": "Change your personal details and preferences",
+    "summary": "Update your name, direction, target date, units, language preference, and notification preference with their current limits clear.",
+    "searchTerms": [
+      "name",
+      "direction",
+      "target date",
+      "units",
+      "pounds",
+      "kilograms",
+      "miles",
+      "language",
+      "notifications",
+      "preferences"
+    ],
+    "introduction": "Your declaration lives in You, while display and app preferences live in Settings. These choices can change without rewriting completed workouts.",
+    "steps": [
+      {
+        "title": "Edit your declaration",
+        "body": "In You, change the display name, training direction, weekly rhythm, or optional target date. A target date is context for your direction, not a promise that North can guarantee."
+      },
+      {
+        "title": "Choose display units",
+        "body": "Lifting weight, body weight, and distance can use separate supported units. North converts the display while preserving the identity of existing records."
+      },
+      {
+        "title": "Read the language setting honestly",
+        "body": "The language selector saves your preference. It does not mean every North screen or generated response is fully translated in this release."
+      },
+      {
+        "title": "Understand notifications",
+        "body": "The notification switch saves your preference. Actual delivery also requires browser or device permission and a supported delivery path, so the switch alone does not guarantee a notification."
+      }
+    ],
+    "remember": "A saved preference and an active device capability are not always the same thing. North should show the result rather than imply permission was granted.",
+    "action": {
+      "label": "Open app settings",
+      "destination": "settings"
+    }
+  },
+  {
+    "id": "understand-you-signals-and-trends",
+    "topic": "Your record",
+    "title": "Understand your signals and trends in You",
+    "summary": "See where direction, current signals, trends, and learned observations come from.",
+    "searchTerms": [
+      "you",
+      "direction",
+      "signals",
+      "energy",
+      "soreness",
+      "weight",
+      "sleep",
+      "trend",
+      "insight",
+      "dismiss"
+    ],
+    "introduction": "You brings together profile choices and summaries of records you entered or connected. It describes the available record; it does not assess your health.",
+    "steps": [
+      {
+        "title": "Read and edit your direction",
+        "body": "Your declaration comes from the name, direction, weekly rhythm, and optional target date saved in your profile. Use Edit in You to change what appears there."
+      },
+      {
+        "title": "Check the signal source",
+        "body": "Energy and soreness come from dated check-ins; optional body weight comes from check-ins; and sleep can come from your reported check-in or permitted connected-health records. Check the date before treating a value as current."
+      },
+      {
+        "title": "Open the trend evidence",
+        "body": "The optional weight and recovery charts use up to the latest 14 saved check-ins. Weight shows recorded check-in values; recovery places your 1–5 energy and soreness observations side by side."
+      },
+      {
+        "title": "Control learned observations",
+        "body": "Open an observation to read its evidence and limits. Forgetting it hides that observation from the visible learned list; Restore brings forgotten observations back. This does not delete the workouts or check-ins behind the observation."
+      }
+    ],
+    "remember": "A summary is only as current as its latest dated source. Energy, soreness, sleep, and weight are context, not a diagnosis.",
+    "action": {
+      "label": "Open You",
+      "destination": "you"
+    }
+  },
+  {
+    "id": "account-saving-and-local-data",
+    "topic": "Settings & access",
+    "title": "Understand account saving and local data",
+    "summary": "North saves changes to your signed-in account and keeps a temporary device copy for offline use.",
+    "searchTerms": [
+      "database",
+      "storage",
+      "local",
+      "sync",
+      "device",
+      "account save",
+      "wipe",
+      "restore"
+    ],
+    "introduction": "North saves changes to the signed-in account automatically. A temporary device copy keeps the app usable while offline, and the latest account save wins when several tabs or devices are open.",
+    "steps": [
+      {
+        "title": "Let North save automatically",
+        "body": "Changes are sent to your signed-in North account without version prompts or manual conflict decisions."
+      },
+      {
+        "title": "Know what happens in several tabs",
+        "body": "If the same item is changed in several open tabs or devices, the latest completed account save becomes the current version."
+      },
+      {
+        "title": "Use one tab for important edits",
+        "body": "North does not ask you to merge competing versions. Avoid editing the same workout or setting in several places at the same time."
+      },
+      {
+        "title": "Prepare before wiping this device",
+        "body": "Confirm that pending work has synchronized, keep an export when the record matters, and make sure you can sign in again. Unsynced local changes can be lost when this browser copy is erased."
+      },
+      {
+        "title": "Distinguish wipe actions",
+        "body": "Deleting local data signs out and removes this browser copy. Restoring from the account requires sign-in, a connection, and a successful account pull. Account deletion is a separate action that removes account records and access."
+      }
+    ],
+    "remember": "Your signed-in account is the source of truth. The device copy exists only to keep North usable while offline.",
+    "action": {
+      "label": "Open data settings",
+      "destination": "settings"
+    }
+  },
+  {
+    "id": "weather-on-today",
+    "topic": "Start here",
+    "title": "Use weather as context on Today",
+    "summary": "Load current local conditions when they are useful, without treating them as a training instruction.",
+    "searchTerms": [
+      "weather",
+      "temperature",
+      "rain",
+      "precipitation",
+      "location",
+      "permission",
+      "refresh"
+    ],
+    "introduction": "Today can request local weather from the device and weather service. The result is context for your decision, not a command to train or stay home.",
+    "steps": [
+      {
+        "title": "Choose to load it",
+        "body": "Use the weather control when local conditions matter. The browser may ask whether North can use your current location."
+      },
+      {
+        "title": "Allow or decline location",
+        "body": "Declining leaves weather unavailable and does not prevent workouts, planning, check-ins, or manual activity records."
+      },
+      {
+        "title": "Check freshness",
+        "body": "Use refresh when conditions may have changed. A displayed result reflects the available observation rather than a guarantee for the whole session."
+      },
+      {
+        "title": "Make your own decision",
+        "body": "Consider conditions alongside your route, equipment, experience, and any relevant official safety advice."
+      }
+    ],
+    "remember": "Weather is one piece of context. North does not know every condition around you.",
+    "action": {
+      "label": "Open Today",
+      "destination": "today"
+    }
+  },
+  {
+    "id": "health-metrics-and-weight",
+    "topic": "Health & privacy",
+    "title": "Read imported health metrics and weight",
+    "summary": "Check the source date, category permission, and difference between daily context and a session.",
+    "searchTerms": [
+      "steps",
+      "active minutes",
+      "sleep",
+      "calories",
+      "distance",
+      "weight",
+      "health metric",
+      "latest"
+    ],
+    "introduction": "Imported daily totals and measurements keep their source and timestamp. North uses them as context and does not turn every daily total into a Journey session.",
+    "steps": [
+      {
+        "title": "Check the date and source",
+        "body": "A latest value is useful only with its measurement date and connected source. Two apps may summarize the same day differently."
+      },
+      {
+        "title": "Read the daily fields literally",
+        "body": "Steps are the Health Connect step-count total shared for the day. Movement distance is the shared Distance-record total, not a distance North estimates from steps. Recorded minutes are the duration of shared exercise sessions, not Samsung’s broader active-time estimate."
+      },
+      {
+        "title": "Treat sleep as a shared interval",
+        "body": "North totals the start-to-end duration of sleep sessions supplied through Health Connect and assigns an overnight session to the day it ended. Samsung may calculate an asleep-time or stage summary differently."
+      },
+      {
+        "title": "Check the energy label",
+        "body": "Activity calories are shared active energy. When active energy is unavailable but total energy is shared, North labels the value Total calories; that total can include resting energy. North does not convert one kind into the other."
+      },
+      {
+        "title": "Separate context from sessions",
+        "body": "Steps, sleep, daily distance, active minutes, and calorie totals can remain daily context. Purposeful recorded activities may appear as sessions."
+      },
+      {
+        "title": "Control the category",
+        "body": "Body measurements have their own permission category. Turning that category off stops future access without pretending older imported records never existed."
+      },
+      {
+        "title": "Read units carefully",
+        "body": "North displays supported weight and distance values using your chosen units while retaining the record’s identity and date."
+      }
+    ],
+    "remember": "A health number needs its date and source. It is context, not a diagnosis.",
+    "action": {
+      "label": "Open privacy and services",
+      "destination": "settings"
+    }
+  },
+  {
+    "id": "updates-and-reporting-a-problem",
+    "topic": "Settings & access",
+    "title": "Read updates or report a problem",
+    "summary": "Find what changed in North and send a useful issue report without exposing private information.",
+    "searchTerms": [
+      "release notes",
+      "update",
+      "version",
+      "changelog",
+      "bug",
+      "issue",
+      "problem",
+      "support",
+      "report"
+    ],
+    "introduction": "Release notes explain member-visible changes. The problem report is for behavior that is broken, confusing, or unreliable.",
+    "steps": [
+      {
+        "title": "Check the version story",
+        "body": "Open release notes to see what changed across North releases and whether a behavior is newly introduced."
+      },
+      {
+        "title": "Describe the action",
+        "body": "State what you were trying to do, what you expected, and what happened instead."
+      },
+      {
+        "title": "Include useful context",
+        "body": "Device type, browser, screen, and the rough time of the problem can help reproduce it."
+      },
+      {
+        "title": "Leave secrets out",
+        "body": "Do not include passwords, recovery codes, access tokens, private health details, or images you do not intend to share."
+      }
+    ],
+    "remember": "Useful technical context helps. Passwords and recovery codes never belong in a problem report.",
+    "action": {
+      "label": "Open app settings",
+      "destination": "settings"
+    }
+  },
+  {
+    "id": "north-in-one-minute",
+    "topic": "Start here",
+    "title": "North in one minute",
+    "summary": "Plan what comes next, record what happened, then learn from the pattern.",
+    "searchTerms": [
+      "begin",
+      "new",
+      "today",
+      "what is north",
+      "navigation"
+    ],
+    "introduction": "North gives your training one home. You do not need to understand every screen before you begin. Start with Today, follow the next useful action, and let your record grow from there.",
+    "steps": [
+      {
+        "title": "Start with one clear direction.",
+        "body": "Today shows your planned workout, lets you check in with how you are feeling, and keeps the next useful action clear."
+      },
+      {
+        "title": "Progress becomes visible here.",
+        "body": "Journey brings your workouts, activities, milestones, and patterns together over time so you can inspect what actually happened."
+      },
+      {
+        "title": "Shape the week around real life.",
+        "body": "Training lets you plan the week, open or edit a session, choose a ready-made workout, or build your own."
+      },
+      {
+        "title": "Ask, inspect, then decide.",
+        "body": "Nova can answer from your saved North records and prepare useful changes, but meaningful plan changes wait for your approval."
+      },
+      {
+        "title": "You stay in control.",
+        "body": "You holds your direction, current signals, progress, and North memory, with account, device, privacy, and accessibility controls nearby."
+      }
+    ],
+    "remember": "You are not behind. North is a direction, not a scorecard.",
+    "action": {
+      "label": "Open Today",
+      "destination": "today"
+    }
+  },
+  {
+    "id": "sets-reps-and-rest",
+    "topic": "Start here",
+    "title": "Sets, reps, weight and rest",
+    "summary": "The basic gym words, without the gym-language fog.",
+    "searchTerms": [
+      "set",
+      "rep",
+      "repetition",
+      "weight",
+      "load",
+      "rest",
+      "target",
+      "beginner"
+    ],
+    "introduction": "A repetition, usually shortened to rep, is one complete movement. A set is one group of repetitions before you rest.",
+    "steps": [
+      {
+        "title": "Read the target",
+        "body": "Three sets of ten means: do ten repetitions, rest, then repeat that two more times."
+      },
+      {
+        "title": "Choose a manageable weight",
+        "body": "Use a weight you can control through the intended movement. The last repetitions may feel challenging, but the target should not require you to abandon the movement."
+      },
+      {
+        "title": "Record the work",
+        "body": "Enter the weight and repetitions you actually completed. North keeps each set separately because real sets are not always identical."
+      },
+      {
+        "title": "Take the rest",
+        "body": "The rest target is time between working sets. It is part of the session, not wasted time."
+      }
+    ],
+    "remember": "The target guides the set. Your honest result is the record.",
+    "action": {
+      "label": "See your Training plan",
+      "destination": "training"
+    }
+  },
+  {
+    "id": "understand-today",
+    "topic": "Start here",
+    "title": "What Today is showing you",
+    "summary": "Your planned direction, current signals, week, and latest record in one place.",
+    "searchTerms": [
+      "today",
+      "direction",
+      "check in",
+      "week",
+      "next milestone"
+    ],
+    "introduction": "Today is the shortest route into North. It combines the plan with the latest information you have chosen to record or connect.",
+    "steps": [
+      {
+        "title": "Today’s direction",
+        "body": "This is the session currently planned for today. Opening it does not complete it; the record changes only when you save completed work."
+      },
+      {
+        "title": "How are you arriving?",
+        "body": "Sleep is the number of hours you choose to report; energy and soreness are your own 1–5 observations; body weight is optional; and the note holds context the numbers miss. North treats these entries as personal observations, not measurements or medical conclusions."
+      },
+      {
+        "title": "Your week",
+        "body": "The seven day strip shows which planned days are complete, skipped, resting, or still ahead."
+      },
+      {
+        "title": "The record",
+        "body": "Your latest completed session and the next planned direction keep the plan connected to what really happened."
+      }
+    ],
+    "remember": "Today helps you choose the next useful action. It does not demand a perfect day.",
+    "action": {
+      "label": "Open Today",
+      "destination": "today"
+    }
+  },
+  {
+    "id": "today-muscle-map",
+    "topic": "Start here",
+    "title": "Read today’s muscle map",
+    "summary": "Open the body map already on Today and understand what its highlights mean.",
+    "searchTerms": [
+      "anatomy",
+      "body",
+      "muscle",
+      "map",
+      "front",
+      "back",
+      "primary",
+      "supporting",
+      "today"
+    ],
+    "introduction": "Today’s muscle map is a visual summary of the movements in today’s plan. It helps you connect exercise names to body areas without turning the plan into a medical assessment.",
+    "steps": [
+      {
+        "title": "Open the existing map",
+        "body": "Use the expand button on Today to open North’s full-screen muscle explorer. The Guide sends you to that same explorer rather than keeping a separate anatomy view."
+      },
+      {
+        "title": "Switch sides",
+        "body": "Choose Front or Back to inspect the highlighted areas from either side of the body."
+      },
+      {
+        "title": "Choose a highlight",
+        "body": "Select a highlighted area or its name to read its plain-language purpose and role in today’s plan."
+      },
+      {
+        "title": "Check the source exercise",
+        "body": "When available, Used by today lists the exercise or activity that caused that area to be highlighted."
+      }
+    ],
+    "remember": "The map describes today’s planned movements. It does not diagnose pain, injury, or health conditions.",
+    "action": {
+      "label": "Open today’s muscle explorer",
+      "destination": "today",
+      "intent": "open-today-anatomy"
+    }
+  },
+  {
+    "id": "plan-a-week-and-block",
+    "topic": "Planning",
+    "title": "Plan a week or a 12-week block",
+    "summary": "Shape one useful week, copy the rhythm forward, then adjust the exceptions.",
+    "searchTerms": [
+      "plan",
+      "calendar",
+      "week",
+      "12 week",
+      "block",
+      "schedule",
+      "copy"
+    ],
+    "introduction": "North stores one historical week and a twelve-week planning block. You can edit one day at a time without needing to design all 84 future days at once.",
+    "steps": [
+      {
+        "title": "Start with this week",
+        "body": "Choose a day in Training and set it as strength, biking, running, walking, recovery, or rest."
+      },
+      {
+        "title": "Open the 12-week block",
+        "body": "Use the week controls to open the block. Each week remains individually editable."
+      },
+      {
+        "title": "Copy a rhythm",
+        "body": "Copy the current week into the next week, or repeat it through Week 12. North asks before replacing future plans."
+      },
+      {
+        "title": "Adjust real-life changes",
+        "body": "Open any copied day and change it. Editing one future day does not rewrite the completed record behind you."
+      },
+      {
+        "title": "Move or skip a plan",
+        "body": "Moving changes where unfinished planned work appears. Skipping marks that planned session as skipped; it does not create a completed workout or claim that the work happened."
+      },
+      {
+        "title": "Add work later",
+        "body": "Choose a past calendar date to add a missed workout or activity. North uses the performed date in Journey and Training while separately preserving that the record was entered later."
+      }
+    ],
+    "remember": "A plan is allowed to change. Completed records remain the truth.",
+    "action": {
+      "label": "Open Training",
+      "destination": "training"
+    }
+  },
+  {
+    "id": "build-a-strength-workout",
+    "topic": "Workouts",
+    "title": "Build a strength workout",
+    "summary": "Choose movements, shape the target, and save a workout you can reuse.",
+    "searchTerms": [
+      "build",
+      "workout",
+      "strength",
+      "exercise",
+      "routine",
+      "sets",
+      "custom"
+    ],
+    "introduction": "A strength workout is a saved group of exercises. Each exercise can have its own number of sets, target, and rest time.",
+    "steps": [
+      {
+        "title": "Name the workout",
+        "body": "Use a name you will recognize later. The description, focus, goal, level, duration, and location help you find it again."
+      },
+      {
+        "title": "Find movements",
+        "body": "Search by exercise name, body area, or equipment. Refine by body area, equipment, movement, difficulty, type, position, place, or target muscle; quick filters include no equipment, low impact, beginner, timed holds, cardio, and left/right work. Filters update immediately and Clear removes them."
+      },
+      {
+        "title": "Read an exercise profile",
+        "body": "The profile separates setup and technique, common mistakes, safety notes, equipment, tracking method, catalogue difficulty, accessibility tags, personal history, and muscles by role. Difficulty describes North’s catalogue classification, not your worth or a guarantee that the movement suits you. Muscle and relationship labels are editorial training data, not a measurement of your body."
+      },
+      {
+        "title": "Keep a favourite exercise",
+        "body": "Use the heart in an exercise profile to add or remove its favourite marker. Favourite exercises return in Training under Favourite exercises and sync with your North account. Removing the heart removes only that shortcut; it does not delete workouts, plans, or completed history."
+      },
+      {
+        "title": "Shape each prescription",
+        "body": "Choose 1–10 planned sets, an optional planned load, a target written as repetitions, time, distance, or another clear instruction, and 0–600 seconds of rest in 15-second steps. The tracking method shows which results fit the exercise. Template values are editable starting points, not physiological recommendations; record actual results during the session."
+      },
+      {
+        "title": "Edit the saved order",
+        "body": "Adding places a movement in this personal template, removing takes it out of future uses of this template, and moving it changes the order shown when the workout is prepared. These edits do not rewrite completed sessions."
+      },
+      {
+        "title": "Save or schedule it",
+        "body": "Keep the workout in My Workouts, add it to a selected day, or prepare it immediately. Editing your private copy does not alter a completed workout."
+      }
+    ],
+    "remember": "Start simple. A short workout you understand is more useful than a complicated one you avoid.",
+    "action": {
+      "label": "Build a workout",
+      "destination": "nova-workout-builder"
+    }
+  },
+  {
+    "id": "complete-a-workout",
+    "topic": "Workouts",
+    "title": "Record a workout honestly",
+    "summary": "Log sets, pause safely, pass a movement, and finish without losing the session.",
+    "searchTerms": [
+      "record",
+      "workout",
+      "complete",
+      "pause",
+      "resume",
+      "pass",
+      "timer",
+      "offline"
+    ],
+    "introduction": "The live workout screen records the work set by set. North saves the active session on the device so a refresh or weak connection does not silently erase it.",
+    "steps": [
+      {
+        "title": "Start from preparation",
+        "body": "Review the exercises and targets before beginning. Starting claims that planned day but does not mark it complete yet."
+      },
+      {
+        "title": "Separate the target from history",
+        "body": "The target describes the work planned now. A previous result is a historical reference from an earlier completed session, not a requirement for today."
+      },
+      {
+        "title": "Complete each set",
+        "body": "Enter what you performed, then mark the set complete. Rest timing begins from the completed set when a rest target is present."
+      },
+      {
+        "title": "Control rest timing",
+        "body": "The timer starts from that exercise’s planned rest value. Pause or resume it, add or remove 15 seconds, or skip the remainder. These controls change the clock for this rest period; the planned value is a schedule you can adjust, not a recovery guarantee or medical recommendation."
+      },
+      {
+        "title": "Record a timed hold",
+        "body": "By default, enter the duration you actually held and mark the set done. Assisted hold timer is an optional, off-by-default account preference: when enabled, start and stop the timer to record duration automatically, or use its close control to return to manual entry for the current workout."
+      },
+      {
+        "title": "Adapt without pretending",
+        "body": "Add or remove sets, use an alternative, write a note, or pass an exercise and return later. Incomplete work remains incomplete."
+      },
+      {
+        "title": "Keep the session available",
+        "body": "North requests that a supported device keep the screen awake during an active workout and tries again after you return. Browser, battery, and device rules can still deny or release that request, so this is not a guarantee."
+      },
+      {
+        "title": "Review and save",
+        "body": "Finish the session, review energy, difficulty, and reflection, then save it. Only then does it become permanent history."
+      }
+    ],
+    "remember": "North records the session you did, not the session you hoped to do.",
+    "action": {
+      "label": "Open Training",
+      "destination": "training"
+    }
+  },
+  {
+    "id": "record-an-activity",
+    "topic": "Workouts",
+    "title": "Record biking, walking, running or recovery",
+    "summary": "Movement outside a strength workout still belongs in your record.",
+    "searchTerms": [
+      "bike",
+      "cycle",
+      "walk",
+      "run",
+      "recovery",
+      "activity",
+      "distance",
+      "effort"
+    ],
+    "introduction": "North keeps purposeful activities alongside workouts. You can record them on the day they happened, including a past day.",
+    "steps": [
+      {
+        "title": "Choose the activity",
+        "body": "Open Quick log or choose a date in the Training calendar, then select bike, walk, run, or recovery."
+      },
+      {
+        "title": "Add what you know",
+        "body": "Duration is useful. Distance, effort, and a note are optional context when they apply."
+      },
+      {
+        "title": "Save it to Journey",
+        "body": "The activity appears on its performed date and contributes to relevant time and distance summaries."
+      },
+      {
+        "title": "Correct it if needed",
+        "body": "Open the corresponding day in Journey or the Training calendar to inspect the record."
+      }
+    ],
+    "remember": "You do not need perfect data for movement to count. Record only what you know.",
+    "action": {
+      "label": "Open Training",
+      "destination": "training"
+    }
+  },
+  {
+    "id": "journey-and-training-atlas",
+    "topic": "Your record",
+    "title": "Read Journey and Training Atlas",
+    "summary": "See sessions in order, then zoom out to the patterns they create.",
+    "searchTerms": [
+      "journey",
+      "timeline",
+      "atlas",
+      "chart",
+      "progress",
+      "milestone",
+      "history"
+    ],
+    "introduction": "Journey is the chronological record. Training Atlas summarizes that record across a chosen period without changing it.",
+    "steps": [
+      {
+        "title": "Use Timeline for detail",
+        "body": "Filter or choose a date to find workouts, activities, check-ins, reflections, and meaningful imported sessions."
+      },
+      {
+        "title": "Use Milestones for earned moments",
+        "body": "Milestones unlock from recorded evidence. North does not award them from an unfinished plan."
+      },
+      {
+        "title": "Use Training Atlas for direction",
+        "body": "Compare sessions, time, sets, volume, or distance across supported periods. A chart describes your records; it does not diagnose your health."
+      },
+      {
+        "title": "Open the evidence",
+        "body": "Select a date or record when you need the session behind a total or trend."
+      }
+    ],
+    "remember": "A trend is a description of your record, not a verdict on your effort.",
+    "action": {
+      "label": "Open Journey",
+      "destination": "journey"
+    }
+  },
+  {
+    "id": "samsung-health-and-health-connect",
+    "topic": "Health & privacy",
+    "title": "Samsung Health and Health Connect",
+    "summary": "Understand what is imported, where it appears, and what remains under your control.",
+    "searchTerms": [
+      "samsung",
+      "health connect",
+      "watch",
+      "sync",
+      "steps",
+      "sleep",
+      "permissions",
+      "import"
+    ],
+    "introduction": "On supported Android devices, North receives permitted records through Health Connect. Samsung Health remains the source app; North does not read your Samsung account directly.",
+    "steps": [
+      {
+        "title": "Choose categories",
+        "body": "You control separate permissions for purposeful workouts, daily movement, sleep and recovery, and optional body measurements."
+      },
+      {
+        "title": "Sync through North Health",
+        "body": "The Android companion sends permitted Health Connect records to your private North account. Imports are designed to be idempotent, so the same source record is not intentionally added twice."
+      },
+      {
+        "title": "Know where records appear",
+        "body": "Purposeful rides, walks, runs, and workouts can appear as sessions. Daily totals such as steps remain contextual summaries rather than separate Journey activities."
+      },
+      {
+        "title": "Pause or revoke access",
+        "body": "Change North’s category preferences or revoke Health Connect permission. Existing imported account records are handled separately from future access."
+      }
+    ],
+    "remember": "Nothing connects silently. Source attribution matters when two apps show different totals.",
+    "action": {
+      "label": "Open privacy and services",
+      "destination": "settings"
+    }
+  },
+  {
+    "id": "ask-nova",
+    "topic": "Your record",
+    "title": "Ask Nova without giving up control",
+    "summary": "Nova can explain, reflect and propose. You decide what changes.",
+    "searchTerms": [
+      "nova",
+      "ai",
+      "coach",
+      "memory",
+      "suggestion",
+      "proposal",
+      "privacy"
+    ],
+    "introduction": "Nova is North’s conversational companion. It can use your approved records and memory to help you think through training, but it cannot silently apply a meaningful plan change.",
+    "steps": [
+      {
+        "title": "Ask in ordinary language",
+        "body": "Ask about today, your week, recovery, an exercise, or a pattern. You do not need a special command."
+      },
+      {
+        "title": "Inspect evidence and limits",
+        "body": "When evidence is available, Nova shows what informed the response and how confident it is."
+      },
+      {
+        "title": "Review proposed changes",
+        "body": "Plan-changing suggestions show the before and after state. Confirm, correct, reject, or undo supported changes."
+      },
+      {
+        "title": "Keep goals explicit",
+        "body": "A Nova goal has a title, description, category, priority from 1 to 5, and an optional target date. Draft is not yet current; active means it can guide current context; paused preserves it without treating it as current; completed records that it was finished; abandoned records that you stopped pursuing it. Goal changes still require your approval."
+      },
+      {
+        "title": "Give only useful setup context",
+        "body": "Nova setup can save usual locations, home equipment, gym access, and preferred training time as coaching memory so suggestions can stay practical. Every field is optional. Review that saved memory later to pause its influence or erase it."
+      },
+      {
+        "title": "Control memory",
+        "body": "Review, pause, correct, reject, or delete what Nova may use. Private conversation is not a replacement for medical care."
+      }
+    ],
+    "remember": "Nova helps you think. It does not take ownership of your direction.",
+    "action": {
+      "label": "Open Nova",
+      "destination": "nova"
+    }
+  },
+  {
+    "id": "account-sync-and-recovery",
+    "topic": "Health & privacy",
+    "title": "Account, sync and recovery",
+    "summary": "Keep access to your private record across devices and understand the recovery code.",
+    "searchTerms": [
+      "account",
+      "password",
+      "recovery",
+      "code",
+      "sync",
+      "device",
+      "backup",
+      "restore",
+      "sign out"
+    ],
+    "introduction": "Your signed-in North account keeps private records scoped to you. A username uses 3–30 letters, numbers, underscores, or hyphens, and a password must contain at least 10 characters. The recovery code is the way back in if you cannot use that password; North does not use email recovery in this release.",
+    "steps": [
+      {
+        "title": "Keep the recovery code somewhere safe",
+        "body": "North shows a high-entropy recovery code when the account is created, recovered, or rotated. It is shown once; North stores a protected fingerprint rather than a readable copy, so it cannot email the original code back to you."
+      },
+      {
+        "title": "Use recovery carefully",
+        "body": "Enter the username, current recovery code, and a new password of at least 10 characters. Successful recovery issues a new one-time recovery code and invalidates the old code."
+      },
+      {
+        "title": "Let sync finish",
+        "body": "North keeps a local working copy and synchronizes account documents. Offline changes wait in an outbox and retry when connection returns."
+      },
+      {
+        "title": "Review devices",
+        "body": "Account & devices shows signed-in devices. You can sign out another device without deleting your account records."
+      },
+      {
+        "title": "Keep an export when useful",
+        "body": "Settings can export a North backup for personal recovery. Restoring a file replaces the browser copy, so review the confirmation carefully."
+      }
+    ],
+    "remember": "Signing out removes access on that device. Deleting an account is a separate, explicit action.",
+    "action": {
+      "label": "Open Account & devices",
+      "destination": "account"
+    }
+  }
+]

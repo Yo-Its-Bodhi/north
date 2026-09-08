@@ -1,13 +1,19 @@
 import { exerciseLibrary } from "./exercises";
+import { productionExerciseLibrary, normalizeExerciseKey } from "../exerciseDatabase/libraryExercises";
 
 export type WorkoutLevel = "Beginner" | "Intermediate" | "Advanced";
 export type WorkoutGoal = "Strength" | "Muscle" | "General fitness" | "Conditioning" | "Mobility";
+export type WorkoutDay = "Monday" | "Tuesday" | "Wednesday" | "Thursday" | "Friday" | "Saturday" | "Sunday";
 
 export type WorkoutTemplateExercise = {
   exerciseName: string;
+  canonicalExerciseId?: string;
   sets: number;
   reps: string;
   rest: number;
+  supersetId?: string;
+  supersetOrder?: number;
+  supersetRest?: number;
 };
 
 export type WorkoutTemplate = {
@@ -20,8 +26,30 @@ export type WorkoutTemplate = {
   duration: number;
   equipment: string[];
   location: "Gym" | "Home" | "Anywhere";
+  preferredDay?: WorkoutDay;
+  createdAt?: string;
+  updatedAt?: string;
+  duplicatedFromId?: string;
   exercises: WorkoutTemplateExercise[];
-  source?: "north" | "personal";
+  source?: "north" | "personal" | "community";
+  community?: {
+    id: string;
+    sourceTemplateId: string;
+    creator: { id: string; displayName: string; username: string };
+    originalWorkoutId?: string;
+    originalCreator?: { id: string; displayName: string; username: string };
+    version: number;
+    saves: number;
+    starts: number;
+    publishedAt: string;
+    updatedAt: string;
+    ownedByViewer: boolean;
+  };
+  lineage?: {
+    sourceCommunityWorkoutId: string;
+    originalCommunityWorkoutId: string;
+    originalCreator: { id: string; displayName: string; username: string };
+  };
 };
 
 type Blueprint = {
@@ -69,6 +97,10 @@ function chooseExercise(blueprint: Blueprint, category: string, index: number, s
   return pool[(seed + index * 3) % pool.length];
 }
 
+const canonicalByName = new Map(productionExerciseLibrary.flatMap((exercise) =>
+  [exercise.canonicalName, exercise.displayName, ...exercise.aliases].map((name) => [normalizeExerciseKey(name), exercise.id] as const),
+));
+
 export const workoutTemplates: WorkoutTemplate[] = blueprints.flatMap((blueprint, blueprintIndex) =>
   levels.flatMap((level, levelIndex) => durations.map((duration, durationIndex) => {
     const exerciseCount = duration <= 20 ? 4 : duration <= 45 ? 5 : 6;
@@ -77,12 +109,12 @@ export const workoutTemplates: WorkoutTemplate[] = blueprints.flatMap((blueprint
       const exercise = chooseExercise(blueprint, category, index, seed);
       const sets = level === "Beginner" ? 2 : level === "Intermediate" ? 3 : 4;
       const strength = blueprint.goal === "Strength";
-      return { exerciseName: exercise.name, sets, reps: blueprint.goal === "Mobility" ? "30–60 sec" : strength ? "5–8" : "8–15", rest: blueprint.goal === "Mobility" ? 30 : strength ? 120 : 75 };
+      return { exerciseName: exercise.name, canonicalExerciseId: canonicalByName.get(normalizeExerciseKey(exercise.name)), sets, reps: blueprint.goal === "Mobility" ? "30–60 sec" : strength ? "5–8" : "8–15", rest: blueprint.goal === "Mobility" ? 30 : strength ? 120 : 75 };
     });
     const equipment = [...new Set(exercises.map((item) => exerciseLibrary.find((exercise) => exercise.name === item.exerciseName)?.equipment ?? "Other"))];
     return {
       id: `${blueprint.slug}-${level.toLowerCase()}-${duration}`,
-      name: `${duration}-Minute ${blueprint.name}`,
+      name: blueprint.name,
       description: `${level} ${blueprint.focus.toLowerCase()} session built for ${blueprint.goal.toLowerCase()}.`,
       focus: blueprint.focus,
       goal: blueprint.goal,
@@ -99,3 +131,36 @@ export const workoutTemplates: WorkoutTemplate[] = blueprints.flatMap((blueprint
 export const workoutFocuses = ["All", ...new Set(workoutTemplates.map((workout) => workout.focus))];
 export const workoutGoals = ["All", ...new Set(workoutTemplates.map((workout) => workout.goal))];
 export const workoutLevels = ["All", ...levels];
+
+export function estimatedWorkoutMinutes(template: WorkoutTemplate) {
+  const seconds = template.exercises.reduce((total, exercise) => total + exercise.sets * (45 + exercise.rest), 0);
+  return Math.max(10, Math.round(seconds / 60 + 5));
+}
+
+export function fitWorkoutToDuration(exercises: WorkoutTemplateExercise[], targetMinutes: number) {
+  const fitted = structuredClone(exercises);
+  const targetSeconds = Math.max(10, targetMinutes) * 60;
+  const totalSeconds = () => 300 + fitted.reduce((total, exercise) => total + exercise.sets * (45 + exercise.rest), 0);
+
+  for (let adjustment = 0; adjustment < 100; adjustment += 1) {
+    const currentSeconds = totalSeconds();
+    const direction = currentSeconds < targetSeconds ? 1 : -1;
+    const eligibleSetCount = direction > 0
+      ? Math.min(...fitted.filter((exercise) => exercise.sets < 10).map((exercise) => exercise.sets))
+      : Math.max(...fitted.filter((exercise) => exercise.sets > 1).map((exercise) => exercise.sets));
+    const candidates = fitted
+      .map((exercise, index) => ({ exercise, index }))
+      .filter(({ exercise }) => direction > 0 ? exercise.sets < 10 && exercise.sets === eligibleSetCount : exercise.sets > 1 && exercise.sets === eligibleSetCount)
+      .map(({ exercise, index }) => ({ index, nextSeconds: currentSeconds + direction * (45 + exercise.rest) }))
+      .sort((left, right) => Math.abs(targetSeconds - left.nextSeconds) - Math.abs(targetSeconds - right.nextSeconds));
+    const best = candidates[0];
+    if (!best || Math.abs(targetSeconds - best.nextSeconds) >= Math.abs(targetSeconds - currentSeconds)) break;
+    fitted[best.index].sets += direction;
+  }
+
+  return fitted;
+}
+
+export function workoutDisplayName(name: string) {
+  return name.replace(/^\d+[-\s]*(?:minute|min)\s+/i, "");
+}

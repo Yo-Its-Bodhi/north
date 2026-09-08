@@ -19,6 +19,15 @@ test("exercise catalogue is large, unique, searchable, and prescription-ready", 
   }
 });
 
+test("exercise catalogue includes rear-delt raises and curl 21s", () => {
+  const rearDeltRaise = exerciseLibrary.find((exercise) => exercise.name === "Dumbbell rear-delt raise");
+  const curl21s = exerciseLibrary.find((exercise) => exercise.name === "EZ-bar curl 21s");
+  assert.ok(rearDeltRaise, "rear-delt raise should be available in the exercise picker");
+  assert.ok(rearDeltRaise.aliases.includes("rear delt raises"), "rear-delt raise should be discoverable by its common plural name");
+  assert.ok(curl21s, "curl 21s should be available in the exercise picker");
+  assert.match(curl21s.target, /7 lower \+ 7 full \+ 7 upper/i, "curl 21s needs its complete 7/7/7 protocol");
+});
+
 test("workout catalogue covers the promised scale and every exercise reference resolves", () => {
   assert.ok(workoutTemplates.length >= 360, `expected at least 360 workouts, found ${workoutTemplates.length}`);
   const exerciseNames = new Set(exerciseLibrary.map((exercise) => exercise.name));

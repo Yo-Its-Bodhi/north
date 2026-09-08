@@ -44,7 +44,7 @@
 - [x] CRUD/version/publish exercise catalogue entries
 - [x] CRUD/version/publish workouts and programs
 - [x] Initial feature flags and maintenance-mode controls
-- [ ] Announcement/banner composer with schedule and audience
+- [ ] North Updates composer with audience, preview, schedule, expiry, correction, archive, publish confirmation, member notification category, and audited delivery; see [North 0.8 — Together](product/NORTH_0_8_TOGETHER.md)
 - [ ] Milestone definitions and safe Nova prompt/tool configuration
 - [ ] Read-only system configuration view with secrets always redacted
 

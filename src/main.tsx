@@ -1,4 +1,4 @@
-import { Component, createElement, StrictMode, useEffect, useState, type ErrorInfo, type ReactNode } from "react";
+import { Component, createElement, lazy, StrictMode, Suspense, useEffect, type ErrorInfo, type ReactNode } from "react";
 import { createRoot } from "react-dom/client";
 import "@fontsource/dm-sans/latin-400.css";
 import "@fontsource/dm-sans/latin-500.css";
@@ -6,25 +6,49 @@ import "@fontsource/dm-sans/latin-600.css";
 import "@fontsource/dm-sans/latin-700.css";
 import "@fontsource/manrope/latin-600.css";
 import "@fontsource/manrope/latin-700.css";
-import "@fontsource/barlow-condensed/latin-600.css";
 import "@fontsource/barlow-condensed/latin-700.css";
 import "@fontsource/barlow-condensed/latin-800.css";
 import App from "./App";
-import Admin from "./Admin";
 import { BootIntro } from "./components/BrandMotion";
 import { hydratePublishedCatalogue } from "./data/catalogue";
-import "./styles.css";
+import "./styles/runtime-01.css";
+import "./styles/runtime-02.css";
+import "./styles/runtime-03.css";
+import "./styles/runtime-04.css";
+import "./styles/runtime-05.css";
+import "./styles/runtime-06.css";
+import "./styles/runtime-07.css";
+import "./trophy-room.css";
+import "./destination-reliability.css";
+import "./product-tour.css";
+import "./styles/runtime-08.css";
+
+// Local-network previews use plain HTTP, where browsers may omit randomUUID
+// even though cryptographically secure random bytes remain available.
+if (typeof globalThis.crypto !== "undefined" && typeof globalThis.crypto.randomUUID !== "function") {
+  Object.defineProperty(globalThis.crypto, "randomUUID", {
+    configurable: true,
+    value: () => {
+      const bytes = globalThis.crypto.getRandomValues(new Uint8Array(16));
+      bytes[6] = (bytes[6] & 0x0f) | 0x40;
+      bytes[8] = (bytes[8] & 0x3f) | 0x80;
+      const value = Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
+      return `${value.slice(0, 8)}-${value.slice(8, 12)}-${value.slice(12, 16)}-${value.slice(16, 20)}-${value.slice(20)}`;
+    },
+  });
+}
+
+const Admin = lazy(() => import("./Admin"));
+const MuscleMapPreview = lazy(() => import("./components/MuscleMapPreview"));
 
 export function NorthRoot() {
   const admin = location.pathname.startsWith("/admin");
-  const [ready, setReady] = useState(admin);
+  const musclePreview = import.meta.env.DEV && location.pathname.startsWith("/dev/muscle-map");
   useEffect(() => {
-    if (admin) return;
-    let active = true;
-    void hydratePublishedCatalogue().finally(() => { if (active) setReady(true); });
-    return () => { active = false; };
-  }, [admin]);
-  return <BootIntro ready={ready}>{ready ? createElement(admin ? Admin : App) : null}</BootIntro>;
+    if (admin || musclePreview) return;
+    void hydratePublishedCatalogue();
+  }, [admin, musclePreview]);
+  return <BootIntro><Suspense fallback={null}>{createElement(musclePreview ? MuscleMapPreview : admin ? Admin : App)}</Suspense></BootIntro>;
 }
 
 class NorthErrorBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
@@ -47,6 +71,14 @@ if ("serviceWorker" in navigator && import.meta.env.PROD) {
   window.addEventListener("load", async () => {
     try {
       const registration = await navigator.serviceWorker.register("/sw.js", { updateViaCache: "none" });
+      const activateWaitingWorker = () => registration.waiting?.postMessage({ type: "NORTH_ACTIVATE_UPDATE" });
+      registration.addEventListener("updatefound", () => {
+        const installingWorker = registration.installing;
+        installingWorker?.addEventListener("statechange", () => {
+          if (installingWorker.state === "installed") activateWaitingWorker();
+        });
+      });
+      activateWaitingWorker();
       void registration.update();
     } catch (error) {
       console.warn("North offline support could not start", error);

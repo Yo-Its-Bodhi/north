@@ -120,7 +120,11 @@ Potential integrations:
 
 Goal: connection without social media toxicity.
 
-Possible future ideas:
+The first connection surface is North Together: persistent private one-to-one conversations, a small resumable inbox, deliberate sharing, and a separate signed North Updates channel for owner announcements.
+
+Core rule: connecting never merges timelines, records, recommendations, Nova context, health data, or analytics. Sharing is always an intentional message to a chosen person.
+
+Later ideas may include:
 
 - accountability partners
 - coach mode
@@ -129,6 +133,8 @@ Possible future ideas:
 - optional sharing of PRs and milestones
 
 North will not build feeds, likes, influencer mechanics, shame streaks, or engagement traps.
+
+See [North 0.8 — Together](../docs/product/NORTH_0_8_TOGETHER.md) for the product contract and implementation checklist.
 
 ## Notifications Principle
 
