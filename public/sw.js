@@ -1,4 +1,4 @@
-const S=self,C="north-shell-v10",I="/app-icons/pwa-icon-light-512.png";
+const S=self,C="north-shell-v11",I="/app-icons/pwa-icon-light-512.png";
 S.addEventListener("install",e=>e.waitUntil(Promise.all([caches.open(C).then(c=>c.addAll(["/","/index.html","/manifest.webmanifest","/release-notes.json","/guide-articles.json",I])),S.skipWaiting()])));
 S.addEventListener("activate",e=>e.waitUntil(Promise.all([caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith("north-")&&key!==C).map(key=>caches.delete(key)))),S.clients.claim()])));
 S.addEventListener("message",e=>{if(e.data?.type==="NORTH_ACTIVATE_UPDATE")e.waitUntil(S.skipWaiting())});

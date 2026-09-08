@@ -790,6 +790,7 @@ function App() {
   const [workoutCancelOpen, setWorkoutCancelOpen] = useState(false);
   const [pendingWorkoutChange, setPendingWorkoutChange] = useState<{ title: string; actionLabel: "start" | "open" | "schedule"; proceed: () => void | Promise<void> } | null>(null);
   const [workoutSubmitting, setWorkoutSubmitting] = useState(false);
+  const [workoutSubmitError, setWorkoutSubmitError] = useState("");
   const workoutSubmitLock = useRef(false);
   const [workoutClock, setWorkoutClock] = useState(() => Date.now());
   const [recorderStatus, setRecorderStatus] = useState("");
@@ -2407,16 +2408,18 @@ function App() {
   }
 
   function saveReview() {
-    if (workoutSubmitLock.current || session.finishedAt) return;
+    if (workoutSubmitLock.current || session.finishedAt || (sessionRef.current.id === session.id && sessionRef.current.finishedAt)) return;
     workoutSubmitLock.current = true;
     setWorkoutSubmitting(true);
+    setWorkoutSubmitError("");
+    try {
     const savedAt = new Date().toISOString();
     const resumedSession = session.pausedAt ? resumeWorkoutTiming(session, savedAt) : session;
     const finishedAt = resumedSession.addedLater && resumedSession.performedAt ? resumedSession.performedAt : savedAt;
     const finished = { ...resumedSession, id: resumedSession.id ?? crypto.randomUUID(), finishedAt, recordedAt: resumedSession.recordedAt ?? savedAt };
-    if (!profile.reducedMotion && "vibrate" in navigator) navigator.vibrate(sessionNewRecords.length || sessionEarnedMoments.length ? [55, 45, 90] : 55);
     const nextHistory = [finished, ...history.filter((workout) => workout.id !== finished.id)];
-    setLocalStorageItem(HISTORY_KEY, JSON.stringify(nextHistory));
+    if (!setLocalStorageItem(HISTORY_KEY, JSON.stringify(nextHistory))) throw new Error("North couldn’t save this workout on your device. Keep this screen open, check available storage, then try Submit again.");
+    sessionRef.current = finished;
     setHistory(nextHistory);
     setSession(finished);
     setNovaMessages((messages) => [...messages, { id: crypto.randomUUID(), role: "nova" as const, text: `${finished.addedLater ? `Backfilled workout preserved: performed ${formatSessionDate(finished.performedAt)}, entered ${formatSessionDate(finished.recordedAt)}. ` : "Workout submitted to North Records: "}${finished.exercises.filter((exercise) => exercise.sets.some((set) => set.complete)).length} exercises and ${sessionSetCount(finished)} completed sets. I can reference the performed date separately from the entry date when reviewing progress.`, createdAt: savedAt, evidence: finished.addedLater ? ["Performed date", "Record entry date", "Completed workout record"] : ["Completed workout record"] }].slice(-80));
@@ -2424,6 +2427,14 @@ function App() {
     setWeeklyPlan((value) => value.map((day) => day.id === finished.planDayId || (!finished.planDayId && day.date === workoutDate && day.kind === "strength") ? { ...day, status: "completed" } : day));
     setWorkoutSubmitOpen(false);
     setScreen("today");
+    // Haptic feedback must never prevent a workout from being saved.
+    try { if (!profile.reducedMotion && "vibrate" in navigator) navigator.vibrate(sessionNewRecords.length || sessionEarnedMoments.length ? [55, 45, 90] : 55); } catch { /* Optional device feedback. */ }
+    } catch (error) {
+      setWorkoutSubmitError(error instanceof Error ? error.message : "North couldn’t submit this workout. Your entries are still here. Please try again.");
+    } finally {
+      workoutSubmitLock.current = false;
+      setWorkoutSubmitting(false);
+    }
   }
 
   function startFresh() {
@@ -4612,13 +4623,13 @@ function App() {
 
           {!session.finishedAt ? (
             <>
-              <button className="primary-button submit-record-button" onClick={() => setWorkoutSubmitOpen(true)}>Submit to Nova &amp; Records <Check size={17} /></button>
+              <button className="primary-button submit-record-button" onClick={() => { setWorkoutSubmitError(""); setWorkoutSubmitOpen(true); }}>Submit to Nova &amp; Records <Check size={17} /></button>
               {workoutSubmitOpen && (() => {
                 const allSets = session.exercises.flatMap((exercise) => exercise.sets.map((set) => ({ set, target: Number(prescribedResult(exercise.target)) })));
                 const hit = allSets.filter(({ set, target }) => set.complete && (!target || Number(set.reps) >= target)).length;
                 const missed = allSets.filter(({ set, target }) => set.complete && target && Number(set.reps) < target).length;
                 const notLogged = allSets.length - hit - missed;
-                return createPortal(<div className="exercise-finish-overlay" role="presentation"><section className="exercise-finish-dialog" role="dialog" aria-modal="true" aria-labelledby="workout-submit-title"><p className="eyebrow">FINAL CHECK</p><h2 id="workout-submit-title">Submit this workout?</h2><p>Review what North will carry into your workout record.</p><div className="exercise-finish-summary"><span className="hit"><strong>{hit}</strong> Hit</span><span className="missed"><strong>{missed}</strong> Missed target</span><span className="open"><strong>{notLogged}</strong> Not logged</span></div><footer><button className="secondary-button" onClick={() => setWorkoutSubmitOpen(false)} disabled={workoutSubmitting}>Go back</button><button className="primary-button" onClick={saveReview} disabled={workoutSubmitting}>{workoutSubmitting ? "Submitting…" : "Submit"} <Check size={17}/></button></footer></section></div>, document.body);
+                return createPortal(<div className="exercise-finish-overlay" role="presentation"><section className="exercise-finish-dialog" role="dialog" aria-modal="true" aria-labelledby="workout-submit-title"><p className="eyebrow">FINAL CHECK</p><h2 id="workout-submit-title">Submit this workout?</h2><p>Review what North will carry into your workout record.</p><div className="exercise-finish-summary"><span className="hit"><strong>{hit}</strong> Hit</span><span className="missed"><strong>{missed}</strong> Missed target</span><span className="open"><strong>{notLogged}</strong> Not logged</span></div>{workoutSubmitError && <p role="alert">{workoutSubmitError}</p>}<footer><button className="secondary-button" onClick={() => setWorkoutSubmitOpen(false)} disabled={workoutSubmitting}>Go back</button><button className="primary-button" onClick={saveReview} disabled={workoutSubmitting}>{workoutSubmitting ? "Submitting…" : "Submit"} <Check size={17}/></button></footer></section></div>, document.body);
               })()}
             </>
           ) : (
